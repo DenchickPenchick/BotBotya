@@ -2,7 +2,7 @@
 <!--Конфиг бота-->
 <Config>
     <!--Токен бота-->
-    <Token value="NzQ5OTkxMzkxNjM5MTA5Njcz.X00B6Q.0ADQjzZg41_WV0Uo_C4LwaNbXWc"/>
+    <Token value="NzQ5OTkxMzkxNjM5MTA5Njcz.X00B6Q.AGsf_0Qbf9Ae0wezvjdqMzOJwTY"/>
     <!--ID сервера-->
     <Guild id="630455432690794546"/>
     <!--ID канала, где есть все участники сервера-->
