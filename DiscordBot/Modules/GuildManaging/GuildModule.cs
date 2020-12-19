@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Linq;
 using Console = Colorful.Console;
 using System;
-using System.Threading;
 
 namespace DiscordBot.GuildManaging
 {
