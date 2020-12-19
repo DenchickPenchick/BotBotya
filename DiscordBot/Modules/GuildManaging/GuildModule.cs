@@ -16,7 +16,8 @@ namespace DiscordBot.GuildManaging
     /// Если удалить этот модуль, тогда все сломается при первом же удалении или изменении какого-либо канала в какой-либо гильдии. А об добавлении на сервер я уже молчу...
     /// </summary>
     public class GuildModule : IModule
-    {               
+    {
+        private bool Setup = true;
         private readonly DiscordSocketClient Client;
         IReadOnlyCollection<SocketGuild> Guilds { get => Client.Guilds; }        
 
@@ -57,6 +58,7 @@ namespace DiscordBot.GuildManaging
                 await SetupGuild(guild);
 
             FilesProvider.ChangeNewsAndPlansToFalse();
+            Setup = false;
             Console.WriteLine("Guild(-s) setup ended", Color.Green);
         }
 
@@ -83,7 +85,8 @@ namespace DiscordBot.GuildManaging
             var SerializableGuild = FilesProvider.GetGuild(Guild);
             var serNewsPlans = FilesProvider.GetNewsAndPlans();
 
-            Console.WriteLine($"Guild {Guild.Id} setup started");
+            if(Setup)
+                Console.WriteLine($"Guild {Guild.Id} setup started");
 
             var categories = Guild.CategoryChannels;
             var textChannels = Guild.TextChannels;
@@ -180,7 +183,9 @@ namespace DiscordBot.GuildManaging
             if (serNewsPlans.ShouldSend)
                 await Guild.TextChannels.ToArray()[0].SendMessageAsync(embed: serNewsPlans.GetNewsAndPlansEmbed(Client));
 
-            Console.WriteLine($"Guild {Guild.Id} setup ended", Color.Green);
+            if (Setup)
+                Console.WriteLine($"Guild {Guild.Id} setup ended", Color.Green);
+            
         }
 
         private async Task RebuildCurrentChannel(SocketGuildChannel channel)
