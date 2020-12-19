@@ -14,7 +14,6 @@ using DiscordBot.GuildManaging;
 using DiscordBot.Modules.NotificationsManaging;
 using System.Collections.Generic;
 using DiscordBot.FileWorking;
-using DiscordBot.Modules.WidgetsManaging;
 
 namespace DiscordBot
 {
@@ -55,8 +54,7 @@ namespace DiscordBot
                 ContentModule = new ContentModule(Client),
                 FileModule = new FilesModule(this),
                 GuildModule = new GuildModule(Client),
-                NotificationsModule = new LogModule(Client),
-                WidgetsModule = new WidgetsModule(Client)
+                NotificationsModule = new LogModule(Client)                
             }).RunModule();            
 
             await RegisterCommandsAsync();           

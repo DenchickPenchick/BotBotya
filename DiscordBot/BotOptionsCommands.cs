@@ -7,7 +7,6 @@ using DiscordBot.Modules.FileManaging;
 using DiscordBot.FileWorking;
 using DiscordBot.GuildManaging;
 using Discord.WebSocket;
-using DiscordBot.Modules.WidgetsManaging;
 
 namespace DiscordBot
 {
@@ -418,39 +417,6 @@ namespace DiscordBot
             await ReplyAsync("Значок комнат изменен успешно");
 
             await provider.SyncGuildProperties();
-        }
-
-        [RequireUserPermission(GuildPermission.ManageGuild)]
-        [Command("CreateWidget")]
-        [Summary("создает виджет. [BETA]")]
-        public async Task CreateWidget(string type)
-        {
-            var provider = new GuildProvider(Context.Guild);
-            switch (type.ToLower())
-            {
-                case "users":
-                    if (!provider.WidgetExist(WidgetsModule.WidgetType.Users))
-                    {
-                        await provider.CreateWidget(WidgetsModule.WidgetType.Users);
-                        await ReplyAsync("Виджет пользователей создан.");
-                    }
-                    else
-                        await ReplyAsync("Нельзя создать еще один виджет, так как виджет такого типа уже существует.");
-                    break;
-                case "channels":
-                    if (!provider.WidgetExist(WidgetsModule.WidgetType.Channels))
-                    {
-                        await provider.CreateWidget(WidgetsModule.WidgetType.Channels);
-                        await ReplyAsync("Виджет каналов создан.");
-                    }
-                    else
-                        await ReplyAsync("Нельзя создать еще один виджет, так как виджет такого типа уже существует.");
-                    break;
-                default:
-                    await ReplyAsync("Недопустимый тип виджета.\n" +
-                        "Типы: users, channels");
-                    break;
-            }            
         }
     }
 }

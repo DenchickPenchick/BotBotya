@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Linq;
 using DiscordBot.FileWorking;
 using DiscordBot.Modules.FileManaging;
-using DiscordBot.Modules.WidgetsManaging;
 
 namespace DiscordBot.GuildManaging
 {
@@ -360,72 +359,7 @@ namespace DiscordBot.GuildManaging
 
             foreach (var category in systemCategories)
                 await category.ModifyAsync(x => x.Position = argPos++);
-        }
-
-        public async Task CreateWidget(WidgetsModule.WidgetType widgetType)
-        {
-            var serGuild = FilesProvider.GetGuild(Guild);
-            switch (widgetType)
-            {
-                case WidgetsModule.WidgetType.Users:
-                    var widgetUsers = await Guild.CreateVoiceChannelAsync($"Участников: {Guild.Users.Count}");
-                    await widgetUsers.AddPermissionOverwriteAsync(Guild.CurrentUser.Roles.ToArray()[1], new OverwritePermissions().Modify(manageChannel: PermValue.Allow, connect: PermValue.Allow));
-                    await widgetUsers.AddPermissionOverwriteAsync(Guild.EveryoneRole, new OverwritePermissions().Modify(connect: PermValue.Deny));
-                    serGuild.UsersWidgetId = widgetUsers.Id;
-                    break;
-                case WidgetsModule.WidgetType.Channels:
-                    var widgetChannels = await Guild.CreateVoiceChannelAsync($"Каналов: {Guild.Channels.Count}");
-                    await widgetChannels.AddPermissionOverwriteAsync(Guild.CurrentUser.Roles.ToArray()[1], new OverwritePermissions().Modify(manageChannel: PermValue.Allow, connect: PermValue.Allow));
-                    await widgetChannels.AddPermissionOverwriteAsync(Guild.EveryoneRole, new OverwritePermissions().Modify(connect: PermValue.Deny));
-                    serGuild.ChannelsWidgetId = widgetChannels.Id;
-                    break;
-            }
-            FilesProvider.RefreshGuild(serGuild);
-        }
-
-        public bool WidgetExist(WidgetsModule.WidgetType type)
-        {
-            if (GetWidget(type) != null)
-                return true;
-            else
-                return false;
-        }
-
-        private SocketVoiceChannel GetWidget(WidgetsModule.WidgetType type)
-        {
-            var serGuild = FilesProvider.GetGuild(Guild);
-
-            switch (type)
-            {
-                case WidgetsModule.WidgetType.Users:
-                    if (serGuild.UsersWidgetId != default)
-                    {
-                        if (Guild.GetVoiceChannel(serGuild.UsersWidgetId) != null)
-                            return Guild.GetVoiceChannel(serGuild.UsersWidgetId);
-                        else
-                        {
-                            serGuild.UsersWidgetId = default;
-                            FilesProvider.RefreshGuild(serGuild);
-                            return null;
-                        }
-                    }
-                    break;
-                case WidgetsModule.WidgetType.Channels:
-                    if (serGuild.ChannelsWidgetId != default)
-                    {
-                        if (Guild.GetVoiceChannel(serGuild.ChannelsWidgetId) != null)
-                            return Guild.GetVoiceChannel(serGuild.ChannelsWidgetId);
-                        else
-                        {
-                            serGuild.UsersWidgetId = default;
-                            FilesProvider.RefreshGuild(serGuild);
-                            return null;
-                        }
-                    }
-                    break;
-            }
-            return null;
-        }
+        }        
 
         public bool ExistChannelByName(SocketGuildChannel channel)
         {
