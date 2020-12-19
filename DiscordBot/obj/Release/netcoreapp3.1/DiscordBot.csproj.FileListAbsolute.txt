@@ -1,0 +1,31 @@
+C:\Users\Денис\source\repos\DiscordBot\DiscordBot\obj\Release\netcoreapp3.1\DiscordBot.csprojAssemblyReference.cache
+C:\Users\Денис\source\repos\DiscordBot\DiscordBot\obj\Release\netcoreapp3.1\DiscordBot.AssemblyInfoInputs.cache
+C:\Users\Денис\source\repos\DiscordBot\DiscordBot\obj\Release\netcoreapp3.1\DiscordBot.AssemblyInfo.cs
+C:\Users\Денис\source\repos\DiscordBot\DiscordBot\obj\Release\netcoreapp3.1\DiscordBot.csproj.CoreCompileInputs.cache
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\DiscordBot.exe
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\DiscordBot.deps.json
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\DiscordBot.runtimeconfig.json
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\DiscordBot.runtimeconfig.dev.json
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\DiscordBot.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\DiscordBot.pdb
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\Colorful.Console.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\Discord.Net.Commands.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\Discord.Net.Core.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\Discord.Net.Rest.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\Discord.Net.Webhook.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\Discord.Net.WebSocket.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\Lavalink4NET.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\Lavalink4NET.DiscordNet.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\Microsoft.Extensions.DependencyInjection.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\Newtonsoft.Json.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\System.Interactive.Async.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Release\netcoreapp3.1\System.Linq.Async.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\obj\Release\netcoreapp3.1\DiscordBot.csprojAssemblyReference.cache
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\obj\Release\netcoreapp3.1\DiscordBot.AssemblyInfoInputs.cache
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\obj\Release\netcoreapp3.1\DiscordBot.AssemblyInfo.cs
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\obj\Release\netcoreapp3.1\DiscordBot.csproj.CoreCompileInputs.cache
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\obj\Release\netcoreapp3.1\DiscordBot.csproj.CopyComplete
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\obj\Release\netcoreapp3.1\DiscordBot.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\obj\Release\netcoreapp3.1\DiscordBot.pdb
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\obj\Release\netcoreapp3.1\DiscordBot.genruntimeconfig.cache
