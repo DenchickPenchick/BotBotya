@@ -38,8 +38,7 @@ namespace DiscordBot.GuildManaging
         }
 
         private async Task ChannelDestroyed(SocketChannel arg)
-        {
-            Console.WriteLine("Channel destroyed.", Color.Blue);
+        {            
             await RebuildCurrentChannel(arg as SocketGuildChannel);
         }
 

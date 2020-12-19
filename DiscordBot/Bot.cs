@@ -139,12 +139,15 @@ namespace DiscordBot
 
                         if (!result.IsSuccess)
                         {
-                            Console.WriteLine(result.ErrorReason, Color.Red);
-                            Console.WriteLine("Command from:", Color.Red);
-                            Console.WriteLine(context.User.Username);
-                            Console.WriteLine("Command:", Color.Red);
-                            Console.WriteLine(message);
-                            Console.WriteLine("Command Status: Failed", Color.Red);
+                            if (result.Error != CommandError.UnknownCommand)
+                            {
+                                Console.WriteLine(result.ErrorReason, Color.Red);
+                                Console.WriteLine("Command from:", Color.Red);
+                                Console.WriteLine(context.User.Username);
+                                Console.WriteLine("Command:", Color.Red);
+                                Console.WriteLine(message);
+                                Console.WriteLine("Command Status: Failed", Color.Red);
+                            }                            
                             switch (result.Error)
                             {
                                 case CommandError.UnknownCommand:
@@ -172,15 +175,7 @@ namespace DiscordBot
                                     await context.Channel.SendMessageAsync("Команда выполнена неудачно.");
                                     break;
                             }
-                        }
-                        else if (result.IsSuccess)
-                        {
-                            Console.WriteLine("Command from:", Color.Blue);
-                            Console.WriteLine(context.User.Username);
-                            Console.WriteLine("Command:", Color.Blue);
-                            Console.WriteLine(message);
-                            Console.WriteLine("Command Status: Completed", Color.Green);
-                        }
+                        }                        
                     }
                 }
             }

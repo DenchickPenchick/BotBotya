@@ -148,9 +148,7 @@ namespace DiscordBot.GuildManaging
         public enum GetCategoryIdEnum { MainVoiceChannelsCategory, RoomVoiceChannelsCategory, MainTextChannelsCategory, ContentChannelsCategory, BotChannelsCategory }
 
         public async Task SetupGuild()
-        {
-            Console.WriteLine($"Guild {Guild.Id} setup started");            
-
+        {                
             var categories = Guild.CategoryChannels;
             var textChannels = Guild.TextChannels;
             var voiceChannels = Guild.VoiceChannels;
@@ -241,8 +239,7 @@ namespace DiscordBot.GuildManaging
                     await provider.LinksTextChannel().DeleteAsync();
                 if (provider.VideosTextChannel() != null)
                     await provider.VideosTextChannel().DeleteAsync();
-            }
-            Console.WriteLine($"Guild {Guild.Id} setup ended", Color.Green);
+            }            
         }
 
         public async Task SendHelloMessageToGuild(DiscordSocketClient client)
