@@ -672,6 +672,19 @@
         "compile": {
           "ref/netstandard1.3/System.Threading.Tasks.dll": {}
         }
+      },
+      "Victoria/5.1.10": {
+        "type": "package",
+        "dependencies": {
+          "Discord.Net.WebSocket": "2.2.0",
+          "Microsoft.Extensions.DependencyInjection": "3.1.3"
+        },
+        "compile": {
+          "lib/netcoreapp3.0/Victoria.dll": {}
+        },
+        "runtime": {
+          "lib/netcoreapp3.0/Victoria.dll": {}
+        }
       }
     }
   },
@@ -2915,6 +2928,20 @@
         "system.threading.tasks.4.3.0.nupkg.sha512",
         "system.threading.tasks.nuspec"
       ]
+    },
+    "Victoria/5.1.10": {
+      "sha512": "8w51E7ddiHM4yeS9GyvM3H8/PJFWjQMuH6/uuWCp00X2hocvpsOZxvLBUK0KyeCOiUQZgGtDdLJrUFpdohhMxQ==",
+      "type": "package",
+      "path": "victoria/5.1.10",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Logo.png",
+        "lib/netcoreapp3.0/Victoria.dll",
+        "lib/netcoreapp3.0/Victoria.xml",
+        "victoria.5.1.10.nupkg.sha512",
+        "victoria.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
@@ -2924,7 +2951,8 @@
       "Discord.Net >= 2.2.0",
       "Lavalink4NET.Discord.NET >= 1.6.0",
       "Microsoft.Extensions.DependencyInjection >= 3.1.4",
-      "System.Threading.Tasks >= 4.3.0"
+      "System.Threading.Tasks >= 4.3.0",
+      "Victoria >= 5.1.10"
     ]
   },
   "packageFolders": {
@@ -2990,6 +3018,10 @@
           "System.Threading.Tasks": {
             "target": "Package",
             "version": "[4.3.0, )"
+          },
+          "Victoria": {
+            "target": "Package",
+            "version": "[5.1.10, )"
           }
         },
         "imports": [

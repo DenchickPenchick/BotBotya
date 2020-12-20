@@ -146,6 +146,12 @@ namespace TestBot
                 await ReplyAsync("Интервал не может быть больше 21600 секунд.");
         }
 
+        [Command("TestTrack")]
+        public async Task PlayTestTrack()
+        { 
+        
+        }
+
         private SocketGuildUser GetSocketGuildUser(params string[] NameOfUser)
         {
             string name = null;

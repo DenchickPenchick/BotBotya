@@ -14,7 +14,7 @@ namespace DiscordBot.Modules.ProcessManage
         public ContentModule ContentModule { get; set; }
         public FilesModule FileModule { get; set; }
         public GuildModule GuildModule { get; set; }
-        public LogModule NotificationsModule { get; set; }        
+        public LogModule NotificationsModule { get; set; }            
         public List<IModule> GetAllModules() => new List<IModule> { FileModule, GuildModule, RoomModule, ContentModule, NotificationsModule };        
     }
 }

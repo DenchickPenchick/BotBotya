@@ -9,11 +9,15 @@ using DiscordBot.Modules.ProcessManage;
 using DiscordBot.RoomManaging;
 using Microsoft.Extensions.DependencyInjection;
 using Console = Colorful.Console;
+using Lavalink4NET.DiscordNet;
+using Lavalink4NET.Lyrics;
 using TestBot;
 using DiscordBot.GuildManaging;
 using DiscordBot.Modules.NotificationsManaging;
 using System.Collections.Generic;
 using DiscordBot.FileWorking;
+using Lavalink4NET;
+using Victoria;
 
 namespace DiscordBot
 {
@@ -35,7 +39,14 @@ namespace DiscordBot
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 AlwaysDownloadUsers = true
-            });            
+            });
+
+            //AudioService = new LavalinkNode(new LavalinkNodeOptions
+            //{
+            //    RestUri = "http://localhost:8080/",
+            //    WebSocketUri = "ws://localhost:8080/",
+            //    Password = "youshallnotpass"
+            //}, new DiscordClientWrapper(Client));
 
             Commands = new CommandService();
             BotOptionsCommands = new CommandService();
@@ -44,9 +55,12 @@ namespace DiscordBot
                 DefaultTimeout = TimeSpan.FromMinutes(5)
             });
             Services = new ServiceCollection()
-                .AddSingleton(Client)                
+                .AddSingleton(Client)
                 .AddSingleton(interactiveService)
-                .BuildServiceProvider();
+                .AddSingleton<LavaNode>()
+                .AddSingleton<LavaConfig>()                
+                .BuildServiceProvider();                                  
+
             new ProcessingModule(new ProcessingConfiguration
             {
                 DiscordSocketClient = Client,
@@ -55,7 +69,9 @@ namespace DiscordBot
                 FileModule = new FilesModule(this),
                 GuildModule = new GuildModule(Client),
                 NotificationsModule = new LogModule(Client)                
-            }).RunModule();            
+            }).RunModule();
+
+            Client.Ready += Client_Ready;
 
             await RegisterCommandsAsync();           
 
@@ -63,11 +79,22 @@ namespace DiscordBot
 
             await Client.StartAsync();            
 
-            await Client.SetGameAsync("https://botbotya.ru", "https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991", activityType);            
+            await Client.SetGameAsync("https://botbotya.ru", "https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991", activityType);                                  
 
             await Task.Delay(-1);
-        }   
-        
+        }
+
+        private async Task Client_Ready()
+        {
+            Console.WriteLine("Connecting Lava node..");
+            var instanceOfLavaNode = new LavaNode(Client, new LavaConfig());            
+            if (!instanceOfLavaNode.IsConnected)            
+                await instanceOfLavaNode.ConnectAsync();
+            new MusicCommands(instanceOfLavaNode);
+            await Commands.AddModuleAsync<MusicCommands>(Services);
+            Console.WriteLine("Lava node connected", Color.Green);
+        }
+
         private async Task HandleCommandAsync(SocketMessage arg)
         {
             int argsPos = 0;

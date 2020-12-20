@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "jq1mP8p/tHV9BPfGCVXqDM8mYfwBQALkUKG/wMy4ifkrO+2mxMVjgYiXqnSL56LKNdF6+EwwPY1XQD7lm3tdZA==",
+  "dgSpecHash": "ZiTdNhlIHP1sOOr31DFAPw4ccxZECpZPOxAoOV2njpS8DwyHopCRDtSXXqSUSz+W3DiiBnz5UCxi1XyY7usFlA==",
   "success": true,
   "projectFilePath": "D:\\Программы\\Сервер Discord\\DiscordBot\\DiscordBot\\DiscordBot.csproj",
   "expectedPackageFiles": [
@@ -52,7 +52,8 @@
     "C:\\Users\\Денис\\.nuget\\packages\\system.text.encoding\\4.3.0\\system.text.encoding.4.3.0.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\system.text.regularexpressions\\4.1.0\\system.text.regularexpressions.4.1.0.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\system.threading\\4.3.0\\system.threading.4.3.0.nupkg.sha512",
-    "C:\\Users\\Денис\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512"
+    "C:\\Users\\Денис\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512",
+    "C:\\Users\\Денис\\.nuget\\packages\\victoria\\5.1.10\\victoria.5.1.10.nupkg.sha512"
   ],
   "logs": []
 }
