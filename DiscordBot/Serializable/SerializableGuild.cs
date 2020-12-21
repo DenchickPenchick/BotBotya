@@ -7,9 +7,7 @@ namespace DiscordBot.Modules.FileManaging
     {
         public ulong GuildId { get; set; } = default;
         public ulong DefaultRoleId { get; set; } = default;
-        public ulong LoggerId { get; set; } = default;
-        public ulong UsersWidgetId { get; set; } = default;
-        public ulong ChannelsWidgetId { get; set; } = default;
+        public ulong LoggerId { get; set; } = default;        
         public bool HelloMessageEnable { get; set; } = default;
         public bool ContentEnable { get; set; } = default;
         public bool RoomsEnable { get; set; } = default;
