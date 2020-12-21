@@ -55,3 +55,4 @@ D:\Программы\Сервер Discord\DiscordBot\DiscordBot\obj\Debug\netco
 D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Lavalink4NET.dll
 D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Lavalink4NET.DiscordNet.dll
 D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Victoria.dll
+D:\Программы\Сервер Discord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csprojAssemblyReference.cache

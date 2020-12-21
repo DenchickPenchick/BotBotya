@@ -28,9 +28,22 @@ namespace DiscordBot.GuildManaging
         public void RunModule()
         {
             Client.JoinedGuild += Client_JoinedGuild;
-            Client.ChannelDestroyed += ChannelDestroyed;            
+            Client.ChannelDestroyed += ChannelDestroyed;
+            Client.UserJoined += Client_UserJoined;
             Client.Ready += Client_Ready;            
-        }        
+        }
+
+        private async Task Client_UserJoined(SocketGuildUser arg)
+        {
+            var serGuild = FilesProvider.GetGuild(arg.Guild);
+            var defaultRole = arg.Guild.GetRole(serGuild.DefaultRoleId);
+
+            if(serGuild.DefaultRoleId != default)
+                await arg.AddRoleAsync(defaultRole);
+            if(serGuild.HelloMessageEnable && serGuild.HelloMessage != null)
+                await arg.GetOrCreateDMChannelAsync().Result.SendMessageAsync(serGuild.HelloMessage);
+            await arg.Guild.TextChannels.ToArray()[0].SendMessageAsync($"Поприветстуем малоуважемого {arg.Username}!");
+        }
 
         private async Task Client_Ready()
         {

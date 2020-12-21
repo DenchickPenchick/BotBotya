@@ -9,14 +9,11 @@ using DiscordBot.Modules.ProcessManage;
 using DiscordBot.RoomManaging;
 using Microsoft.Extensions.DependencyInjection;
 using Console = Colorful.Console;
-using Lavalink4NET.DiscordNet;
-using Lavalink4NET.Lyrics;
 using TestBot;
 using DiscordBot.GuildManaging;
 using DiscordBot.Modules.NotificationsManaging;
 using System.Collections.Generic;
 using DiscordBot.FileWorking;
-using Lavalink4NET;
 using Victoria;
 
 namespace DiscordBot
@@ -40,13 +37,6 @@ namespace DiscordBot
             {
                 AlwaysDownloadUsers = true
             });
-
-            //AudioService = new LavalinkNode(new LavalinkNodeOptions
-            //{
-            //    RestUri = "http://localhost:8080/",
-            //    WebSocketUri = "ws://localhost:8080/",
-            //    Password = "youshallnotpass"
-            //}, new DiscordClientWrapper(Client));
 
             Commands = new CommandService();
             BotOptionsCommands = new CommandService();
@@ -87,10 +77,9 @@ namespace DiscordBot
         private async Task Client_Ready()
         {
             Console.WriteLine("Connecting Lava node..");
-            var instanceOfLavaNode = new LavaNode(Client, new LavaConfig());            
+            var instanceOfLavaNode = Services.GetRequiredService<LavaNode>();            
             if (!instanceOfLavaNode.IsConnected)            
-                await instanceOfLavaNode.ConnectAsync();
-            new MusicCommands(instanceOfLavaNode);
+                await instanceOfLavaNode.ConnectAsync();            
             await Commands.AddModuleAsync<MusicCommands>(Services);
             Console.WriteLine("Lava node connected", Color.Green);
         }

@@ -21,8 +21,4 @@
     </Reference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Modules\MusicManaging\" />
-  </ItemGroup>
-
 </Project>
