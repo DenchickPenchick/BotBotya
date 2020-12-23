@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Программы\\Сервер Discord\\DiscordBot\\DiscordBot\\DiscordBot.csproj": {}
+    "D:\\Программы\\СерверDiscord\\DiscordBot\\DiscordBot\\DiscordBot.csproj": {}
   },
   "projects": {
-    "D:\\Программы\\Сервер Discord\\DiscordBot\\DiscordBot\\DiscordBot.csproj": {
+    "D:\\Программы\\СерверDiscord\\DiscordBot\\DiscordBot\\DiscordBot.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Программы\\Сервер Discord\\DiscordBot\\DiscordBot\\DiscordBot.csproj",
+        "projectUniqueName": "D:\\Программы\\СерверDiscord\\DiscordBot\\DiscordBot\\DiscordBot.csproj",
         "projectName": "DiscordBot",
-        "projectPath": "D:\\Программы\\Сервер Discord\\DiscordBot\\DiscordBot\\DiscordBot.csproj",
+        "projectPath": "D:\\Программы\\СерверDiscord\\DiscordBot\\DiscordBot\\DiscordBot.csproj",
         "packagesPath": "C:\\Users\\Денис\\.nuget\\packages\\",
-        "outputPath": "D:\\Программы\\Сервер Discord\\DiscordBot\\DiscordBot\\obj\\",
+        "outputPath": "D:\\Программы\\СерверDiscord\\DiscordBot\\DiscordBot\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Денис\\AppData\\Roaming\\NuGet\\NuGet.Config",

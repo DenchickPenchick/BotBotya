@@ -15,6 +15,7 @@ using DiscordBot.Modules.NotificationsManaging;
 using System.Collections.Generic;
 using DiscordBot.FileWorking;
 using Victoria;
+using DiscordBot.MusicOperations;
 
 namespace DiscordBot
 {
@@ -25,7 +26,7 @@ namespace DiscordBot
         
         public DiscordSocketClient Client;
         public CommandService Commands;
-        public CommandService BotOptionsCommands;
+        public CommandService BotOptionsCommands;        
         public IServiceProvider Services;                                      
 
         public async Task RunBotAsync()
@@ -39,7 +40,7 @@ namespace DiscordBot
             });
 
             Commands = new CommandService();
-            BotOptionsCommands = new CommandService();
+            BotOptionsCommands = new CommandService();            
             InteractiveService interactiveService = new InteractiveService(Client, new InteractiveServiceConfig
             {
                 DefaultTimeout = TimeSpan.FromMinutes(5)
@@ -47,8 +48,11 @@ namespace DiscordBot
             Services = new ServiceCollection()
                 .AddSingleton(Client)
                 .AddSingleton(interactiveService)
-                .AddSingleton<LavaNode>()
-                .AddSingleton<LavaConfig>()                
+                .AddSingleton<CommandService>()
+                .AddSingleton(new LavaNode(Client, new LavaConfig()))
+                .AddSingleton(new LavaConfig())
+                .AddLavaNode()
+                .AddSingleton<LavaOperations>()
                 .BuildServiceProvider();                                  
 
             new ProcessingModule(new ProcessingConfiguration
@@ -76,12 +80,13 @@ namespace DiscordBot
 
         private async Task Client_Ready()
         {
-            Console.WriteLine("Connecting Lava node..");
-            var instanceOfLavaNode = Services.GetRequiredService<LavaNode>();            
-            if (!instanceOfLavaNode.IsConnected)            
-                await instanceOfLavaNode.ConnectAsync();            
-            await Commands.AddModuleAsync<MusicCommands>(Services);
-            Console.WriteLine("Lava node connected", Color.Green);
+            var instanceOfLavaNode = Services.GetRequiredService<LavaNode>();
+            if (!instanceOfLavaNode.IsConnected)
+            {
+                Console.WriteLine("Connecting Lava node..");                
+                await instanceOfLavaNode.ConnectAsync();                
+                Console.WriteLine("Lava node connected", Color.Green);
+            }                        
         }
 
         private async Task HandleCommandAsync(SocketMessage arg)
@@ -208,7 +213,7 @@ namespace DiscordBot
         private async Task RegisterCommandsAsync()
         {           
             await Commands.AddModuleAsync<Commands>(Services);
-            await BotOptionsCommands.AddModuleAsync<BotOptionsCommands>(Services);
+            await BotOptionsCommands.AddModuleAsync<BotOptionsCommands>(Services);             
             Client.MessageReceived += HandleCommandAsync;
         }
     }

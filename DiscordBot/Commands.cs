@@ -8,11 +8,20 @@ using System.Threading.Tasks;
 using Discord.Addons.Interactive;
 using Console = Colorful.Console;
 using DiscordBot.FileWorking;
+using DiscordBot.MusicOperations;
 
 namespace TestBot
 {
     public class Commands : InteractiveBase
-    {        
+    {
+        private readonly LavaOperations LavaOperations;
+
+        public Commands(LavaOperations lavaOperations)
+        {
+            LavaOperations = lavaOperations;
+        }
+
+        #region --СТАНДАРТНЫЕ КОМАНДЫ--
         [Command("News")]
         [Summary("позволяет узнать последние новости")]
         public async Task UpdateNews()
@@ -145,12 +154,37 @@ namespace TestBot
             else if (time > 21600)
                 await ReplyAsync("Интервал не может быть больше 21600 секунд.");
         }
+        #endregion
 
-        [Command("TestTrack")]
-        public async Task PlayTestTrack()
-        { 
-        
+        #region --МУЗЫКАЛЬНЫЕ КОМАНДЫ--
+        [Command("Join")]
+        [Summary("подключает бота к голосовому каналу")]
+        public async Task JoinAsync()
+        {
+            await ReplyAsync(embed: await LavaOperations.JoinAsync(Context.User as SocketGuildUser));
         }
+
+        [Command("Leave")]
+        [Summary("отключает бота от канала")]
+        public async Task LeaveAsync()
+        {
+            await ReplyAsync(embed: await LavaOperations.LeaveAsync(Context.User as SocketGuildUser));
+        }
+
+        [Command("Play")]
+        [Summary("включает трек, который задан url")]
+        public async Task PlayTrackAsync(params string[] query)
+        {
+            await ReplyAsync(embed: await LavaOperations.PlayTrackAsync(Context.User as SocketGuildUser, query));
+        }
+
+        [Command("Stop")]
+        [Summary("включает трек, который задан url")]
+        public async Task StopTrackAsync()
+        {
+            await ReplyAsync(embed: await LavaOperations.StopTrackAsync(Context.User as SocketGuildUser));
+        }
+        #endregion
 
         private SocketGuildUser GetSocketGuildUser(params string[] NameOfUser)
         {

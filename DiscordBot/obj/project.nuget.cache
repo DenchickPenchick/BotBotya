@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ZiTdNhlIHP1sOOr31DFAPw4ccxZECpZPOxAoOV2njpS8DwyHopCRDtSXXqSUSz+W3DiiBnz5UCxi1XyY7usFlA==",
+  "dgSpecHash": "cAgnKkOTrwJ7xjqiP/GqX4XfRECUjjuuWUz7iLPWMFoDrdA7WEt7yKL+KOBuMPSrDNoxi2c3+YgEQFFJiNR1mg==",
   "success": true,
-  "projectFilePath": "D:\\Программы\\Сервер Discord\\DiscordBot\\DiscordBot\\DiscordBot.csproj",
+  "projectFilePath": "D:\\Программы\\СерверDiscord\\DiscordBot\\DiscordBot\\DiscordBot.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Денис\\.nuget\\packages\\colorful.console\\1.2.10\\colorful.console.1.2.10.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\discord.addons.interactive\\2.0.0\\discord.addons.interactive.2.0.0.nupkg.sha512",

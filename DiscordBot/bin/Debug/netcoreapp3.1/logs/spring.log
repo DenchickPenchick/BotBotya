@@ -1,0 +1,27 @@
+2020-12-24 00:00:06.221  INFO 12940 --- [XNIO-1 I/O-1] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:58765 -- CloseStatus[code=1006, reason=]
+2020-12-24 00:00:06.225  INFO 12940 --- [XNIO-1 I/O-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
+2020-12-24 00:00:35.210  INFO 12940 --- [XNIO-1 task-22] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:58782
+2020-12-24 00:00:35.215  INFO 12940 --- [XNIO-1 task-22] lavalink.server.io.SocketServer          : Connection successfully established from /127.0.0.1:58782
+2020-12-24 00:00:38.045  INFO 12940 --- [XNIO-1 task-23] l.server.player.AudioLoaderRestHandler   : Got request to load for identifier "ytsearch:hislerim"
+2020-12-24 00:00:38.595  INFO 12940 --- [lava-daemon-pool-info-loader-2-thread-1] lavalink.server.player.AudioLoader       : Loaded playlist Search results for: hislerim
+2020-12-24 00:00:38.652  INFO 12940 --- [XNIO-1 I/O-18] lavalink.server.io.SocketServer          : {"endTime":215000,"track":"QAAAkgIAJVNlcmhhdCBEdXJtdXMgLSBIaXNsZXJpbSAoZnQuIFplcnJpbikAE1NlcmhhdCBEdXJtdXMgTXVzaWMAAAAAAANH2AALTWMyLVlNOUJodTQAAQAraHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1NYzItWU05Qmh1NAAHeW91dHViZQAAAAAAAAAA","noReplace":false,"startTime":0,"guildId":"777618262074458202","op":"play"}
+2020-12-24 00:00:39.244  INFO 12940 --- [XNIO-1 I/O-18] lavalink.server.io.SocketServer          : {"guildId":"777618262074458202","sessionId":"01fb581820deb9621178ce293e5f08cb","event":{"token":"8815208d27020b0f","endpoint":"russia8310.discord.media:443"},"op":"voiceUpdate"}
+2020-12-24 00:00:49.097  INFO 12940 --- [XNIO-1 I/O-18] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:58782 -- CloseStatus[code=1006, reason=]
+2020-12-24 00:00:49.097  INFO 12940 --- [XNIO-1 I/O-18] lavalink.server.io.SocketContext         : Shutting down 1 playing players.
+2020-12-24 00:15:19.615  INFO 12940 --- [XNIO-1 task-25] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:57158
+2020-12-24 00:15:19.618  INFO 12940 --- [XNIO-1 task-25] lavalink.server.io.SocketServer          : Connection successfully established from /127.0.0.1:57158
+2020-12-24 00:15:30.208  INFO 12940 --- [XNIO-1 task-26] l.server.player.AudioLoaderRestHandler   : Got request to load for identifier "ytsearch: II"
+2020-12-24 00:15:30.912  INFO 12940 --- [lava-daemon-pool-info-loader-2-thread-1] lavalink.server.player.AudioLoader       : Loaded playlist Search results for: II
+2020-12-24 00:15:30.988  INFO 12940 --- [XNIO-1 I/O-2] lavalink.server.io.SocketServer          : {"endTime":432000,"track":"QAAArAIAREtpbmcncyBCb3VudHkgSUkgLSDQntCR0JfQntCgINC4INCf0JXQoNCS0KvQlSDQktCf0JXQp9CQ0KLQm9CV0J3QmNCvAA5HYW1pbmcg0LfQsCAzMAAAAAAABpeAAAtOa25HanBOYWp6cwABACtodHRwczovL3d3dy55b3V0dWJlLmNvbS93YXRjaD92PU5rbkdqcE5hanpzAAd5b3V0dWJlAAAAAAAAAAA=","noReplace":false,"startTime":0,"guildId":"777618262074458202","op":"play"}
+2020-12-24 00:15:31.312  INFO 12940 --- [XNIO-1 I/O-2] lavalink.server.io.SocketServer          : {"guildId":"777618262074458202","sessionId":"469585f8f800e103a202dcc06d934adc","event":{"token":"0e26f5b4b51ce14c","endpoint":"russia8310.discord.media:443"},"op":"voiceUpdate"}
+2020-12-24 00:15:49.406  INFO 12940 --- [XNIO-1 I/O-2] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:57158 -- CloseStatus[code=1006, reason=]
+2020-12-24 00:15:49.407  INFO 12940 --- [XNIO-1 I/O-2] lavalink.server.io.SocketContext         : Shutting down 1 playing players.
+2020-12-24 00:16:35.944  INFO 12940 --- [XNIO-1 task-28] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:57181
+2020-12-24 00:16:35.946  INFO 12940 --- [XNIO-1 task-28] lavalink.server.io.SocketServer          : Connection successfully established from /127.0.0.1:57181
+2020-12-24 00:16:55.277  INFO 12940 --- [XNIO-1 task-29] l.server.player.AudioLoaderRestHandler   : Got request to load for identifier "ytsearch: волчком"
+2020-12-24 00:16:55.735  INFO 12940 --- [lava-daemon-pool-info-loader-2-thread-1] lavalink.server.player.AudioLoader       : Loaded playlist Search results for: волчком
+2020-12-24 00:16:55.772  INFO 12940 --- [XNIO-1 I/O-1] lavalink.server.io.SocketServer          : {"endTime":217000,"track":"QAAAeAIADtCS0L7Qu9GH0LrQvtC8ABBBZmZpbmF6aCAtIFRvcGljAAAAAAADT6gACzNHUThDZmluTVk4AAEAK2h0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3dhdGNoP3Y9M0dROENmaW5NWTgAB3lvdXR1YmUAAAAAAAAAAA==","noReplace":false,"startTime":0,"guildId":"777618262074458202","op":"play"}
+2020-12-24 00:16:56.199  INFO 12940 --- [XNIO-1 I/O-1] lavalink.server.io.SocketServer          : {"guildId":"777618262074458202","sessionId":"e0c88bbc22a673572d0214b04c6a965e","event":{"token":"a8728f926bc3cfdd","endpoint":"russia8310.discord.media:443"},"op":"voiceUpdate"}
+2020-12-24 00:17:07.703  INFO 12940 --- [XNIO-1 I/O-1] lavalink.server.io.SocketServer          : {"guildId":"777618262074458202","op":"stop"}
+2020-12-24 00:17:28.410  INFO 12940 --- [XNIO-1 I/O-1] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:57181 -- CloseStatus[code=1006, reason=]
+2020-12-24 00:17:28.410  INFO 12940 --- [XNIO-1 I/O-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.

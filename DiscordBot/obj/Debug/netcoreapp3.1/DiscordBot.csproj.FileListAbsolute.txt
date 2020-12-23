@@ -56,3 +56,33 @@ D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Debug\netco
 D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Lavalink4NET.DiscordNet.dll
 D:\Программы\Сервер Discord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Victoria.dll
 D:\Программы\Сервер Discord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csprojAssemblyReference.cache
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\DiscordBot.exe
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\DiscordBot.deps.json
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\DiscordBot.runtimeconfig.json
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\DiscordBot.runtimeconfig.dev.json
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\DiscordBot.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\DiscordBot.pdb
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Colorful.Console.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Discord.Addons.Interactive.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Discord.Net.Commands.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Discord.Net.Core.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Discord.Net.Rest.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Discord.Net.Webhook.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Discord.Net.WebSocket.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Lavalink4NET.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Lavalink4NET.DiscordNet.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Microsoft.Extensions.DependencyInjection.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\System.Interactive.Async.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\System.Linq.Async.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Victoria.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\MathematicsDiscordBotLibrary.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\MathematicsDiscordBotLibrary.pdb
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.AssemblyInfoInputs.cache
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.AssemblyInfo.cs
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csproj.CoreCompileInputs.cache
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csproj.CopyComplete
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.dll
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.pdb
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.genruntimeconfig.cache
