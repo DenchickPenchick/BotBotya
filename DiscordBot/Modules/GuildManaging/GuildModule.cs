@@ -2,11 +2,11 @@
 using DiscordBot.FileWorking;
 using DiscordBot.Modules;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Threading.Tasks;
 using System.Linq;
 using Console = Colorful.Console;
 using System;
+using Discord;
 
 namespace DiscordBot.GuildManaging
 {
@@ -47,7 +47,7 @@ namespace DiscordBot.GuildManaging
 
         private async Task Client_Ready()
         {
-            await SetupGuilds();
+            await SetupGuilds();            
         }
 
         private async Task ChannelDestroyed(SocketChannel arg)
@@ -116,7 +116,7 @@ namespace DiscordBot.GuildManaging
             {
                 { SerializableGuild.SystemChannels.LinksChannelName },
                 { SerializableGuild.SystemChannels.VideosChannelName },
-                { SerializableGuild.SystemChannels.ConsoleChannelName }
+                { SerializableGuild.SystemChannels.ConsoleChannelName },                
             };
             List<string> listOfSystemVoiceChannels = new List<string>
             {
@@ -198,7 +198,7 @@ namespace DiscordBot.GuildManaging
             if (Setup)
                 Console.WriteLine($"Guild {Guild.Id} setup ended", Color.Green);
             
-        }
+        }        
 
         private async Task RebuildCurrentChannel(SocketGuildChannel channel)
         {

@@ -202,7 +202,7 @@ namespace DiscordBot
                     LinksChannelName = "🌐ссылки",
                     VideosChannelName = "📹видео",
                     CreateRoomChannelName = "➕Создать комнату",
-                    ConsoleChannelName = "🤖консоль-бота"
+                    ConsoleChannelName = "🤖консоль-бота"                    
                 }
             };
             using (FileStream stream = new FileStream($@"{Bot.PathToBotDirectory}\BotGuilds\{guild.Id}.xml", FileMode.Create))

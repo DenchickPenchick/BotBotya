@@ -1,6 +1,7 @@
 ﻿using Discord.WebSocket;
 using DiscordBot.GuildManaging;
 using DiscordBot.Modules.ContentManaging;
+using DiscordBot.Modules.MusicManaging;
 using DiscordBot.Modules.NotificationsManaging;
 using DiscordBot.RoomManaging;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace DiscordBot.Modules.ProcessManage
         public FilesModule FileModule { get; set; }
         public GuildModule GuildModule { get; set; }
         public LogModule NotificationsModule { get; set; }            
-        public List<IModule> GetAllModules() => new List<IModule> { FileModule, GuildModule, RoomModule, ContentModule, NotificationsModule };        
+        public MusicModule MusicModule { get; set; }
+        public List<IModule> GetAllModules() => new List<IModule> { FileModule, GuildModule, RoomModule, ContentModule, NotificationsModule, MusicModule };        
     }
 }

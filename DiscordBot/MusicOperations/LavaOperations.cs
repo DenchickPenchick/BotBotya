@@ -1,9 +1,8 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Victoria;
 
@@ -13,171 +12,247 @@ namespace DiscordBot.MusicOperations
     {
         private readonly LavaNode LavaNode;
 
-        public LavaOperations(LavaNode lavaNode)
+        public Hashtable GuildsPlayers { get; set; } = new Hashtable();
+
+        public LavaOperations(LavaNode lavaNode, DiscordSocketClient client)
         {
             LavaNode = lavaNode;
+            foreach (var guild in client.Guilds)
+                GuildsPlayers.Add(guild, null);
         }
-
-        public async Task<Embed> JoinAsync(SocketGuildUser user)
+        
+        public async Task JoinAsync(SocketGuildUser user, SocketTextChannel contextChannel)
         {
             var voiceState = user.VoiceState;            
             var channel = voiceState.Value.VoiceChannel;
 
-            if (channel == null)//Если пользователь не подключен
-                return CreateErrorReplyEmbed(ErrorType.NotConnected);
+            if (channel == null)
+                await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NotConnected));
 
             try
             {
                 await LavaNode.JoinAsync(channel);
-                return new EmbedBuilder
+                await contextChannel.SendMessageAsync(embed: new EmbedBuilder
                 {
                     Title = $"Подключен к каналу {channel.Name}",
                     Color = Color.Blue
-                }.Build();
+                }.Build());
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return CreateErrorReplyEmbed(ErrorType.Exception);
+                Console.WriteLine(ex);                
             }
         }
 
-        public async Task<Embed> LeaveAsync(SocketGuildUser user)
-        {
-            var voiceState = user.VoiceState;
-            var channel = voiceState.Value.VoiceChannel;
-            var player = LavaNode.GetPlayer(user.Guild);
-
-            if (player.VoiceChannel == null)
-                return CreateErrorReplyEmbed(ErrorType.BotNotConnected);
-
-            if (player.VoiceChannel != channel)
-                return new EmbedBuilder
-                {
-                    Title = "Ты не можешь меня отключить из другого канала",
-                    Color = Color.Red
-                }.Build();
-
+        public async Task LeaveAsync(SocketGuildUser user, SocketTextChannel contextChannel)
+        {                     
             try
-            {                
-                await LavaNode.LeaveAsync(player.VoiceChannel);
-                return new EmbedBuilder
+            {
+                if (user.Guild.CurrentUser.VoiceChannel != null)
                 {
-                    Title = $"Покинул канал {channel.Name}",
-                    Color = Color.Blue
-                }.Build();
+                    await LavaNode.LeaveAsync(user.Guild.CurrentUser.VoiceChannel);
+                    await contextChannel.SendMessageAsync(embed: new EmbedBuilder
+                    {
+                        Title = $"Покинул канал {user.Guild.CurrentUser.VoiceChannel.Name}",
+                        Color = Color.Blue
+                    }.Build());
+                }
+                else
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.BotNotConnected));
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return CreateErrorReplyEmbed(ErrorType.Exception);
-            }
+                Console.WriteLine(ex);                
+            }            
         }
 
-        public async Task<Embed> PlayTrackAsync(SocketGuildUser user, string[] query)
+        public async Task PlayTrackAsync(SocketGuildUser user, string[] query, SocketTextChannel contextChannel)
         {
-            if (query == null)
-                return CreateErrorReplyEmbed(ErrorType.NoName);
+            if (user.VoiceChannel == null)
+            {
+                await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoName));
+                return;
+            }
             string Query = null;
 
             for (int i = 0; i < query.Length; i++)            
-                Query = i == 0 ? $"{query[i]}" : $" {query[i]}";            
+                Query += i == 0 ? $"{query[i]}" : $" {query[i]}";            
 
             try
-            {
+            {                
                 bool hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
                 if (user.VoiceChannel == null)
-                    return CreateErrorReplyEmbed(ErrorType.NotConnected);
+                {
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NotConnected));
+                    return;
+                }
 
                 if (!hasPlayer)                
-                    player = await LavaNode.JoinAsync(user.VoiceChannel);
-                
+                    player = await LavaNode.JoinAsync(user.VoiceChannel);                
+                else
+                    if(player.VoiceState.VoiceChannel == null)
+                        await LavaNode.JoinAsync(user.VoiceChannel);
+
                 var search = Uri.IsWellFormedUriString(Query, UriKind.Absolute) ? await LavaNode.SearchAsync(Query) : await LavaNode.SearchYouTubeAsync(Query);
                 var track = search.Tracks.FirstOrDefault();
                 await player.PlayAsync(track);
-                return new EmbedBuilder
-                {
-                    Title = $"Играет {track.Title}",
-                    Color = Color.Blue
-                }.Build();
+
+                await SendPlayer(player);                
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return CreateErrorReplyEmbed(ErrorType.Exception);
+                Console.WriteLine(ex);                
             }
         }
 
-        public async Task<Embed> StopTrackAsync(SocketGuildUser user)
+        public async Task StopTrackAsync(SocketGuildUser user, SocketTextChannel contextChannel)
         {
             try
             {
                 bool hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
                 if (user.VoiceChannel == null)
-                    return CreateErrorReplyEmbed(ErrorType.NotConnected);
+                {
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NotConnected));
+                    return;
+                }
+
                 if (!hasPlayer)
-                    return CreateErrorReplyEmbed(ErrorType.NoTrack);
-                if(player.Track == null)
-                    return CreateErrorReplyEmbed(ErrorType.NoTrack);
+                {
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoTrack));
+                    return;
+                }
+
+                if (player.Track == null)
+                {
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoTrack));
+                    return;
+                }
 
                 await player.StopAsync();
-                return new EmbedBuilder
-                {
-                    Title = $"Трек {player.Track.Title} остановлен",
-                    Color = Color.Blue
-                }.Build();
+                await SendPlayer(player);                
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return CreateErrorReplyEmbed(ErrorType.Exception);
+                Console.WriteLine(ex);                
             }
         }
 
-        public async Task<Embed> PauseTrackAsync(SocketGuildUser user)
+        public async Task PauseTrackAsync(SocketGuildUser user, SocketTextChannel contextChannel)
         {
             try
             {
                 var hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
 
                 if (user.VoiceChannel == null)
-                    return CreateErrorReplyEmbed(ErrorType.NotConnected);
+                {
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NotConnected));
+                    return;
+                }
+
                 if (!hasPlayer)
-                    return CreateErrorReplyEmbed(ErrorType.NoTrack);
+                {
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoTrack));
+                    return;
+                }
+
                 if (player.Track == null)
-                    return CreateErrorReplyEmbed(ErrorType.NoTrack);
+                {
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoTrack));
+                    return;
+                }
 
                 await player.PauseAsync();
-                return new EmbedBuilder
-                {
-                    Title = $"Трек {player.Track.Title} приостановлен",
-                    Color = Color.Blue
-                }.Build();
+                await SendPlayer(player);                
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return CreateErrorReplyEmbed(ErrorType.Exception);
+                Console.WriteLine(ex);                
             }
         }
 
-        public async Task<Embed> PlayTrackAsync(SocketGuildUser user)
+        public async Task ResumeTrackAsync(SocketGuildUser user, SocketTextChannel contextChannel)
         {
             try
             {
                 var hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
 
                 if (user.VoiceChannel == null)
-                    return CreateErrorReplyEmbed(ErrorType.NotConnected);
+                {
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NotConnected));
+                    return;
+                }
+                   
                 if (!hasPlayer)
-                    return CreateErrorReplyEmbed(ErrorType.NoTrack);
+                {
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoTrack));
+                    return;
+                }
+
                 if (player.Track == null)
-                    return CreateErrorReplyEmbed(ErrorType.NoTrack);
+                {
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoTrack));
+                    return;
+                }                   
 
                 await player.ResumeAsync();
+                await SendPlayer(player);                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);                
+            }
+        }
+
+        public async Task AddTrackAsync(SocketGuildUser user, string[] query, SocketTextChannel contextChannel)
+        {
+            if (query == null)
+            {
+                await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoName));
+                return;
+            }
+            
+            string Query = null;
+
+            for (int i = 0; i < query.Length; i++)
+                Query += i == 0 ? $"{query[i]}" : $" {query[i]}";
+
+            try
+            {
+                bool hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
+                if (user.VoiceChannel == null)
+                {
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NotConnected));
+                    return;
+                }
+                
+                if (!hasPlayer)
+                    player = await LavaNode.JoinAsync(user.VoiceChannel);
+
+                var search = Uri.IsWellFormedUriString(Query, UriKind.Absolute) ? await LavaNode.SearchAsync(Query) : await LavaNode.SearchYouTubeAsync(Query);
+                var track = search.Tracks.FirstOrDefault();
+                player.Queue.Enqueue(track);
+                if (player.Queue.Count == 1)
+                    await player.PlayAsync(track);
+                await SendPlayer(player);                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);                
+            }
+        }
+
+        public async Task<Embed> SetVolumeAsync(SocketGuildUser user, ushort vol, SocketTextChannel contextChannel)
+        {
+            try
+            {
+                var hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
+                if (!hasPlayer)
+                    return CreateErrorReplyEmbed(ErrorType.NoTrack);
+                await player.UpdateVolumeAsync(vol);
+                await SendPlayer(player);
                 return new EmbedBuilder
                 {
-                    Title = $"Трек {player.Track.Title} воспроизведен",
+                    Title = $"Громкость установлена до {vol}",
                     Color = Color.Blue
                 }.Build();
             }
@@ -219,6 +294,30 @@ namespace DiscordBot.MusicOperations
                 }.Build(),
                 _ => null,
             };
+        }
+
+        private async Task SendPlayer(LavaPlayer player)
+        {
+            var guild = player.VoiceChannel.Guild;            
+
+            var mess = await (player.TextChannel ?? (guild as SocketGuild).DefaultChannel).SendMessageAsync(embed: new EmbedBuilder
+            { 
+                Title = $"Плеер сервера {guild.Name}",                
+                Description = player.Track.Title,
+                Color = Color.Blue,
+                Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url }
+            }.Build());
+            
+
+            await mess.AddReactionsAsync(new Emoji[]
+            {
+                new Emoji("⏯️"), 
+                new Emoji("⏹"), 
+                new Emoji("⏮"),
+                new Emoji("⏭")
+            });
+
+            GuildsPlayers[guild] = mess;            
         }
 
         private enum ErrorType { Exception, NotConnected, BotNotConnected, NoTrack, NoName }

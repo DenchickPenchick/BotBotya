@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using DiscordBot.FileWorking;
 using Victoria;
 using DiscordBot.MusicOperations;
+using DiscordBot.Modules.MusicManaging;
 
 namespace DiscordBot
 {
@@ -62,7 +63,8 @@ namespace DiscordBot
                 ContentModule = new ContentModule(Client),
                 FileModule = new FilesModule(this),
                 GuildModule = new GuildModule(Client),
-                NotificationsModule = new LogModule(Client)                
+                NotificationsModule = new LogModule(Client),
+                MusicModule = new MusicModule(Services)
             }).RunModule();
 
             Client.Ready += Client_Ready;

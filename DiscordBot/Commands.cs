@@ -25,7 +25,7 @@ namespace TestBot
         [Command("News")]
         [Summary("позволяет узнать последние новости")]
         public async Task UpdateNews()
-        {                                    
+        {
             await ReplyAsync(embed: FilesProvider.GetNewsAndPlans().GetNewsAndPlansEmbed(Context.Client));
         }
 
@@ -41,7 +41,7 @@ namespace TestBot
                 {
                     await ReplyAsync("Начинаю удаление сообщений...");
                     var deleteMessagesThread = new Thread(new ParameterizedThreadStart(ClearMessages));
-                    deleteMessagesThread.Start(count);                    
+                    deleteMessagesThread.Start(count);
                 }
                 catch (ArgumentOutOfRangeException)
                 {
@@ -58,13 +58,13 @@ namespace TestBot
                 await Task.Delay(1000);
                 await errMess.DeleteAsync();
             }
-            
+
         }
 
         [Command("ReportUser", RunMode = RunMode.Async)]
         [Summary("отпраляет жалобу на участника сервера.")]
         public async Task ReportUser()
-        {            
+        {
             await ReplyAsync("Упомяни пользователя, на которого ты хочешь подать жалобу.");
             var replyUser = await NextMessageAsync();
             if (replyUser.MentionedUsers.Count == 0)
@@ -128,7 +128,7 @@ namespace TestBot
         [Summary("позволяет забанить пользователя на сервере (У тебя должно быть право на эту команду).")]
         public async Task Ban(params string[] NameOfUser)
         {
-            SocketGuildUser user = GetSocketGuildUser(NameOfUser);            
+            SocketGuildUser user = GetSocketGuildUser(NameOfUser);
             if (user != null)
                 await user.BanAsync();
             else
@@ -161,28 +161,56 @@ namespace TestBot
         [Summary("подключает бота к голосовому каналу")]
         public async Task JoinAsync()
         {
-            await ReplyAsync(embed: await LavaOperations.JoinAsync(Context.User as SocketGuildUser));
+            await LavaOperations.JoinAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
         }
 
         [Command("Leave")]
         [Summary("отключает бота от канала")]
         public async Task LeaveAsync()
         {
-            await ReplyAsync(embed: await LavaOperations.LeaveAsync(Context.User as SocketGuildUser));
+            await LavaOperations.LeaveAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
         }
 
         [Command("Play")]
         [Summary("включает трек, который задан url")]
         public async Task PlayTrackAsync(params string[] query)
         {
-            await ReplyAsync(embed: await LavaOperations.PlayTrackAsync(Context.User as SocketGuildUser, query));
+            await LavaOperations.PlayTrackAsync(Context.User as SocketGuildUser, query, Context.Channel as SocketTextChannel);
         }
 
         [Command("Stop")]
         [Summary("включает трек, который задан url")]
         public async Task StopTrackAsync()
         {
-            await ReplyAsync(embed: await LavaOperations.StopTrackAsync(Context.User as SocketGuildUser));
+            await LavaOperations.StopTrackAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
+        }
+
+        [Command("Pause")]
+        [Summary("ставит на паузу трек")]
+        public async Task PauseTrackAsync()
+        {
+            await  LavaOperations.PauseTrackAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
+        }
+
+        [Command("Resume")]
+        [Summary("продолжает трек, который стоит на паузе")]
+        public async Task ResumeTrackAsync()
+        {
+            await LavaOperations.ResumeTrackAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
+        }
+
+        [Command("SetVolume")]
+        [Summary("устанавливает громкость бота")]
+        public async Task SetVolumeAsync(ushort vol)
+        {
+            await LavaOperations.SetVolumeAsync(Context.User as SocketGuildUser, vol, Context.Channel as SocketTextChannel);
+        }
+
+        [Command("AddTrack")]
+        [Summary("Добавляет трек в плейлист")]
+        public async Task AddTrackAsync(params string[] query)
+        {
+            await LavaOperations.AddTrackAsync(Context.User as SocketGuildUser, query, Context.Channel as SocketTextChannel);
         }
         #endregion
 
