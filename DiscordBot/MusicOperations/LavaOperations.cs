@@ -76,6 +76,8 @@ namespace DiscordBot.MusicOperations
 
         public async Task<Embed> PlayTrackAsync(SocketGuildUser user, string[] query)
         {
+            if (query == null)
+                return CreateErrorReplyEmbed(ErrorType.NoName);
             string Query = null;
 
             for (int i = 0; i < query.Length; i++)            
@@ -132,7 +134,60 @@ namespace DiscordBot.MusicOperations
             }
         }
 
-        private enum ErrorType { Exception, NotConnected, BotNotConnected, NoTrack }
+        public async Task<Embed> PauseTrackAsync(SocketGuildUser user)
+        {
+            try
+            {
+                var hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
+
+                if (user.VoiceChannel == null)
+                    return CreateErrorReplyEmbed(ErrorType.NotConnected);
+                if (!hasPlayer)
+                    return CreateErrorReplyEmbed(ErrorType.NoTrack);
+                if (player.Track == null)
+                    return CreateErrorReplyEmbed(ErrorType.NoTrack);
+
+                await player.PauseAsync();
+                return new EmbedBuilder
+                {
+                    Title = $"Трек {player.Track.Title} приостановлен",
+                    Color = Color.Blue
+                }.Build();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return CreateErrorReplyEmbed(ErrorType.Exception);
+            }
+        }
+
+        public async Task<Embed> PlayTrackAsync(SocketGuildUser user)
+        {
+            try
+            {
+                var hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
+
+                if (user.VoiceChannel == null)
+                    return CreateErrorReplyEmbed(ErrorType.NotConnected);
+                if (!hasPlayer)
+                    return CreateErrorReplyEmbed(ErrorType.NoTrack);
+                if (player.Track == null)
+                    return CreateErrorReplyEmbed(ErrorType.NoTrack);
+
+                await player.ResumeAsync();
+                return new EmbedBuilder
+                {
+                    Title = $"Трек {player.Track.Title} воспроизведен",
+                    Color = Color.Blue
+                }.Build();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return CreateErrorReplyEmbed(ErrorType.Exception);
+            }
+        }
+
         private Embed CreateErrorReplyEmbed(ErrorType error)
         {
             return error switch
@@ -153,12 +208,19 @@ namespace DiscordBot.MusicOperations
                     Color = Color.Red
                 }.Build(),
                 ErrorType.NoTrack => new EmbedBuilder
-                { 
+                {
                     Title = "Нет трека в воспроизведении",
-                    Color  = Color.Red
+                    Color = Color.Red
+                }.Build(),
+                ErrorType.NoName => new EmbedBuilder 
+                {
+                    Title = "Ты не указал ссылку или название на видео или трек",
+                    Color = Color.Red
                 }.Build(),
                 _ => null,
             };
         }
+
+        private enum ErrorType { Exception, NotConnected, BotNotConnected, NoTrack, NoName }
     }
 }

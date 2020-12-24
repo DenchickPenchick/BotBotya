@@ -86,17 +86,7 @@ namespace DiscordBot.RoomManaging
 
                     foreach (SocketVoiceChannel channel in provider.RoomsCategoryChannel().Channels)
                         if (channel.Users.Count == 0 && !provider.MainVoiceChannels().Contains(channel) && channel != provider.CreateRoomChannel())
-                            await channel.DeleteAsync();
-                    foreach (var offlineChannel in MainCategory.Channels)
-                        if (offlineChannel.Users.Count != 0)
-                        {
-                            SocketGuildUser firstUser = offlineChannel.Users.ToArray()[0];
-                            var newChannel = await CreateRoom(firstUser, provider);
-
-                            foreach (SocketGuildUser guildUser in offlineChannel.Users)
-                                await guildUser.ModifyAsync(x => { x.Channel = newChannel; });
-                            continue;
-                        }
+                            await channel.DeleteAsync();                    
 
                     foreach (var roomChannel in RoomsCategory.Channels)
                         if (roomChannel.Users.Count != 0 && roomChannel == provider.CreateRoomChannel())
