@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
 using DiscordBot.FileWorking;
 using DiscordBot.GuildManaging;
@@ -8,6 +9,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Victoria;
+using Victoria.EventArgs;
 using Console = Colorful.Console;
 
 namespace DiscordBot.Modules.MusicManaging
@@ -24,8 +26,10 @@ namespace DiscordBot.Modules.MusicManaging
             Client = services.GetRequiredService<DiscordSocketClient>();
             LavaOperations = services.GetRequiredService<LavaOperations>();
             Client.ReactionAdded += Client_ReactionAdded;
+            LavaNode.OnTrackEnded += LavaNode_OnTrackEnded;            
             Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
-        }
+            
+        }        
 
         private async Task Client_UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
         {
@@ -64,19 +68,29 @@ namespace DiscordBot.Modules.MusicManaging
                         break;
                     case "⏹":
                         await player.StopAsync();
+                        break;                    
+                    case "❌":
+                        await ((RestUserMessage)LavaOperations.GuildsPlayers[user.Guild]).DeleteAsync();
+                        LavaOperations.GuildsPlayers[user.Guild] = null;
                         break;
-                    case "⏮":
-                        var track = player.Track;
-                        int index = player.Queue.ToList().IndexOf(track);
-                        int backIndex = index == 0 ? 0 : index - 1;
-                        await player.PlayAsync(player.Queue.ToList()[backIndex]);
+                    case "➕":
+                        if(player.Volume + 10 <= 100)
+                            await player.UpdateVolumeAsync((ushort)(player.Volume + 10));
                         break;
-                    case "⏭":
-                        await player.SkipAsync();
+                    case "➖":
+                        if(player.Volume - 10 >= 0)
+                            await player.UpdateVolumeAsync((ushort)(player.Volume + 10));
                         break;
                 }
                 await message.RemoveReactionAsync(arg3.Emote, user);
             }
         }
+
+        private async Task LavaNode_OnTrackEnded(TrackEndedEventArgs arg)
+        {                                           
+            var guild = arg.Player.VoiceState.VoiceChannel.Guild;
+            var playerMessage = (RestUserMessage)LavaOperations.GuildsPlayers[guild];
+            await playerMessage.DeleteAsync();
+        }        
     }
 }
