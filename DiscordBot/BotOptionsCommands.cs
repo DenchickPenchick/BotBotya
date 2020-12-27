@@ -12,7 +12,7 @@ namespace DiscordBot
 {
     public class BotOptionsCommands : InteractiveBase
     {        
-        [Command("GetGuildConfig")]
+        [Command("КонфигурацияСервера")]
         [Summary("получает конфигурацию сервера.")]
         public async Task GetGuildConfig()
         {
@@ -31,7 +31,7 @@ namespace DiscordBot
             }.Build());
         }
 
-        [Command("SortSystemCategories")]
+        [Command("РасставитьСистемныеКатегории")]
         [Summary("сортирует \"системные\" категории.")]
         public async Task SortSystemCategories()
         {
@@ -39,7 +39,7 @@ namespace DiscordBot
             await ReplyAsync("Сортировка завершена");
         }
 
-        [Command("ChangeBotNickname")]
+        [Command("ПоменятьНикнеймБота")]
         [Summary("меняет никнейм бота")]
         public async Task ChangeBotNickname(params string[] NewNick)
         {
@@ -59,7 +59,7 @@ namespace DiscordBot
             await ReplyAsync($"Никнейм бота изменен с {prevName} на {name}");
         }
 
-        [Command("ChangeNameOfTextChannel", RunMode = RunMode.Async)]
+        [Command("ПоменятьНазваниеТекстовогоКанала", RunMode = RunMode.Async)]
         [RequireUserPermission(GuildPermission.ManageChannels)]
         [Summary("меняет название текстового канала.\nВНИМАНИЕ! Для категорий и голосовых каналов данная команда не подойдет.")]
         public async Task ChangeNameOfTextOrCategoryChannel()
@@ -107,7 +107,7 @@ namespace DiscordBot
             }               
         }
 
-        [Command("ChangeNameOfSystemCategory", RunMode = RunMode.Async)]
+        [Command("ПоменятьНазваниеСистемнойКатегории", RunMode = RunMode.Async)]
         [RequireUserPermission(GuildPermission.ManageChannels)]
         [Summary("меняет название \"системной\" категории.\nДля того чтобы выбратькатегорию, нужно правильно вписать тип категории (основные текстовые каналы: txt, контент: content, основные голосовые каналы: mainvoice, категория с комнатами: roomscat, категория бота: botcat)\nВНИМАНИЕ! Для текстовых каналов и голосовых каналов данная команда не подойдет (будет выдана ошибка).")]
         public async Task ChangeNameOfSystemCategoryChannel(string Type, params string[] NewName)
@@ -161,7 +161,7 @@ namespace DiscordBot
             FilesProvider.RefreshGuild(guild);            
         }
 
-        [Command("ChangeNameOfCreateRoomChannel", RunMode = RunMode.Async)]
+        [Command("ПоменятьИмяКаналаКомнат", RunMode = RunMode.Async)]
         [RequireUserPermission(GuildPermission.ManageChannels)]
         [Summary("меняет название голосового канала, который создает новые комнаты.\nВНИМАНИЕ! Для текстовых каналов и категорий, и не \"ситемных\" голосовых каналов данная команда не подойдет.")]
         public async Task ChangeNameOfCreateRoomChannel(params string[] NewName)
@@ -186,7 +186,7 @@ namespace DiscordBot
         }
 
         [RequireUserPermission(GuildPermission.ManageRoles)]
-        [Command("AddDefaultRole", RunMode = RunMode.Async)]
+        [Command("ДобавитьРольПоумолчанию", RunMode = RunMode.Async)]
         [Summary("устанавливает роль по-умолчанию, которая будет выдаваться каждому пользователю (У тебя должно быть право на выполнение этой команды).\nДля того чтобы установить роль нужно ее отметить. Если отметить несколько ролей, то установлена будет только первая.")]
         public async Task AddDefaultRole(params string[] str)
         {
@@ -259,7 +259,7 @@ namespace DiscordBot
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
-        [Command("EnableHelloMessage")]
+        [Command("ВключитьПриветствие")]
         [Summary("выключает или включает приветственные сообщения. Отредактировать сообщение можно с помощью команды EditHelloMessage (У тебя должно быть право на выполнение этой команды).")]
         public async Task EnableHelloMessage()
         {                               
@@ -274,7 +274,7 @@ namespace DiscordBot
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
-        [Command("EditHelloMessage", RunMode = RunMode.Async)]
+        [Command("РедактироватьПриветственноеСообщение", RunMode = RunMode.Async)]
         [Summary("редактирует приветственное сообщение (У тебя должно быть право на выполнение этой команды).")]
         public async Task EditHelloMessage()
         {            
@@ -294,7 +294,7 @@ namespace DiscordBot
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
-        [Command("ChangePrefix")]
+        [Command("ПоменятьПрефикс")]
         [Summary("редактирует префикс (У тебя должно быть право на выполнение этой команды).")]
         public async Task EditPrefix(string newPrefix)
         {
@@ -308,7 +308,7 @@ namespace DiscordBot
         }
 
         [RequireUserPermission(GuildPermission.ManageChannels)]
-        [Command("EnableRooms")]
+        [Command("РежимКомнат")]
         [Summary("включает/выключает режим приватных комнат (У тебя должно быть право на выполнение этой команды).")]
         public async Task EnableRooms()
         {
@@ -328,7 +328,7 @@ namespace DiscordBot
         }
 
         [RequireUserPermission(GuildPermission.ManageChannels)]
-        [Command("EnableContent")]
+        [Command("КаналыКонтента")]
         [Summary("включает/выключает каналы контента. У тебя должно быть право на выполнение этой команды.")]
         public async Task EnableContent()
         {
@@ -347,7 +347,7 @@ namespace DiscordBot
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
-        [Command("EnableCheckingContent")]
+        [Command("ПроверкаКонтента")]
         [Summary("включает/выключает проверку контента (сортировку видео, ссылок по нужным каналам). Работает только при включенных каналах контента. У тебя должно быть право на выполнение этой команды.")]
         public async Task EnableCheckingContent()
         {
@@ -366,7 +366,7 @@ namespace DiscordBot
         }       
 
         [RequireUserPermission(GuildPermission.Administrator)]
-        [Command("EnableGuildNotifications", RunMode = RunMode.Async)]
+        [Command("Уведомления", RunMode = RunMode.Async)]
         [Summary("включает/выключает уведомления сервера. При бане, кике, добавлении на сервер пользователя бот тебя уведомит")]
         public async Task EnableGuildNotifications()
         {
@@ -404,7 +404,7 @@ namespace DiscordBot
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
-        [Command("SetEmojiOfRoom")]
+        [Command("ЭмодзиКомнаты")]
         [Summary("устанавливает значок комнат.")]
         public async Task SetRoomsEmoji(string emoji)
         {

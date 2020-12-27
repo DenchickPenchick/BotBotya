@@ -22,14 +22,14 @@ namespace TestBot
         }
 
         #region --СТАНДАРТНЫЕ КОМАНДЫ--
-        [Command("News")]
+        [Command("Новости")]
         [Summary("позволяет узнать последние новости")]
         public async Task UpdateNews()
         {
             await ReplyAsync(embed: FilesProvider.GetNewsAndPlans().GetNewsAndPlansEmbed(Context.Client));
         }
 
-        [Command("Clear", RunMode = RunMode.Async)]
+        [Command("Очистить", RunMode = RunMode.Async)]
         [Summary("позволяет очистить сообщений (до 100). Если сообщения отправлены более двух недель назад, то эти сообщения не удалятся.")]
         public async Task Clear(int count)
         {
@@ -61,7 +61,7 @@ namespace TestBot
 
         }
 
-        [Command("ReportUser", RunMode = RunMode.Async)]
+        [Command("Жалоба", RunMode = RunMode.Async)]
         [Summary("отпраляет жалобу на участника сервера.")]
         public async Task ReportUser()
         {
@@ -112,7 +112,7 @@ namespace TestBot
         }
 
         [RequireUserPermission(GuildPermission.KickMembers)]
-        [Command("Kick")]
+        [Command("Кик")]
         [Summary("позволяет кикнуть пользователя с сервера (У тебя должно быть право на эту команду).")]
         public async Task Kick(params string[] NameOfUser)
         {
@@ -124,7 +124,7 @@ namespace TestBot
         }
 
         [RequireUserPermission(GuildPermission.BanMembers)]
-        [Command("Ban")]
+        [Command("Бан")]
         [Summary("позволяет забанить пользователя на сервере (У тебя должно быть право на эту команду).")]
         public async Task Ban(params string[] NameOfUser)
         {
@@ -136,7 +136,7 @@ namespace TestBot
         }
 
         [RequireUserPermission(GuildPermission.ManageChannels)]
-        [Command("SlowMode")]
+        [Command("МедленныйРежим")]
         [Summary("позволяет включить медленный режим в канале (У тебя должно быть право на эту команду).")]
         public async Task ChangePosOfSlowMode(int time = 0)
         {
@@ -157,61 +157,54 @@ namespace TestBot
         #endregion
 
         #region --МУЗЫКАЛЬНЫЕ КОМАНДЫ--
-        [Command("Join")]
+        [Command("Подключиться")]
         [Summary("подключает бота к голосовому каналу")]
         public async Task JoinAsync()
         {
             await LavaOperations.JoinAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
         }
 
-        [Command("Leave")]
+        [Command("Покинуть")]
         [Summary("отключает бота от канала")]
         public async Task LeaveAsync()
         {
             await LavaOperations.LeaveAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
         }
 
-        [Command("Play")]
+        [Command("Играть")]
         [Summary("включает трек, который задан url")]
         public async Task PlayTrackAsync(params string[] query)
         {
             await LavaOperations.PlayTrackAsync(Context.User as SocketGuildUser, query, Context.Channel as SocketTextChannel);
         }
 
-        [Command("Stop")]
+        [Command("Остановить")]
         [Summary("включает трек, который задан url")]
         public async Task StopTrackAsync()
         {
             await LavaOperations.StopTrackAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
         }
 
-        [Command("Pause")]
+        [Command("Пауза")]
         [Summary("ставит на паузу трек")]
         public async Task PauseTrackAsync()
         {
             await  LavaOperations.PauseTrackAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
         }
 
-        [Command("Resume")]
+        [Command("Воспроизведение")]
         [Summary("продолжает трек, который стоит на паузе")]
         public async Task ResumeTrackAsync()
         {
             await LavaOperations.ResumeTrackAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
         }
 
-        [Command("SetVolume")]
+        [Command("Громкость")]
         [Summary("устанавливает громкость бота")]
         public async Task SetVolumeAsync(ushort vol)
         {
             await LavaOperations.SetVolumeAsync(Context.User as SocketGuildUser, vol, Context.Channel as SocketTextChannel);
-        }
-
-        [Command("AddTrack")]
-        [Summary("Добавляет трек в плейлист")]
-        public async Task AddTrackAsync(params string[] query)
-        {
-            await LavaOperations.AddTrackAsync(Context.User as SocketGuildUser, query, Context.Channel as SocketTextChannel);
-        }
+        }        
         #endregion
 
         private SocketGuildUser GetSocketGuildUser(params string[] NameOfUser)

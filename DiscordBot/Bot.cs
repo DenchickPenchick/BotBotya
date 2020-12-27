@@ -106,7 +106,7 @@ namespace DiscordBot
 
                 if (message.HasStringPrefix(serGuild.Prefix, ref argsPos))
                 {
-                    if (message.Content.ToLower() == "!help")
+                    if (message.Content.ToLower() == "!справка")
                     {
                         int pos = 0;
                         int posit = 1;
@@ -138,19 +138,20 @@ namespace DiscordBot
                             }
                         }
 
-                        await interactive.SendPaginatedMessageAsync(context, new PaginatedMessage
-                        {
-                            Pages = pages,
-                            Color = Color.Blue,
-                            Title = "🤖 Функционал бота 🤖",
-                            Author = new EmbedAuthorBuilder
-                            {
-                                Name = Client.CurrentUser.Username,
-                                IconUrl = Client.CurrentUser.GetAvatarUrl(),
-                                Url = "https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991"
-                            },
-                            AlternateDescription = "Здесь показан функционал бота."
-                        });                                     
+                        int num = 1;
+                        foreach (var page in pages)
+                            await context.Channel.SendMessageAsync(embed: new EmbedBuilder
+                            { 
+                                Author = new EmbedAuthorBuilder 
+                                { 
+                                    IconUrl = Client.CurrentUser.GetAvatarUrl(),
+                                    Name = "Ботя",
+                                    Url = "https://botbotya.ru"
+                                },
+                                Title = $"Страница справки {num++} из {pages.Count}",
+                                Description = page,
+                                Color = Color.Blue
+                            }.Build());
                     }
                     else
                     {
@@ -174,7 +175,7 @@ namespace DiscordBot
                             switch (result.Error)
                             {
                                 case CommandError.UnknownCommand:
-                                    await context.Channel.SendMessageAsync("Неизвестная команда.");
+                                    await context.Channel.SendMessageAsync($"Неизвестная команда. У нас недавно прошла русификация команд. Поэтому пропиши команду {serGuild.Prefix}Справка");
                                     break;
                                 case CommandError.ParseFailed:
                                     await context.Channel.SendMessageAsync("Навеверное ты неправильно ввел данные.");
