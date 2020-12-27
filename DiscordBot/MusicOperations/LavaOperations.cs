@@ -201,65 +201,25 @@ namespace DiscordBot.MusicOperations
             {
                 Console.WriteLine(ex);                
             }
-        }
+        }        
 
-        public async Task AddTrackAsync(SocketGuildUser user, string[] query, SocketTextChannel contextChannel)
-        {
-            if (query == null)
-            {
-                await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoName));
-                return;
-            }
-            
-            string Query = null;
-
-            for (int i = 0; i < query.Length; i++)
-                Query += i == 0 ? $"{query[i]}" : $" {query[i]}";
-
-            try
-            {
-                bool hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
-                if (user.VoiceChannel == null)
-                {
-                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NotConnected));
-                    return;
-                }
-                
-                if (!hasPlayer)
-                    player = await LavaNode.JoinAsync(user.VoiceChannel);
-
-                var search = Uri.IsWellFormedUriString(Query, UriKind.Absolute) ? await LavaNode.SearchAsync(Query) : await LavaNode.SearchYouTubeAsync(Query);
-                var track = search.Tracks.FirstOrDefault();
-                player.Queue.Enqueue(track);
-                if (player.Queue.Count == 1)
-                    await player.PlayAsync(track);
-                await SendPlayer(player);                
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);                
-            }
-        }
-
-        public async Task<Embed> SetVolumeAsync(SocketGuildUser user, ushort vol, SocketTextChannel contextChannel)
+        public async Task SetVolumeAsync(SocketGuildUser user, ushort vol, SocketTextChannel contextChannel)
         {
             try
             {
                 var hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
                 if (!hasPlayer)
-                    return CreateErrorReplyEmbed(ErrorType.NoTrack);
-                await player.UpdateVolumeAsync(vol);
-                await SendPlayer(player);
-                return new EmbedBuilder
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoTrack));
+                await player.UpdateVolumeAsync(vol);                
+                await contextChannel.SendMessageAsync(embed: new EmbedBuilder
                 {
-                    Title = $"Громкость установлена до {vol}",
+                    Description = $"Громкость установлена до {vol}",
                     Color = Color.Blue
-                }.Build();
+                }.Build());
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                return CreateErrorReplyEmbed(ErrorType.Exception);
+                Console.WriteLine(ex);                
             }
         }
 
@@ -269,27 +229,27 @@ namespace DiscordBot.MusicOperations
             {
                 ErrorType.Exception => new EmbedBuilder
                 {
-                    Title = "Было вызвано исключение во время выполнения команды",
+                    Description = "Было вызвано исключение во время выполнения команды",
                     Color = Color.Red
                 }.Build(),
                 ErrorType.NotConnected => new EmbedBuilder
                 {
-                    Title = "Ты не подключен к каналу",
+                    Description = "Ты не подключен к каналу",
                     Color = Color.Red
                 }.Build(),
                 ErrorType.BotNotConnected => new EmbedBuilder
                 {
-                    Title = "Я не подключен к каналу",
+                    Description = "Я не подключен к каналу",
                     Color = Color.Red
                 }.Build(),
                 ErrorType.NoTrack => new EmbedBuilder
                 {
-                    Title = "Нет трека в воспроизведении",
+                    Description = "Нет трека в воспроизведении",
                     Color = Color.Red
                 }.Build(),
                 ErrorType.NoName => new EmbedBuilder 
                 {
-                    Title = "Ты не указал ссылку или название на видео или трек",
+                    Description = "Ты не указал ссылку или название на видео или трек",
                     Color = Color.Red
                 }.Build(),
                 _ => null,
@@ -305,16 +265,17 @@ namespace DiscordBot.MusicOperations
                 Title = $"Плеер сервера {guild.Name}",                
                 Description = player.Track.Title,
                 Color = Color.Blue,
-                Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url }
+                Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url }                
             }.Build());
-            
+
 
             await mess.AddReactionsAsync(new Emoji[]
             {
-                new Emoji("⏯️"), 
-                new Emoji("⏹"), 
-                new Emoji("⏮"),
-                new Emoji("⏭")
+                new Emoji("⏯️"),
+                new Emoji("⏹"),                                
+                new Emoji("➖"),
+                new Emoji("➕"),
+                new Emoji("❌")
             });
 
             GuildsPlayers[guild] = mess;            
