@@ -8,20 +8,19 @@
     ".NETCoreApp,Version=v3.1": {
       "DiscordBot/1.0.0": {
         "dependencies": {
-          "Colorful.Console": "1.2.10",
+          "Colorful.Console": "1.2.15",
           "Discord.Addons.Interactive": "2.0.0",
           "Discord.Net": "2.2.0",
-          "Lavalink4NET.Discord.NET": "1.6.0",
-          "Microsoft.Extensions.DependencyInjection": "3.1.4",
+          "Lavalink4NET.Discord.NET": "1.6.2",
+          "Microsoft.Extensions.DependencyInjection": "5.0.1",
           "System.Threading.Tasks": "4.3.0",
-          "Victoria": "5.1.10",
-          "MathematicsDiscordBotLibrary": "1.0.0.0"
+          "Victoria": "5.1.11"
         },
         "runtime": {
           "DiscordBot.dll": {}
         }
       },
-      "Colorful.Console/1.2.10": {
+      "Colorful.Console/1.2.15": {
         "dependencies": {
           "Microsoft.CSharp": "4.0.1",
           "System.Collections": "4.3.0",
@@ -39,8 +38,8 @@
         },
         "runtime": {
           "lib/netstandard2.0/Colorful.Console.dll": {
-            "assemblyVersion": "1.2.10.0",
-            "fileVersion": "1.2.10.0"
+            "assemblyVersion": "1.2.15.0",
+            "fileVersion": "1.2.15.0"
           }
         }
       },
@@ -124,27 +123,27 @@
           }
         }
       },
-      "Lavalink4NET/1.6.0": {
+      "Lavalink4NET/1.6.2": {
         "dependencies": {
           "Newtonsoft.Json": "12.0.2",
           "System.Buffers": "4.5.0"
         },
         "runtime": {
           "lib/netstandard2.0/Lavalink4NET.dll": {
-            "assemblyVersion": "1.6.0.0",
-            "fileVersion": "1.6.0.0"
+            "assemblyVersion": "1.6.2.0",
+            "fileVersion": "1.6.2.0"
           }
         }
       },
-      "Lavalink4NET.Discord.NET/1.6.0": {
+      "Lavalink4NET.Discord.NET/1.6.2": {
         "dependencies": {
           "Discord.Net.WebSocket": "2.2.0",
-          "Lavalink4NET": "1.6.0"
+          "Lavalink4NET": "1.6.2"
         },
         "runtime": {
           "lib/netstandard2.0/Lavalink4NET.DiscordNet.dll": {
-            "assemblyVersion": "1.6.0.0",
-            "fileVersion": "1.6.0.0"
+            "assemblyVersion": "1.6.2.0",
+            "fileVersion": "1.6.2.0"
           }
         }
       },
@@ -168,22 +167,22 @@
           "System.Threading": "4.3.0"
         }
       },
-      "Microsoft.Extensions.DependencyInjection/3.1.4": {
+      "Microsoft.Extensions.DependencyInjection/5.0.1": {
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "3.1.4"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "5.0.0"
         },
         "runtime": {
-          "lib/netcoreapp3.1/Microsoft.Extensions.DependencyInjection.dll": {
-            "assemblyVersion": "3.1.4.0",
-            "fileVersion": "3.100.420.21409"
+          "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.dll": {
+            "assemblyVersion": "5.0.0.1",
+            "fileVersion": "5.0.120.57516"
           }
         }
       },
-      "Microsoft.Extensions.DependencyInjection.Abstractions/3.1.4": {
+      "Microsoft.Extensions.DependencyInjection.Abstractions/5.0.0": {
         "runtime": {
           "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
-            "assemblyVersion": "3.1.4.0",
-            "fileVersion": "3.100.420.21409"
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.20.51904"
           }
         }
       },
@@ -487,23 +486,15 @@
           "System.Runtime": "4.3.0"
         }
       },
-      "Victoria/5.1.10": {
+      "Victoria/5.1.11": {
         "dependencies": {
           "Discord.Net.WebSocket": "2.2.0",
-          "Microsoft.Extensions.DependencyInjection": "3.1.4"
+          "Microsoft.Extensions.DependencyInjection": "5.0.1"
         },
         "runtime": {
           "lib/netcoreapp3.0/Victoria.dll": {
-            "assemblyVersion": "5.1.10.0",
-            "fileVersion": "5.1.10.0"
-          }
-        }
-      },
-      "MathematicsDiscordBotLibrary/1.0.0.0": {
-        "runtime": {
-          "MathematicsDiscordBotLibrary.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
+            "assemblyVersion": "5.1.11.0",
+            "fileVersion": "5.1.11.0"
           }
         }
       }
@@ -515,12 +506,12 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Colorful.Console/1.2.10": {
+    "Colorful.Console/1.2.15": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-k9PGhscle9U3V/EbRhWLuU1683pteAmD4d+FKFjoK6Fn4Bykl6uWQH5y0qMAAXU5zlHTmEYB7JGxdvsoXlk5Ag==",
-      "path": "colorful.console/1.2.10",
-      "hashPath": "colorful.console.1.2.10.nupkg.sha512"
+      "sha512": "sha512-iDBG+0MHkVzM/p74WsfSpcNP2hL7E3o+8Y5ZEEbWQuYmRtHh/YXdbfEnvusTS2Ds8+KX17NGvuNOgTfBxXLCEw==",
+      "path": "colorful.console/1.2.15",
+      "hashPath": "colorful.console.1.2.15.nupkg.sha512"
     },
     "Discord.Addons.Interactive/2.0.0": {
       "type": "package",
@@ -571,19 +562,19 @@
       "path": "discord.net.websocket/2.2.0",
       "hashPath": "discord.net.websocket.2.2.0.nupkg.sha512"
     },
-    "Lavalink4NET/1.6.0": {
+    "Lavalink4NET/1.6.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-7CrvWFnIDTMFAqiBcLk9aBrplogBXDDhXO8lTeUz2xWMwVXtye+rWfp2xGMODUvVMlse/4w4s0QH5R+ohzLKIQ==",
-      "path": "lavalink4net/1.6.0",
-      "hashPath": "lavalink4net.1.6.0.nupkg.sha512"
+      "sha512": "sha512-gCI7anWbZGKD0SYZPWINehlP0fUVJ02DBDiXkJdTzAzzBwCx5F+KNTDvRfNqTYsaikpydpaZt4Ci/y1F8NpYXg==",
+      "path": "lavalink4net/1.6.2",
+      "hashPath": "lavalink4net.1.6.2.nupkg.sha512"
     },
-    "Lavalink4NET.Discord.NET/1.6.0": {
+    "Lavalink4NET.Discord.NET/1.6.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-JtRgppvnRdAZOxXgoZHqX6t2iXZZSGGSlZyU9AGIZ+8domalp2RwpnbTSnMZNRovAK0D364PRMcXnfitVqiGpg==",
-      "path": "lavalink4net.discord.net/1.6.0",
-      "hashPath": "lavalink4net.discord.net.1.6.0.nupkg.sha512"
+      "sha512": "sha512-COJvKOTy59jntMayVTWDnsNiLO0qYWLLwrxECHveG2/d7Co5Wo7ec7Ly9Y1mmXL25lTYJBhrBjtSSCiVt0LkgQ==",
+      "path": "lavalink4net.discord.net/1.6.2",
+      "hashPath": "lavalink4net.discord.net.1.6.2.nupkg.sha512"
     },
     "Microsoft.CSharp/4.0.1": {
       "type": "package",
@@ -592,19 +583,19 @@
       "path": "microsoft.csharp/4.0.1",
       "hashPath": "microsoft.csharp.4.0.1.nupkg.sha512"
     },
-    "Microsoft.Extensions.DependencyInjection/3.1.4": {
+    "Microsoft.Extensions.DependencyInjection/5.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-dAWhz6BEjUFIVLUPbT1s1sUrPTwbUWdw2iBRRe3ej3xXcKS+oo64dKrIWFxRjYP6TWyESpGFNY5NGeA5FcHVlg==",
-      "path": "microsoft.extensions.dependencyinjection/3.1.4",
-      "hashPath": "microsoft.extensions.dependencyinjection.3.1.4.nupkg.sha512"
+      "sha512": "sha512-//mDNrYeiJ0eh/awFhDFJQzkRVra/njU5Y4fyK7X29g5HScrzbUkKOKlyTtygthcGFt4zNC8G5CFCjb/oizomA==",
+      "path": "microsoft.extensions.dependencyinjection/5.0.1",
+      "hashPath": "microsoft.extensions.dependencyinjection.5.0.1.nupkg.sha512"
     },
-    "Microsoft.Extensions.DependencyInjection.Abstractions/3.1.4": {
+    "Microsoft.Extensions.DependencyInjection.Abstractions/5.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-AceHamXNKDMDwIoZqEoApLp8s3935wSC3VXrPaRWa0wWOaEcYdDlo1nWQ1zLiezoDmpJzV7FqDm53E0Ty/hEMg==",
-      "path": "microsoft.extensions.dependencyinjection.abstractions/3.1.4",
-      "hashPath": "microsoft.extensions.dependencyinjection.abstractions.3.1.4.nupkg.sha512"
+      "sha512": "sha512-ORj7Zh81gC69TyvmcUm9tSzytcy8AVousi+IVRAI8nLieQjOFryRusSFh7+aLk16FN9pQNqJAiMd7BTKINK0kA==",
+      "path": "microsoft.extensions.dependencyinjection.abstractions/5.0.0",
+      "hashPath": "microsoft.extensions.dependencyinjection.abstractions.5.0.0.nupkg.sha512"
     },
     "Microsoft.NETCore.Platforms/1.1.0": {
       "type": "package",
@@ -858,17 +849,12 @@
       "path": "system.threading.tasks/4.3.0",
       "hashPath": "system.threading.tasks.4.3.0.nupkg.sha512"
     },
-    "Victoria/5.1.10": {
+    "Victoria/5.1.11": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-8w51E7ddiHM4yeS9GyvM3H8/PJFWjQMuH6/uuWCp00X2hocvpsOZxvLBUK0KyeCOiUQZgGtDdLJrUFpdohhMxQ==",
-      "path": "victoria/5.1.10",
-      "hashPath": "victoria.5.1.10.nupkg.sha512"
-    },
-    "MathematicsDiscordBotLibrary/1.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
+      "sha512": "sha512-jw6pQc3RVzXAk9JN5ft9xMHwyxtwReMTF+Qoaf0KcfkgcdTBERhc/9nF1LGyScC5qQC5ks+b5Xb1EpMprBkB3Q==",
+      "path": "victoria/5.1.11",
+      "hashPath": "victoria.5.1.11.nupkg.sha512"
     }
   }
 }

@@ -2,7 +2,7 @@
   "version": 3,
   "targets": {
     ".NETCoreApp,Version=v3.1": {
-      "Colorful.Console/1.2.10": {
+      "Colorful.Console/1.2.15": {
         "type": "package",
         "dependencies": {
           "Microsoft.CSharp": "4.0.1",
@@ -113,7 +113,7 @@
           "lib/netstandard2.1/Discord.Net.WebSocket.dll": {}
         }
       },
-      "Lavalink4NET/1.6.0": {
+      "Lavalink4NET/1.6.2": {
         "type": "package",
         "dependencies": {
           "Newtonsoft.Json": "12.0.2",
@@ -126,11 +126,11 @@
           "lib/netstandard2.0/Lavalink4NET.dll": {}
         }
       },
-      "Lavalink4NET.Discord.NET/1.6.0": {
+      "Lavalink4NET.Discord.NET/1.6.2": {
         "type": "package",
         "dependencies": {
           "Discord.Net.WebSocket": "2.0.1",
-          "Lavalink4NET": "1.6.0"
+          "Lavalink4NET": "1.6.2"
         },
         "compile": {
           "lib/netstandard2.0/Lavalink4NET.DiscordNet.dll": {}
@@ -166,19 +166,19 @@
           "lib/netstandard1.3/Microsoft.CSharp.dll": {}
         }
       },
-      "Microsoft.Extensions.DependencyInjection/3.1.4": {
+      "Microsoft.Extensions.DependencyInjection/5.0.1": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "3.1.4"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "5.0.0"
         },
         "compile": {
-          "lib/netcoreapp3.1/Microsoft.Extensions.DependencyInjection.dll": {}
+          "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.dll": {}
         },
         "runtime": {
-          "lib/netcoreapp3.1/Microsoft.Extensions.DependencyInjection.dll": {}
+          "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.dll": {}
         }
       },
-      "Microsoft.Extensions.DependencyInjection.Abstractions/3.1.4": {
+      "Microsoft.Extensions.DependencyInjection.Abstractions/5.0.0": {
         "type": "package",
         "compile": {
           "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
@@ -673,7 +673,7 @@
           "ref/netstandard1.3/System.Threading.Tasks.dll": {}
         }
       },
-      "Victoria/5.1.10": {
+      "Victoria/5.1.11": {
         "type": "package",
         "dependencies": {
           "Discord.Net.WebSocket": "2.2.0",
@@ -689,14 +689,14 @@
     }
   },
   "libraries": {
-    "Colorful.Console/1.2.10": {
-      "sha512": "k9PGhscle9U3V/EbRhWLuU1683pteAmD4d+FKFjoK6Fn4Bykl6uWQH5y0qMAAXU5zlHTmEYB7JGxdvsoXlk5Ag==",
+    "Colorful.Console/1.2.15": {
+      "sha512": "iDBG+0MHkVzM/p74WsfSpcNP2hL7E3o+8Y5ZEEbWQuYmRtHh/YXdbfEnvusTS2Ds8+KX17NGvuNOgTfBxXLCEw==",
       "type": "package",
-      "path": "colorful.console/1.2.10",
+      "path": "colorful.console/1.2.15",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "colorful.console.1.2.10.nupkg.sha512",
+        "colorful.console.1.2.15.nupkg.sha512",
         "colorful.console.nuspec",
         "lib/net40/Colorful.Console.dll",
         "lib/net45/Colorful.Console.dll",
@@ -807,29 +807,29 @@
         "lib/netstandard2.1/Discord.Net.WebSocket.xml"
       ]
     },
-    "Lavalink4NET/1.6.0": {
-      "sha512": "7CrvWFnIDTMFAqiBcLk9aBrplogBXDDhXO8lTeUz2xWMwVXtye+rWfp2xGMODUvVMlse/4w4s0QH5R+ohzLKIQ==",
+    "Lavalink4NET/1.6.2": {
+      "sha512": "gCI7anWbZGKD0SYZPWINehlP0fUVJ02DBDiXkJdTzAzzBwCx5F+KNTDvRfNqTYsaikpydpaZt4Ci/y1F8NpYXg==",
       "type": "package",
-      "path": "lavalink4net/1.6.0",
+      "path": "lavalink4net/1.6.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Lavalink4NET.png",
-        "lavalink4net.1.6.0.nupkg.sha512",
+        "lavalink4net.1.6.2.nupkg.sha512",
         "lavalink4net.nuspec",
         "lib/netstandard2.0/Lavalink4NET.dll",
         "lib/netstandard2.0/Lavalink4NET.xml"
       ]
     },
-    "Lavalink4NET.Discord.NET/1.6.0": {
-      "sha512": "JtRgppvnRdAZOxXgoZHqX6t2iXZZSGGSlZyU9AGIZ+8domalp2RwpnbTSnMZNRovAK0D364PRMcXnfitVqiGpg==",
+    "Lavalink4NET.Discord.NET/1.6.2": {
+      "sha512": "COJvKOTy59jntMayVTWDnsNiLO0qYWLLwrxECHveG2/d7Co5Wo7ec7Ly9Y1mmXL25lTYJBhrBjtSSCiVt0LkgQ==",
       "type": "package",
-      "path": "lavalink4net.discord.net/1.6.0",
+      "path": "lavalink4net.discord.net/1.6.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Lavalink4NET.png",
-        "lavalink4net.discord.net.1.6.0.nupkg.sha512",
+        "lavalink4net.discord.net.1.6.2.nupkg.sha512",
         "lavalink4net.discord.net.nuspec",
         "lib/netstandard2.0/Lavalink4NET.DiscordNet.dll",
         "lib/netstandard2.0/Lavalink4NET.DiscordNet.xml"
@@ -894,38 +894,48 @@
         "ref/xamarinwatchos10/_._"
       ]
     },
-    "Microsoft.Extensions.DependencyInjection/3.1.4": {
-      "sha512": "dAWhz6BEjUFIVLUPbT1s1sUrPTwbUWdw2iBRRe3ej3xXcKS+oo64dKrIWFxRjYP6TWyESpGFNY5NGeA5FcHVlg==",
+    "Microsoft.Extensions.DependencyInjection/5.0.1": {
+      "sha512": "//mDNrYeiJ0eh/awFhDFJQzkRVra/njU5Y4fyK7X29g5HScrzbUkKOKlyTtygthcGFt4zNC8G5CFCjb/oizomA==",
       "type": "package",
-      "path": "microsoft.extensions.dependencyinjection/3.1.4",
+      "path": "microsoft.extensions.dependencyinjection/5.0.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
         "lib/net461/Microsoft.Extensions.DependencyInjection.dll",
         "lib/net461/Microsoft.Extensions.DependencyInjection.xml",
-        "lib/netcoreapp3.1/Microsoft.Extensions.DependencyInjection.dll",
-        "lib/netcoreapp3.1/Microsoft.Extensions.DependencyInjection.xml",
+        "lib/net5.0/Microsoft.Extensions.DependencyInjection.dll",
+        "lib/net5.0/Microsoft.Extensions.DependencyInjection.xml",
         "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.dll",
         "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.xml",
         "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.dll",
         "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.xml",
-        "microsoft.extensions.dependencyinjection.3.1.4.nupkg.sha512",
-        "microsoft.extensions.dependencyinjection.nuspec"
+        "microsoft.extensions.dependencyinjection.5.0.1.nupkg.sha512",
+        "microsoft.extensions.dependencyinjection.nuspec",
+        "useSharedDesignerContext.txt",
+        "version.txt"
       ]
     },
-    "Microsoft.Extensions.DependencyInjection.Abstractions/3.1.4": {
-      "sha512": "AceHamXNKDMDwIoZqEoApLp8s3935wSC3VXrPaRWa0wWOaEcYdDlo1nWQ1zLiezoDmpJzV7FqDm53E0Ty/hEMg==",
+    "Microsoft.Extensions.DependencyInjection.Abstractions/5.0.0": {
+      "sha512": "ORj7Zh81gC69TyvmcUm9tSzytcy8AVousi+IVRAI8nLieQjOFryRusSFh7+aLk16FN9pQNqJAiMd7BTKINK0kA==",
       "type": "package",
-      "path": "microsoft.extensions.dependencyinjection.abstractions/3.1.4",
+      "path": "microsoft.extensions.dependencyinjection.abstractions/5.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net461/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/net461/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
         "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
         "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
-        "microsoft.extensions.dependencyinjection.abstractions.3.1.4.nupkg.sha512",
-        "microsoft.extensions.dependencyinjection.abstractions.nuspec"
+        "microsoft.extensions.dependencyinjection.abstractions.5.0.0.nupkg.sha512",
+        "microsoft.extensions.dependencyinjection.abstractions.nuspec",
+        "useSharedDesignerContext.txt",
+        "version.txt"
       ]
     },
     "Microsoft.NETCore.Platforms/1.1.0": {
@@ -2929,30 +2939,30 @@
         "system.threading.tasks.nuspec"
       ]
     },
-    "Victoria/5.1.10": {
-      "sha512": "8w51E7ddiHM4yeS9GyvM3H8/PJFWjQMuH6/uuWCp00X2hocvpsOZxvLBUK0KyeCOiUQZgGtDdLJrUFpdohhMxQ==",
+    "Victoria/5.1.11": {
+      "sha512": "jw6pQc3RVzXAk9JN5ft9xMHwyxtwReMTF+Qoaf0KcfkgcdTBERhc/9nF1LGyScC5qQC5ks+b5Xb1EpMprBkB3Q==",
       "type": "package",
-      "path": "victoria/5.1.10",
+      "path": "victoria/5.1.11",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Logo.png",
         "lib/netcoreapp3.0/Victoria.dll",
         "lib/netcoreapp3.0/Victoria.xml",
-        "victoria.5.1.10.nupkg.sha512",
+        "victoria.5.1.11.nupkg.sha512",
         "victoria.nuspec"
       ]
     }
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v3.1": [
-      "Colorful.Console >= 1.2.10",
+      "Colorful.Console >= 1.2.15",
       "Discord.Addons.Interactive >= 2.0.0",
       "Discord.Net >= 2.2.0",
-      "Lavalink4NET.Discord.NET >= 1.6.0",
-      "Microsoft.Extensions.DependencyInjection >= 3.1.4",
+      "Lavalink4NET.Discord.NET >= 1.6.2",
+      "Microsoft.Extensions.DependencyInjection >= 5.0.1",
       "System.Threading.Tasks >= 4.3.0",
-      "Victoria >= 5.1.10"
+      "Victoria >= 5.1.11"
     ]
   },
   "packageFolders": {
@@ -2997,7 +3007,7 @@
         "dependencies": {
           "Colorful.Console": {
             "target": "Package",
-            "version": "[1.2.10, )"
+            "version": "[1.2.15, )"
           },
           "Discord.Addons.Interactive": {
             "target": "Package",
@@ -3009,11 +3019,11 @@
           },
           "Lavalink4NET.Discord.NET": {
             "target": "Package",
-            "version": "[1.6.0, )"
+            "version": "[1.6.2, )"
           },
           "Microsoft.Extensions.DependencyInjection": {
             "target": "Package",
-            "version": "[3.1.4, )"
+            "version": "[5.0.1, )"
           },
           "System.Threading.Tasks": {
             "target": "Package",
@@ -3021,7 +3031,7 @@
           },
           "Victoria": {
             "target": "Package",
-            "version": "[5.1.10, )"
+            "version": "[5.1.11, )"
           }
         },
         "imports": [

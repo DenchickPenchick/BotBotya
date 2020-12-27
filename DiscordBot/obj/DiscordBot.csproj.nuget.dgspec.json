@@ -43,7 +43,7 @@
           "dependencies": {
             "Colorful.Console": {
               "target": "Package",
-              "version": "[1.2.10, )"
+              "version": "[1.2.15, )"
             },
             "Discord.Addons.Interactive": {
               "target": "Package",
@@ -55,11 +55,11 @@
             },
             "Lavalink4NET.Discord.NET": {
               "target": "Package",
-              "version": "[1.6.0, )"
+              "version": "[1.6.2, )"
             },
             "Microsoft.Extensions.DependencyInjection": {
               "target": "Package",
-              "version": "[3.1.4, )"
+              "version": "[5.0.1, )"
             },
             "System.Threading.Tasks": {
               "target": "Package",
@@ -67,7 +67,7 @@
             },
             "Victoria": {
               "target": "Package",
-              "version": "[5.1.10, )"
+              "version": "[5.1.11, )"
             }
           },
           "imports": [

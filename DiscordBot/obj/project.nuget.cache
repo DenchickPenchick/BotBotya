@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "cAgnKkOTrwJ7xjqiP/GqX4XfRECUjjuuWUz7iLPWMFoDrdA7WEt7yKL+KOBuMPSrDNoxi2c3+YgEQFFJiNR1mg==",
+  "dgSpecHash": "DCzCCAW93t4k4emLDdWrhGtcAvl6hurfr7W+sAgWhKbl8xN2qS31jD1Y+qBkP3qQ+aAIzf+HZL9nXspwytldww==",
   "success": true,
   "projectFilePath": "D:\\Программы\\СерверDiscord\\DiscordBot\\DiscordBot\\DiscordBot.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Денис\\.nuget\\packages\\colorful.console\\1.2.10\\colorful.console.1.2.10.nupkg.sha512",
+    "C:\\Users\\Денис\\.nuget\\packages\\colorful.console\\1.2.15\\colorful.console.1.2.15.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\discord.addons.interactive\\2.0.0\\discord.addons.interactive.2.0.0.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\discord.net\\2.2.0\\discord.net.2.2.0.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\discord.net.commands\\2.2.0\\discord.net.commands.2.2.0.nupkg.sha512",
@@ -12,11 +12,11 @@
     "C:\\Users\\Денис\\.nuget\\packages\\discord.net.rest\\2.2.0\\discord.net.rest.2.2.0.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\discord.net.webhook\\2.2.0\\discord.net.webhook.2.2.0.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\discord.net.websocket\\2.2.0\\discord.net.websocket.2.2.0.nupkg.sha512",
-    "C:\\Users\\Денис\\.nuget\\packages\\lavalink4net\\1.6.0\\lavalink4net.1.6.0.nupkg.sha512",
-    "C:\\Users\\Денис\\.nuget\\packages\\lavalink4net.discord.net\\1.6.0\\lavalink4net.discord.net.1.6.0.nupkg.sha512",
+    "C:\\Users\\Денис\\.nuget\\packages\\lavalink4net\\1.6.2\\lavalink4net.1.6.2.nupkg.sha512",
+    "C:\\Users\\Денис\\.nuget\\packages\\lavalink4net.discord.net\\1.6.2\\lavalink4net.discord.net.1.6.2.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\microsoft.csharp\\4.0.1\\microsoft.csharp.4.0.1.nupkg.sha512",
-    "C:\\Users\\Денис\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\3.1.4\\microsoft.extensions.dependencyinjection.3.1.4.nupkg.sha512",
-    "C:\\Users\\Денис\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\3.1.4\\microsoft.extensions.dependencyinjection.abstractions.3.1.4.nupkg.sha512",
+    "C:\\Users\\Денис\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\5.0.1\\microsoft.extensions.dependencyinjection.5.0.1.nupkg.sha512",
+    "C:\\Users\\Денис\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\5.0.0\\microsoft.extensions.dependencyinjection.abstractions.5.0.0.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\microsoft.netcore.targets\\1.1.0\\microsoft.netcore.targets.1.1.0.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\newtonsoft.json\\12.0.2\\newtonsoft.json.12.0.2.nupkg.sha512",
@@ -53,7 +53,7 @@
     "C:\\Users\\Денис\\.nuget\\packages\\system.text.regularexpressions\\4.1.0\\system.text.regularexpressions.4.1.0.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\system.threading\\4.3.0\\system.threading.4.3.0.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512",
-    "C:\\Users\\Денис\\.nuget\\packages\\victoria\\5.1.10\\victoria.5.1.10.nupkg.sha512"
+    "C:\\Users\\Денис\\.nuget\\packages\\victoria\\5.1.11\\victoria.5.1.11.nupkg.sha512"
   ],
   "logs": []
 }

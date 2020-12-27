@@ -77,8 +77,6 @@ D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcor
 D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\System.Interactive.Async.dll
 D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\System.Linq.Async.dll
 D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Victoria.dll
-D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\MathematicsDiscordBotLibrary.dll
-D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\MathematicsDiscordBotLibrary.pdb
 D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.AssemblyInfoInputs.cache
 D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.AssemblyInfo.cs
 D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csproj.CoreCompileInputs.cache
@@ -86,3 +84,4 @@ D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcor
 D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.dll
 D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.pdb
 D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.genruntimeconfig.cache
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csprojAssemblyReference.cache
