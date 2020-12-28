@@ -261,8 +261,7 @@ namespace DiscordBot.GuildManaging
                 {
                     Text = "Если хочешь поддержать автора, тогда кидай это своим друзьям: https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991",
                     IconUrl = client.CurrentUser.GetAvatarUrl()
-                },
-                ImageUrl = "https://cdn1.savepice.ru/uploads/2020/11/22/c8d17289af61926320d79ca264b53e33-full.png"
+                }               
             }.Build());
         }
 
