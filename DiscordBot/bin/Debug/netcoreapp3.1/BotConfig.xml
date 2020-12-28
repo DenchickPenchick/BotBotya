@@ -10,5 +10,5 @@
     <!--ID категории, где находятся AFK-каналы-->
     <AFKCategory id="630455432690794549"/>
     <!--Путь к директории, где хранится все нужные данные-->
-    <PathToBotDirectory path="D:\BotDirectory"/>    
+    <PathToBotDirectory path="BotDirectory"/>    
 </Config>
