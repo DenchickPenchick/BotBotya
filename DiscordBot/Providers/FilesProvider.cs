@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Xml;
-using System.IO;
+﻿using System.IO;
+using System.Text.Json;
 using Discord.WebSocket;
 using System.Xml.Serialization;
 using DiscordBot.Modules.FileManaging;
@@ -41,18 +40,8 @@ namespace DiscordBot.FileWorking
 
         public static string GetBotDirectoryPath()
         {
-            XmlTextReader xmlTextReader = new XmlTextReader("BotConfig.xml");
-            string path = null;
-
-            while (xmlTextReader.Read())
-                if (xmlTextReader.NodeType == XmlNodeType.Element && xmlTextReader.Name == "PathToBotDirectory")
-                {
-                    path = xmlTextReader.GetAttribute("path");
-                    continue;
-                }
-
-            xmlTextReader.Dispose();
-            return path;
+            using StreamReader reader = new StreamReader("config.json");
+            return JsonSerializer.Deserialize<SerializableConfig>(reader.ReadToEnd()).Path;
         }        
                                 
         public static SerializableGuild GetGuild(SocketGuild guild)

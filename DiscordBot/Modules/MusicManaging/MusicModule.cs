@@ -27,18 +27,8 @@ namespace DiscordBot.Modules.MusicManaging
             LavaOperations = services.GetRequiredService<LavaOperations>();
             Client.ReactionAdded += Client_ReactionAdded;
             LavaNode.OnTrackEnded += LavaNode_OnTrackEnded;            
-            Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
-            
-        }        
-
-        private async Task Client_UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
-        {
-            var prevChannel = arg2.VoiceChannel;
-            var channel = arg3.VoiceChannel;            
-
-            if (prevChannel != null && channel == null && arg1.Id == Client.CurrentUser.Id)            
-                await LavaNode.LeaveAsync(prevChannel);                        
-        }
+            Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;            
+        }                
 
         public void RunModule()
         {
@@ -84,6 +74,19 @@ namespace DiscordBot.Modules.MusicManaging
                 }
                 await message.RemoveReactionAsync(arg3.Emote, user);
             }
+        }
+
+        private async Task Client_UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
+        {
+            var prevChannel = arg2.VoiceChannel;
+            var channel = arg3.VoiceChannel;
+            if (arg1.Id == Client.CurrentUser.Id)
+            {
+                if (prevChannel != null && channel == null)
+                    await LavaNode.LeaveAsync(prevChannel);
+            }
+            else if (prevChannel != null && prevChannel.Users.Count == 1)            
+                await LavaNode.LeaveAsync(prevChannel);            
         }
 
         private async Task LavaNode_OnTrackEnded(TrackEndedEventArgs arg)

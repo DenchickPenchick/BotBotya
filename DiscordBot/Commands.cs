@@ -175,6 +175,11 @@ namespace TestBot
         [Summary("включает трек, который задан url")]
         public async Task PlayTrackAsync(params string[] query)
         {
+            if (query == null)
+            {
+                await ReplyAsync("Ты не указал название трека или ссылку на него");
+                return;
+            }
             await LavaOperations.PlayTrackAsync(Context.User as SocketGuildUser, query, Context.Channel as SocketTextChannel);
         }
 
@@ -203,6 +208,11 @@ namespace TestBot
         [Summary("устанавливает громкость бота")]
         public async Task SetVolumeAsync(ushort vol)
         {
+            if (vol == 0)
+            {
+                await ReplyAsync("Ты не поставил значение");
+                return;
+            }
             await LavaOperations.SetVolumeAsync(Context.User as SocketGuildUser, vol, Context.Channel as SocketTextChannel);
         }        
         #endregion

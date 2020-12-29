@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System.IO;
-using System.Xml;
+using System.Text.Json;
 using System.Linq;
 using Console = Colorful.Console;
 using DiscordBot.Modules;
@@ -12,13 +12,11 @@ using DiscordBot.FileWorking;
 using DiscordBot.GuildManaging;
 using System.Collections.Generic;
 using DiscordBot.Serializable;
-using System.Threading;
+using System;
+using System.Text;
 
 namespace DiscordBot
-{
-    /// <summary>
-    /// Модуль, который отвечает за файловую работу бота. Например, настройка бота с помощью XML-файла.
-    /// </summary>
+{    
     public class FilesModule : IModule
     {
         public Bot Bot { get; set; }
@@ -59,44 +57,21 @@ namespace DiscordBot
         {
             Console.WriteLine("Configuring bot started");
 
-            XmlTextReader xmlTextReader = new XmlTextReader(@"BotConfig.xml");            
-
-            while (xmlTextReader.Read())
+            if (!File.Exists("config.json"))
+                using (FileStream fs = new FileStream("config.json", FileMode.Create))
+                {
+                    Console.WriteLine("Config not found. Creating config.json...", Color.Red);
+                    fs.Write(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new SerializableConfig())));
+                    Console.WriteLine("Config created. App will be shoot down. You should set token and path to system category.", Color.Green);
+                    fs.Close();
+                    Environment.Exit(0);
+                }
+            using (StreamReader reader = new StreamReader("config.json"))
             {
-                if (xmlTextReader.NodeType == XmlNodeType.Element)
-                    switch (xmlTextReader.Name)
-                    {
-                        case "Token":
-                            Bot.TOKEN = xmlTextReader.GetAttribute("value");
-                            Console.WriteLine("Token got", Color.Green);
-                            break;                        
-                        case "PathToBotDirectory":
-                            Bot.PathToBotDirectory = xmlTextReader.GetAttribute("path");
-                            if (!Directory.Exists(Bot.PathToBotDirectory))
-                            {
-                                Console.WriteLine("Can't find directory. Create directory?", Color.Red);
-                                string rep = Console.ReadLine();
-                                switch (rep.ToLower())
-                                {
-                                    case "yes":
-                                        SetupBotDirectory();
-                                        break;
-                                    case "no":
-                                        Console.WriteLine("OK. Bot may work incorrect", Color.Blue);
-                                        break;
-                                    default:
-                                        Console.WriteLine("Can't understand command", Color.Red);
-                                        break;
-                                }
-                            }
-                            else
-                                Console.WriteLine("Path to bot directory got", Color.Green);
-                            break;
-                    }                                    
-            }
-
-            xmlTextReader.Dispose();
-
+                SerializableConfig config = JsonSerializer.Deserialize<SerializableConfig>(reader.ReadToEnd());
+                Bot.TOKEN = config.Token;
+                Bot.PathToBotDirectory = config.Path;
+            }            
             Console.WriteLine("Configuring bot ended succesfully", Color.Green);
         }
       

@@ -115,7 +115,7 @@ namespace DiscordBot.Modules.NotificationsManaging
                     {
                         Title = $"Возникла ошибка при логировании событий сервера {guild.Name}",
                         Description = $"Не был найден канал для логирования (id: {serGuild.LoggerId}).\n" +
-                      $"Оповещения отключены. Чтобы включить их снова нужно ввести команду !EnableGuildNotifications.",
+                        $"Оповещения отключены. Чтобы включить их снова нужно ввести команду !EnableGuildNotifications.",
                         Color = Color.Red,
                         Footer = new EmbedFooterBuilder
                         {
