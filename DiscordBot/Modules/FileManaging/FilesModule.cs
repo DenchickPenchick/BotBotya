@@ -99,6 +99,16 @@ namespace DiscordBot
             else
                 Console.WriteLine("BotGuilds found", Color.Green);
 
+            Console.WriteLine("Checking directory CustomCommandsDirectory...");
+            if (!Directory.Exists($@"{Bot.PathToBotDirectory}\CustomCommandsDirectory"))
+            {
+                Console.WriteLine("CustomCommandsDirectory not found", Color.Red);
+                Directory.CreateDirectory($@"{Bot.PathToBotDirectory}\CustomCommandsDirectory");
+                Console.WriteLine("CustomCommandsDirectory created", Color.Green);
+            }
+            else
+                Console.WriteLine("CustomCommandsDirectory found", Color.Green);
+
             Console.WriteLine("Checking files...", Color.Blue);
            
             Console.WriteLine("Checking file UpdateNewsDescription.xml...");
@@ -120,6 +130,17 @@ namespace DiscordBot
             }
             else
                 Console.WriteLine("UpdateNewsAndPlans.xml found", Color.Green);
+
+            using (FileStream fs = new FileStream($@"{Bot.PathToBotDirectory}\Example.xml", FileMode.Create))
+            {
+                new XmlSerializer(typeof(CustomCommands.CustomCommand)).Serialize(fs, new CustomCommands.CustomCommand
+                { 
+                    Name = "Test",
+                    Actions = new List<CustomCommands.CustomCommand.Action>() { CustomCommands.CustomCommand.Action.Message },
+                    Message = "Hello",
+                    GuildId = 777618262074458202
+                });
+            }
         }
 
         private async void SetupBotGuildData()
@@ -150,7 +171,7 @@ namespace DiscordBot
                     FilesProvider.DeleteGuild(ulong.Parse(fileName));
 
             Console.WriteLine("Guilds checked", Color.Green);
-        }
+        }        
 
         private void AddGuild(SocketGuild guild)
         {            

@@ -9,6 +9,9 @@ using Discord.Addons.Interactive;
 using Console = Colorful.Console;
 using DiscordBot.FileWorking;
 using DiscordBot.MusicOperations;
+using DiscordBot.Providers;
+using System.Collections.Generic;
+using DiscordBot.CustomCommands;
 
 namespace TestBot
 {
@@ -105,10 +108,10 @@ namespace TestBot
                         await ReplyAsync("Пользователь не найден.");
                 }
                 else
-                    await ReplyAsync("Ответ не получен в течении 5 минут. Команда аннулированна");
+                    await ReplyAsync("Ответ не получен в течение 5 минут. Команда аннулированна");
             }
             else
-                await ReplyAsync("Ответ не получен в течении 5 минут. Команда аннулированна");
+                await ReplyAsync("Ответ не получен в течение 5 минут. Команда аннулированна");
         }
 
         [RequireUserPermission(GuildPermission.KickMembers)]
@@ -214,7 +217,104 @@ namespace TestBot
                 return;
             }
             await LavaOperations.SetVolumeAsync(Context.User as SocketGuildUser, vol, Context.Channel as SocketTextChannel);
-        }        
+        }
+        #endregion
+
+        #region --КАСТОМНЫЕ КОМАНДЫ--
+        [Command("Сконфигурировать команду", RunMode = RunMode.Async)]
+        [Summary("Не реализована. Кастомные команды.")]
+        public async Task ConfigureCommand()
+        {
+            List<CustomCommand.Action> actions = new List<CustomCommand.Action>();
+            string name;
+            string message = null;
+            bool actionsEntering = false;
+            await ReplyAsync("Введи название команды");
+            var replyForName = await NextMessageAsync();
+
+            if (replyForName != null)
+                name = replyForName.Content;
+            else
+            {
+                await ReplyAsync("Ответ не получен в течение 5 минут. Команда аннулированна");
+                return;
+            }
+
+            while (!actionsEntering)
+            {
+                await ReplyAsync("Добавить действие (Message (отправить сообщение), Kick(Кикнуть пользователя), Ban(Забанить пользователя)). Если все действия добавлены введи \"Стоп\". Если нужно остановить процесс введи \"Остановить\"");
+                var replyForAction = await NextMessageAsync();
+                if (replyForAction != null)
+                    switch (replyForAction.Content.ToLower())
+                    {
+                        case "message":
+                            actions.Add(CustomCommand.Action.Message);
+                            break;
+                        case "kick":
+                            actions.Add(CustomCommand.Action.Kick);
+                            break;
+                        case "ban":
+                            actions.Add(CustomCommand.Action.Ban);
+                            break;
+                        case "стоп":
+                            actionsEntering = true;
+                            break;
+                        case "остановить":
+                            return;
+                        default:
+                            await ReplyAsync("Неверное действие");
+                            break;
+                    }
+                else
+                {
+                    await ReplyAsync("Ответ не получен в течение 5 минут. Команда аннулированна");
+                    return;
+                }
+            }
+
+            if (actions.Contains(CustomCommand.Action.Message))
+            {
+                await ReplyAsync("Введи сообщение, которое ты хочешь отправить");
+                var replyForMessage = await NextMessageAsync();
+                if (replyForName != null)
+                    message = replyForMessage.Content;
+            }                        
+
+            var command = new CustomCommand
+            {
+                Name = name,
+                Actions = actions,
+                GuildId = Context.Guild.Id,
+                Message = message
+            };
+
+            //await Context.Channel.SendFileAsync();
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("ДобавитьКоманду")]
+        [Summary("Не реализована. Кастомные команды.")]
+        public async Task AddCommand()
+        {
+            var provider = new CustomCommandsProvider(Context.Guild);
+
+            var res = await provider.AddCommandAsync(Context);
+            if (res == CustomCommandsProvider.Result.Error)
+                await ReplyAsync("Возможно ты не прикрепил файл или же файл сконфигурирован неправильно.");
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("К")]
+        [Summary("В разработке. Кастомные команды.")]
+        public async Task UseCommand(string name, params string[] args)
+        {
+            var provider = new CustomCommandsProvider(Context.Guild);
+
+            var res = await provider.ExecuteCustomCommandAsync(Context, name);
+
+            if (res == CustomCommandsProvider.Result.Error)
+                await ReplyAsync("Возможно ты указал не все параметры, которые нужны команде. Либо же в команде стоят две (или более) несовместимых действий (например, кик и бан)");
+        }
         #endregion
 
         private SocketGuildUser GetSocketGuildUser(params string[] NameOfUser)
@@ -246,6 +346,6 @@ namespace TestBot
             Thread.Sleep(1000);
             await delMess.DeleteAsync();
             Thread.Sleep(0);            
-        }        
+        }
     }
 }

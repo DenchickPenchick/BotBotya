@@ -102,8 +102,7 @@ namespace DiscordBot
                 var context = new SocketCommandContext(Client, message);
                 var interactive = new InteractiveService(Client);
                 var serGuild = FilesProvider.GetGuild((message.Author as SocketGuildUser).Guild);
-                if (message.Author.IsBot || message is null) return;                    
-
+                if (message.Author.IsBot || message is null) return;                
                 if (message.HasStringPrefix(serGuild.Prefix, ref argsPos))
                 {
                     if (message.Content.ToLower() == "!справка")
@@ -216,7 +215,7 @@ namespace DiscordBot
         private async Task RegisterCommandsAsync()
         {           
             await Commands.AddModuleAsync<Commands>(Services);
-            await BotOptionsCommands.AddModuleAsync<BotOptionsCommands>(Services);             
+            await BotOptionsCommands.AddModuleAsync<BotOptionsCommands>(Services);                        
             Client.MessageReceived += HandleCommandAsync;
         }
     }
