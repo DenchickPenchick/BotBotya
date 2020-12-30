@@ -1,17 +1,12 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using DiscordBot.GuildManaging;
-using System.Linq;
 using System;
 using System.Threading.Tasks;
 using DiscordBot.FileWorking;
-using System.Threading;
 
 namespace DiscordBot.Modules.ContentManaging
-{
-    /// <summary>
-    /// Модуль, который отвечает за управление контентом 
-    /// </summary>
+{    
     public class ContentModule : IModule
     {
         private DiscordSocketClient Client { get; set; }
@@ -29,40 +24,50 @@ namespace DiscordBot.Modules.ContentManaging
 
         private async Task MessageUpdated(Cacheable<IMessage, ulong> arg1, SocketMessage arg2, ISocketMessageChannel arg3)
         {
-            if (!((arg2 as SocketUserMessage).Author as SocketGuildUser).IsBot)              
+            if (!((arg2 as SocketUserMessage).Author as SocketGuildUser).IsBot)
                 if (FilesProvider.GetGuild(((arg2 as SocketUserMessage).Author as SocketGuildUser).Guild).CheckingContent && FilesProvider.GetGuild(((arg2 as SocketUserMessage).Author as SocketGuildUser).Guild).ContentEnable)
                 {
                     var messUser = arg2.Author as SocketGuildUser;
-                    var provider = new GuildProvider(messUser.Guild);
+                    GuildProvider provider = new GuildProvider(messUser.Guild);
                     var VideosAndPicturesChannel = provider.VideosTextChannel();
                     var LinksChannel = provider.LinksTextChannel();
-                    var textChannel = arg2.Channel;
                     var message = arg2;
 
-                    if (textChannel == VideosAndPicturesChannel && !message.Content.Contains("https://youtu.be/"))
+                    if (Uri.IsWellFormedUriString(message.Content, UriKind.RelativeOrAbsolute))
                     {
-                        if (message.Content.Contains("https://"))
+                        Uri uri = new Uri(message.Content);
+                        string host = uri.Host;
+                        bool Video = false;
+                        bool DiscordMedia = false;
+                        bool InVideoChannel = false;
+                        bool InLinksChannel = false;
+
+                        if (message.Channel == VideosAndPicturesChannel)
+                            InVideoChannel = true;
+                        else if (message.Channel == LinksChannel)
+                            InLinksChannel = true;
+
+                        if (host == "www.youtube.com" || host == "www.youtu.be")
+                            Video = true;
+                        else if (host.ToLower().Contains("discord") || host.ToLower().Contains("tenor"))
+                            DiscordMedia = true;
+
+                        if (!DiscordMedia)
                         {
-                            await message.DeleteAsync();
-                            string link = message.Content;
-                            await LinksChannel.SendMessageAsync(link);
-                        }
-                        else
-                        {
-                            await message.DeleteAsync();
-                        }
-                    }
-                    else if (textChannel == LinksChannel)
-                    {
-                        if (message.Content.Contains("https://youtu.be/"))
-                        {
-                            await message.DeleteAsync();
-                            string link = message.Content;
-                            await VideosAndPicturesChannel.SendMessageAsync(link);
-                        }
-                        else
-                        {
-                            await message.DeleteAsync();
+                            if (!((InVideoChannel && Video) || (InLinksChannel && !Video)))
+                            {
+                                await message.DeleteAsync();
+                                string link = message.Content;
+                                switch (Video)
+                                {
+                                    case true:
+                                        await VideosAndPicturesChannel.SendMessageAsync(link);
+                                        break;
+                                    case false:
+                                        await LinksChannel.SendMessageAsync(link);
+                                        break;
+                                }
+                            }
                         }
                     }
                 }            
@@ -76,53 +81,47 @@ namespace DiscordBot.Modules.ContentManaging
                     var messUser = arg.Author as SocketGuildUser;
                     GuildProvider provider = new GuildProvider(messUser.Guild);
                     var VideosAndPicturesChannel = provider.VideosTextChannel();
-                    var LinksChannel = provider.LinksTextChannel();
-                    var MainChannel = provider.MainTextChannelsCategory();
-                    var textChannel = arg.Channel as SocketTextChannel;
+                    var LinksChannel = provider.LinksTextChannel();                    
                     var message = arg;
+                    
+                    if (Uri.IsWellFormedUriString(message.Content, UriKind.RelativeOrAbsolute))
+                    {
+                        Uri uri = new Uri(message.Content);
+                        string host = uri.Host;
+                        bool Video = false;
+                        bool DiscordMedia = false;
+                        bool InVideoChannel = false;
+                        bool InLinksChannel = false;
 
-                    if (textChannel == VideosAndPicturesChannel && !message.Content.Contains("https://youtu.be/") && !message.Content.Contains("https://www.youtube.com/"))
-                    {
-                        if (message.Content.Contains("https://"))
+                        if (message.Channel == VideosAndPicturesChannel)
+                            InVideoChannel = true;
+                        else if (message.Channel == LinksChannel)
+                            InLinksChannel = true;
+
+                        if (host == "www.youtube.com" || host == "www.youtu.be")
+                            Video = true;
+                        else if (host.ToLower().Contains("discord") || host.ToLower().Contains("tenor"))
+                            DiscordMedia = true;
+
+                        if (!DiscordMedia)
                         {
-                            await message.DeleteAsync();
-                            string link = message.Content;
-                            await LinksChannel.SendMessageAsync(link);
-                        }
-                        else
-                        {
-                            await message.DeleteAsync();
-                        }
+                            if (!((InVideoChannel && Video) || (InLinksChannel && !Video)))
+                            {
+                                await message.DeleteAsync();
+                                string link = message.Content;
+                                switch (Video)
+                                {
+                                    case true:
+                                        await VideosAndPicturesChannel.SendMessageAsync(link);
+                                        break;
+                                    case false:
+                                        await LinksChannel.SendMessageAsync(link);
+                                        break;
+                                }
+                            }                            
+                        }                        
                     }
-                    else if (MainChannel.Channels.Contains(textChannel) && message.Content.Contains("https://"))
-                    {
-                        if (message.Content.Contains("https://youtu.be/") || message.Content.Contains("https://www.youtube.com/"))
-                        {
-                            await message.DeleteAsync();
-                            string link = message.Content;
-                            await VideosAndPicturesChannel.SendMessageAsync(link);
-                        }
-                        else if (!(message.Content.StartsWith("https://tenor.com/") || message.Content.StartsWith("https://cdn.discordapp.com/") || message.Content.StartsWith("https://media.discordapp.net/")))
-                        {
-                            await message.DeleteAsync();
-                            string link = message.Content;
-                            await LinksChannel.SendMessageAsync(link);
-                        }
-                    }
-                    else if (textChannel == LinksChannel)
-                    {
-                        if (message.Content.Contains("https://youtu.be/") || message.Content.Contains("https://www.youtube.com/"))
-                        {
-                            await message.DeleteAsync();
-                            string link = message.Content;
-                            await VideosAndPicturesChannel.SendMessageAsync(link);
-                        }
-                        else if (!message.Content.Contains("https://"))
-                        {
-                            await message.DeleteAsync();
-                        }
-                    }
-                }            
+                }
         }
     }
 }
