@@ -192,7 +192,7 @@ namespace DiscordBot
                                     await context.Channel.SendMessageAsync("У тебя нет доступа к этой команде.");
                                     break;
                                 case CommandError.Exception:
-                                    await context.Channel.SendMessageAsync("В результате выполнения команды было сгенерировано исключение. Информация об исключении отправлена разработчику.");
+                                    await context.Channel.SendMessageAsync("В результате выполнения команды было сгенерировано исключение.");
                                     break;
                                 case CommandError.Unsuccessful:
                                     await context.Channel.SendMessageAsync("Команда выполнена неудачно.");

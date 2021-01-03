@@ -12,6 +12,8 @@ using DiscordBot.MusicOperations;
 using DiscordBot.Providers;
 using System.Collections.Generic;
 using DiscordBot.CustomCommands;
+using System.IO;
+using System.Xml.Serialization;
 
 namespace TestBot
 {
@@ -123,7 +125,7 @@ namespace TestBot
             if (user != null)
                 await user.KickAsync();
             else
-                await ReplyAsync($"Пользователь не найден. Проверь данные, если что пиши админу ({Context.Guild.Owner.Mention}).");
+                await ReplyAsync($"Пользователь не найден.");
         }
 
         [RequireUserPermission(GuildPermission.BanMembers)]
@@ -135,7 +137,7 @@ namespace TestBot
             if (user != null)
                 await user.BanAsync();
             else
-                await ReplyAsync($"Пользователь не найден. Проверь данные, если что пиши админу ({Context.Guild.Owner.Mention}).");
+                await ReplyAsync($"Пользователь не найден. Проверь данные.");
         }
 
         [RequireUserPermission(GuildPermission.ManageChannels)]
@@ -221,7 +223,46 @@ namespace TestBot
         #endregion
 
         #region --КАСТОМНЫЕ КОМАНДЫ--
-        [Command("Сконфигурировать команду", RunMode = RunMode.Async)]
+        [Command("ВсеКоманды")]
+        [Summary("выводит все кастомные команды")]
+        public async Task GetAllCustomCommands()
+        {
+            var guild = Context.Guild;
+            var serial = new CustomCommandsSerial(guild);
+            var commands = serial.GetCustomCommands();
+            string allComm = null;
+            int arg = 1;
+
+            foreach (var command in commands.Commands)
+            {
+                allComm += $"\n{arg++}. {command.Name}. Алгоритм:";
+                var actions = command.Actions;
+                int argPos = 1;
+                foreach (var action in actions)                
+                    switch (action)
+                    {
+                        case CustomCommand.Action.Message:
+                            allComm += $"\n{arg - 1}.{argPos++}) Отправляет сообщение ({command.Message}).";
+                            break;
+                        case CustomCommand.Action.Kick:
+                            allComm += $"\n{arg - 1}.{argPos++}) Кикает с сервера.";
+                            break;
+                        case CustomCommand.Action.Ban:
+                            allComm += $"\n{arg - 1}.{argPos++}) Банит на сервере.";
+                            break;
+                    }                
+            }
+
+
+            await ReplyAsync(embed: new EmbedBuilder
+            {
+                Title = $"Кастомные команды сервера {Context.Guild.Name}",
+                Description = allComm,
+                Color = Color.Blue
+            }.Build());
+        }
+
+        [Command("СконфигурироватьКоманду", RunMode = RunMode.Async)]
         [Summary("Не реализована. Кастомные команды.")]
         public async Task ConfigureCommand()
         {
@@ -233,7 +274,7 @@ namespace TestBot
             var replyForName = await NextMessageAsync();
 
             if (replyForName != null)
-                name = replyForName.Content;
+                name = replyForName.Content.Replace(" ", string.Empty);
             else
             {
                 await ReplyAsync("Ответ не получен в течение 5 минут. Команда аннулированна");
@@ -242,19 +283,23 @@ namespace TestBot
 
             while (!actionsEntering)
             {
-                await ReplyAsync("Добавить действие (Message (отправить сообщение), Kick(Кикнуть пользователя), Ban(Забанить пользователя)). Если все действия добавлены введи \"Стоп\". Если нужно остановить процесс введи \"Остановить\"");
+                await ReplyAsync("Добавить действие (Сообщение (отправить сообщение), Кик(Кикнуть пользователя), Бан(Забанить пользователя)). Если все действия добавлены введи \"Стоп\". Если нужно остановить процесс введи \"Остановить\"");
                 var replyForAction = await NextMessageAsync();
                 if (replyForAction != null)
+                {
                     switch (replyForAction.Content.ToLower())
                     {
-                        case "message":
+                        case "сообщение":
                             actions.Add(CustomCommand.Action.Message);
+                            await ReplyAsync("Действие добавлено");
                             break;
-                        case "kick":
+                        case "кик":
                             actions.Add(CustomCommand.Action.Kick);
+                            await ReplyAsync("Действие добавлено");
                             break;
-                        case "ban":
+                        case "бан":
                             actions.Add(CustomCommand.Action.Ban);
+                            await ReplyAsync("Действие добавлено");
                             break;
                         case "стоп":
                             actionsEntering = true;
@@ -264,7 +309,8 @@ namespace TestBot
                         default:
                             await ReplyAsync("Неверное действие");
                             break;
-                    }
+                    }                    
+                }                
                 else
                 {
                     await ReplyAsync("Ответ не получен в течение 5 минут. Команда аннулированна");
@@ -287,8 +333,12 @@ namespace TestBot
                 GuildId = Context.Guild.Id,
                 Message = message
             };
-
-            //await Context.Channel.SendFileAsync();
+            using FileStream stream = new FileStream($"{Context.Guild.Id}.xml", FileMode.CreateNew);
+            XmlSerializer serializer = new XmlSerializer(typeof(CustomCommand));
+            serializer.Serialize(stream, command);
+            stream.Close();
+            await Context.Channel.SendFileAsync($"{Context.Guild.Id}.xml", "Твой файл. Если ты хочешь добавить данную команду, тогда скачай файл и пропиши соответствующую команду.");
+            File.Delete($"{Context.Guild.Id}.xml");
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
@@ -298,9 +348,11 @@ namespace TestBot
         {
             var provider = new CustomCommandsProvider(Context.Guild);
 
-            var res = await provider.AddCommandAsync(Context);
+            var res = await provider.AddCommand(Context);
             if (res == CustomCommandsProvider.Result.Error)
                 await ReplyAsync("Возможно ты не прикрепил файл или же файл сконфигурирован неправильно.");
+            else
+                await ReplyAsync("Команда создана успешно");
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
@@ -313,7 +365,17 @@ namespace TestBot
             var res = await provider.ExecuteCustomCommandAsync(Context, name);
 
             if (res == CustomCommandsProvider.Result.Error)
-                await ReplyAsync("Возможно ты указал не все параметры, которые нужны команде. Либо же в команде стоят две (или более) несовместимых действий (например, кик и бан)");
+                await ReplyAsync("Возможно ты указал не все параметры, которые нужны команде. Либо же в команде стоят две (или более) несовместимых действий (например, кик и бан). Также команды может вообще не существовать!");
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("УдалитьКоманду")]
+        [Summary("В разработке. Кастомные команды.")]
+        public async Task DeleteCommand(string name)
+        {
+            var serial = new CustomCommandsSerial(Context.Guild);
+            serial.DeleteCommand(name);
+            await ReplyAsync($"Команда {name} удалена успешно");
         }
         #endregion
 

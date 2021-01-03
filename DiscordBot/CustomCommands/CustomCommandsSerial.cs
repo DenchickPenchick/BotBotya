@@ -28,12 +28,29 @@ namespace DiscordBot.CustomCommands
             {
                 commands = (CustomCommands)new XmlSerializer(typeof(CustomCommands)).Deserialize(reader);
             }
-            
+            command.Name = command.Name.Replace(" ", string.Empty);
             commands.Commands.Add(command);
 
             using StreamWriter writer = new StreamWriter(pathToFile);            
             serializer.Serialize(writer, commands);
             writer.Close();
+        }
+
+        public void DeleteCommand(string name)
+        {
+            var commands = GetCustomCommands();
+            XmlSerializer serializer = new XmlSerializer(typeof(CustomCommands));
+            var command = GetCustomCommand(name);
+            string pathToFile = $@"{FilesProvider.GetBotDirectoryPath()}\CustomCommandsDirectory\{Guild.Id}.xml";
+
+            if (File.Exists(pathToFile))
+                using (StreamWriter writer = new StreamWriter(pathToFile))                
+                    if (command != null)
+                    {
+                        commands.Commands.Remove(command);
+                        writer.Write(string.Empty);
+                        serializer.Serialize(writer, commands);
+                    }                                    
         }
 
         public CustomCommands GetCustomCommands()
@@ -52,7 +69,7 @@ namespace DiscordBot.CustomCommands
             var commands = GetCustomCommands().Commands;
 
             foreach (var command in commands)            
-                if (command.Name == name)
+                if (command.Name.ToLower() == name.ToLower())
                     return command;
             return null;
         }
