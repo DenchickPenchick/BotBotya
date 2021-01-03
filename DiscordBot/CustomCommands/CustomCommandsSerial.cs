@@ -18,7 +18,7 @@ namespace DiscordBot.CustomCommands
         {
             XmlSerializer serializer = new XmlSerializer(typeof(CustomCommands));
             CustomCommands commands;
-            string pathToFile = $@"{FilesProvider.GetBotDirectoryPath()}\CustomCommandsDirectory\{Guild.Id}.xml";
+            string pathToFile = $"{FilesProvider.GetBotDirectoryPath()}/CustomCommandsDirectory/{Guild.Id}.xml";
 
             if (!File.Exists(pathToFile))
                 using (FileStream fs = new FileStream(pathToFile, FileMode.Create))
@@ -41,7 +41,7 @@ namespace DiscordBot.CustomCommands
             var commands = GetCustomCommands();
             XmlSerializer serializer = new XmlSerializer(typeof(CustomCommands));
             var command = GetCustomCommand(name);
-            string pathToFile = $@"{FilesProvider.GetBotDirectoryPath()}\CustomCommandsDirectory\{Guild.Id}.xml";
+            string pathToFile = $"{FilesProvider.GetBotDirectoryPath()}/CustomCommandsDirectory/{Guild.Id}.xml";
 
             if (File.Exists(pathToFile))
                 using (StreamWriter writer = new StreamWriter(pathToFile))                
@@ -56,7 +56,7 @@ namespace DiscordBot.CustomCommands
         public CustomCommands GetCustomCommands()
         {
             XmlSerializer serializer = new XmlSerializer(typeof(CustomCommands));
-            string pathToFile = $@"{FilesProvider.GetBotDirectoryPath()}\CustomCommandsDirectory\{Guild.Id}.xml";
+            string pathToFile = $"{FilesProvider.GetBotDirectoryPath()}/CustomCommandsDirectory/{Guild.Id}.xml";
             if (File.Exists(pathToFile))
                 using (StreamReader reader = new StreamReader(pathToFile))
                     return (CustomCommands)serializer.Deserialize(reader);            
