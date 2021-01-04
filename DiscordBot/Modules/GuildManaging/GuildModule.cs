@@ -65,10 +65,9 @@ namespace DiscordBot.GuildManaging
         private async Task SetupGuilds()
         {
             Console.WriteLine("Guild(-s) setup started");
-
-            foreach (SocketGuild guild in Guilds)            
-                await SetupGuild(guild);
-
+            if (Guilds.Count > 0)
+                foreach (SocketGuild guild in Guilds)
+                    await SetupGuild(guild);
             FilesProvider.ChangeNewsAndPlansToFalse();
             Setup = false;
             Console.WriteLine("Guild(-s) setup ended", Color.Green);
