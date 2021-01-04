@@ -97,7 +97,7 @@ namespace DiscordBot.FileWorking
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));                        
             
             File.WriteAllText($@"{GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml", string.Empty);
-            using FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml", FileMode.Open, FileAccess.ReadWrite);
+            using FileStream stream = new FileStream($"{GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml", FileMode.Open, FileAccess.ReadWrite);
             serializer.Serialize(stream, guild);
         }
 

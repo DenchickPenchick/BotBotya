@@ -7,6 +7,10 @@ using DiscordBot.Modules.FileManaging;
 using DiscordBot.FileWorking;
 using DiscordBot.GuildManaging;
 using Discord.WebSocket;
+using System.Net;
+using System.Xml.Serialization;
+using System.IO;
+using System.Xml;
 
 namespace DiscordBot
 {
@@ -57,6 +61,37 @@ namespace DiscordBot
 
             await Context.Guild.GetUser(Context.Client.GetApplicationInfoAsync().Result.Id).ModifyAsync(x => x.Nickname = name);
             await ReplyAsync($"Никнейм бота изменен с {prevName} на {name}");
+        }
+
+        [Command("СконфигурироватьСервер")]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Summary("конфигурирует сервер с соответствующим XML файлом")]
+        public async Task ConfigureGuild()
+        {
+            WebClient webClient = new WebClient();
+            var attachedFile = Context.Message.Attachments.ToArray()[0];
+            if (Path.GetExtension(attachedFile.Filename) == ".xml")
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
+                bool deserializable = serializer.CanDeserialize(new XmlTextReader(webClient.OpenRead(attachedFile.Url)));
+                if (deserializable)
+                {
+                    var serGuild = (SerializableGuild)serializer.Deserialize(webClient.OpenRead(attachedFile.Url));
+                    FilesProvider.RefreshGuild(serGuild);
+                    await ReplyAsync("Сервер успешно сконфигурирован");
+                }
+                else
+                    await ReplyAsync("Неправильно сформирован файл");
+            }
+            else
+                await ReplyAsync("Неверный формат файла");
+        }
+
+        [Command("ФайлКонфигурации")]
+        [Summary("возвращает XML файл конфигурации сервера")]
+        public async Task GetConfigFile()
+        {            
+            await Context.Channel.SendFileAsync($"{FilesProvider.GetBotDirectoryPath()}/BotGuilds/{Context.Guild.Id}.xml", $"Файл конфигурации сервера {Context.Guild.Name}");
         }
 
         [Command("ПоменятьНазваниеТекстовогоКанала", RunMode = RunMode.Async)]
