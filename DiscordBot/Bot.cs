@@ -82,12 +82,15 @@ namespace DiscordBot
 
         private async Task Client_Ready()
         {
-            var instanceOfLavaNode = Services.GetRequiredService<LavaNode>();
+            var instanceOfLavaNode = Services.GetRequiredService<LavaNode>();            
             if (!instanceOfLavaNode.IsConnected)
             {
                 Console.WriteLine("Connecting Lava node..");                
-                await instanceOfLavaNode.ConnectAsync();                
-                Console.WriteLine("Lava node connected", Color.Green);
+                await instanceOfLavaNode.ConnectAsync();
+                if (!instanceOfLavaNode.IsConnected)
+                    Console.WriteLine("WARN Lava node connecting failed", Color.Red);
+                else
+                    Console.WriteLine("Lava node connected", Color.Green);
             }                        
         }
 

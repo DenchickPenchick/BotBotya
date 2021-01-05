@@ -15,8 +15,7 @@ namespace DiscordBot.GuildManaging
     /// Если удалить этот модуль, тогда все сломается при первом же удалении или изменении какого-либо канала в какой-либо гильдии. А об добавлении на сервер я уже молчу...
     /// </summary>
     public class GuildModule : IModule
-    {
-        private bool Setup = true;
+    {        
         private readonly DiscordSocketClient Client;
         IReadOnlyCollection<SocketGuild> Guilds { get => Client.Guilds; }        
 
@@ -65,11 +64,15 @@ namespace DiscordBot.GuildManaging
         private async Task SetupGuilds()
         {
             Console.WriteLine("Guild(-s) setup started");
+            var progress = new ProgressBar(Client.Guilds.Count);
             if (Guilds.Count > 0)
                 foreach (SocketGuild guild in Guilds)
+                {                    
                     await SetupGuild(guild);
-            FilesProvider.ChangeNewsAndPlansToFalse();
-            Setup = false;
+                    progress.PlusVal(Console.CursorTop);
+                }
+                   
+            FilesProvider.ChangeNewsAndPlansToFalse();            
             Console.WriteLine("Guild(-s) setup ended", Color.Green);
         }
 
@@ -94,10 +97,7 @@ namespace DiscordBot.GuildManaging
         private async Task SetupGuild(SocketGuild Guild)
         {
             var SerializableGuild = FilesProvider.GetGuild(Guild);
-            var serNewsPlans = FilesProvider.GetNewsAndPlans();
-
-            if(Setup)
-                Console.WriteLine($"Guild {Guild.Id} setup started");
+            var serNewsPlans = FilesProvider.GetNewsAndPlans();            
 
             var categories = Guild.CategoryChannels;
             var textChannels = Guild.TextChannels;
@@ -192,11 +192,7 @@ namespace DiscordBot.GuildManaging
             }
 
             if (serNewsPlans.ShouldSend)
-                await Guild.TextChannels.ToArray()[0].SendMessageAsync(embed: serNewsPlans.GetNewsAndPlansEmbed(Client));
-
-            if (Setup)
-                Console.WriteLine($"Guild {Guild.Id} setup ended", Color.Green);
-            
+                await Guild.TextChannels.ToArray()[0].SendMessageAsync(embed: serNewsPlans.GetNewsAndPlansEmbed(Client));                        
         }        
 
         private async Task RebuildCurrentChannel(SocketGuildChannel channel)
