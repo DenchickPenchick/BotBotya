@@ -17,7 +17,7 @@ namespace DiscordBot.FileWorking
         public static SerializableNewsAndPlans GetNewsAndPlans()
         {
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableNewsAndPlans));
-            FileStream stream = new FileStream($@"{GetBotDirectoryPath()}\UpdateNewsAndPlans.xml", FileMode.Open);
+            FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/UpdateNewsAndPlans.xml", FileMode.Open);
 
             var newsAndPlans = (SerializableNewsAndPlans)serializer.Deserialize(stream);
             stream.Dispose();
@@ -29,9 +29,9 @@ namespace DiscordBot.FileWorking
             var newsAndPlans = GetNewsAndPlans();
             newsAndPlans.ShouldSend = false;
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableNewsAndPlans));                        
-            File.WriteAllText($@"{GetBotDirectoryPath()}\UpdateNewsAndPlans.xml", string.Empty);
+            File.WriteAllText($@"{GetBotDirectoryPath()}/UpdateNewsAndPlans.xml", string.Empty);
 
-            FileStream stream = new FileStream($@"{GetBotDirectoryPath()}\UpdateNewsAndPlans.xml", FileMode.Open);
+            FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/UpdateNewsAndPlans.xml", FileMode.Open);
             serializer.Serialize(stream, newsAndPlans);
             stream.Dispose();
         }
@@ -47,13 +47,13 @@ namespace DiscordBot.FileWorking
         public static SerializableGuild GetGuild(SocketGuild guild)
         {            
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
-            using FileStream stream = new FileStream($@"{GetBotDirectoryPath()}\BotGuilds\{guild.Id}.xml", FileMode.Open);
+            using FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/BotGuilds/{guild.Id}.xml", FileMode.Open);
             return (SerializableGuild)serializer.Deserialize(stream);
         }        
 
         public static void DeleteGuild(ulong id)
         {
-            File.Delete($@"{GetBotDirectoryPath()}\BotGuilds\{id}.xml");
+            File.Delete($@"{GetBotDirectoryPath()}/BotGuilds/{id}.xml");
         }
 
         public static void AddGuild(SocketGuild guild)
@@ -87,7 +87,7 @@ namespace DiscordBot.FileWorking
                     ConsoleChannelName = "🤖консоль-бота"
                 }
             };
-            using (FileStream stream = new FileStream($@"{GetBotDirectoryPath()}\BotGuilds\{guild.Id}.xml", FileMode.Create))
+            using (FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/BotGuilds/{guild.Id}.xml", FileMode.Create))
                 serializer.Serialize(stream, serializableGuild);
             Console.WriteLine($"Guild({guild.Id}) serialized.", Color.Green);
         }
@@ -96,8 +96,8 @@ namespace DiscordBot.FileWorking
         {
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));                        
             
-            File.WriteAllText($@"{GetBotDirectoryPath()}\BotGuilds\{guild.GuildId}.xml", string.Empty);
-            using FileStream stream = new FileStream($@"{GetBotDirectoryPath()}\BotGuilds\{guild.GuildId}.xml", FileMode.Open, FileAccess.ReadWrite);
+            File.WriteAllText($@"{GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml", string.Empty);
+            using FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml", FileMode.Open, FileAccess.ReadWrite);
             serializer.Serialize(stream, guild);
         }
     }

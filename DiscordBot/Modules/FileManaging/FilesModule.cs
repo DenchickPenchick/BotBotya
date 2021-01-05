@@ -91,20 +91,20 @@ namespace DiscordBot
                 Console.WriteLine("BotDirectory found", Color.Green);
             
             Console.WriteLine("Checking directory BotGuilds...");
-            if (!Directory.Exists($@"{Bot.PathToBotDirectory}\BotGuilds"))
+            if (!Directory.Exists($@"{Bot.PathToBotDirectory}/BotGuilds"))
             {
                 Console.WriteLine("BotGuilds not found", Color.Red);
-                Directory.CreateDirectory($@"{Bot.PathToBotDirectory}\BotGuilds");
+                Directory.CreateDirectory($@"{Bot.PathToBotDirectory}/BotGuilds");
                 Console.WriteLine("BotGuilds created", Color.Green);
             }
             else
                 Console.WriteLine("BotGuilds found", Color.Green);
             
             Console.WriteLine("Checking directory CustomCommandsDirectory...");
-            if (!Directory.Exists(@$"{Bot.PathToBotDirectory}\CustomCommandsDirectory"))
+            if (!Directory.Exists(@$"{Bot.PathToBotDirectory}/CustomCommandsDirectory"))
             {
                 Console.WriteLine("CustomCommandsDirectory not found", Color.Red);
-                Directory.CreateDirectory($@"{Bot.PathToBotDirectory}\CustomCommandsDirectory");
+                Directory.CreateDirectory($@"{Bot.PathToBotDirectory}/CustomCommandsDirectory");
                 Console.WriteLine("CustomCommandsDirectory created", Color.Green);
             }
             else
@@ -113,10 +113,10 @@ namespace DiscordBot
             Console.WriteLine("Checking files...", Color.Blue);
            
             Console.WriteLine("Checking file UpdateNewsDescription.xml...");
-            if (!File.Exists($@"{Bot.PathToBotDirectory}\UpdateNewsAndPlans.xml"))
+            if (!File.Exists($@"{Bot.PathToBotDirectory}/UpdateNewsAndPlans.xml"))
             {
                 Console.WriteLine("UpdateNewsAndPlans.xml not found", Color.Red);
-                using (FileStream fileStream = new FileStream($@"{Bot.PathToBotDirectory}\UpdateNewsAndPlans.xml", FileMode.Create))
+                using (FileStream fileStream = new FileStream($@"{Bot.PathToBotDirectory}/UpdateNewsAndPlans.xml", FileMode.Create))
                 {
                     XmlSerializer serializer = new XmlSerializer(typeof(SerializableNewsAndPlans));
                     serializer.Serialize(fileStream, new SerializableNewsAndPlans
@@ -139,7 +139,7 @@ namespace DiscordBot
 
             Console.WriteLine("Checking guilds...");
             var guilds = client.Guilds;            
-            string[] fileNames = Directory.GetFiles($@"{Bot.PathToBotDirectory}\BotGuilds");
+            string[] fileNames = Directory.GetFiles($@"{Bot.PathToBotDirectory}/BotGuilds");
             string[] fileNamesWithoutPath = new string[fileNames.Length];
             ulong[] GuildsId = new ulong[guilds.Count];
 
@@ -174,7 +174,7 @@ namespace DiscordBot
                 RoomsEnable = false,
                 ContentEnable = false,
                 CheckingContent = false,
-                HelloMessage = "Добро пожаловать на сервер.\nЕсли ты в первый раз на сервере и не знаешь что я умею, тогда напиши команду \"справка\".",
+                HelloMessage = "Добро пожаловать на сервер./nЕсли ты в первый раз на сервере и не знаешь что я умею, тогда напиши команду \"справка\".",
                 SystemCategories = new SerializableCategories
                 {
                     MainTextCategoryName = "💬Текстовые каналы",
@@ -191,14 +191,14 @@ namespace DiscordBot
                     ConsoleChannelName = "🤖консоль-бота"                    
                 }
             };
-            using (FileStream stream = new FileStream($@"{Bot.PathToBotDirectory}\BotGuilds\{guild.Id}.xml", FileMode.Create))
+            using (FileStream stream = new FileStream($@"{Bot.PathToBotDirectory}/BotGuilds/{guild.Id}.xml", FileMode.Create))
                 serializer.Serialize(stream, serializableGuild);         
             Console.WriteLine($"Guild({guild.Id}) serialized.", Color.Green);
         }
 
         public void DeleteGuild(ulong id)
         {            
-            File.Delete($@"{FilesProvider.GetBotDirectoryPath()}\BotGuilds\{id}.xml");
+            File.Delete($@"{FilesProvider.GetBotDirectoryPath()}/BotGuilds/{id}.xml");
         }
     }    
 }
