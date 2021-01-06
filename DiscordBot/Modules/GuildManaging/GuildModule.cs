@@ -65,11 +65,12 @@ namespace DiscordBot.GuildManaging
         {
             Console.WriteLine("Guild(-s) setup started");
             var progress = new ProgressBar(Client.Guilds.Count);
+            int cursorTop = Console.CursorTop;
             if (Guilds.Count > 0)
                 foreach (SocketGuild guild in Guilds)
                 {                    
                     await SetupGuild(guild);
-                    progress.PlusVal(Console.CursorTop);
+                    progress.PlusVal(cursorTop);
                 }
                    
             FilesProvider.ChangeNewsAndPlansToFalse();            

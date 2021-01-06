@@ -224,7 +224,7 @@ namespace TestBot
 
         #region --КАСТОМНЫЕ КОМАНДЫ--
         [Command("ВсеКоманды")]
-        [Summary("выводит все кастомные команды")]
+        [Summary("выводит все кастомные команды.")]
         public async Task GetAllCustomCommands()
         {
             var guild = Context.Guild;
@@ -263,7 +263,7 @@ namespace TestBot
         }
 
         [Command("СконфигурироватьКоманду", RunMode = RunMode.Async)]
-        [Summary("Не реализована. Кастомные команды.")]
+        [Summary("конфигурирует команду и возвращает XML файл.")]
         public async Task ConfigureCommand()
         {
             List<CustomCommand.Action> actions = new List<CustomCommand.Action>();
@@ -343,7 +343,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("ДобавитьКоманду")]
-        [Summary("Не реализована. Кастомные команды.")]
+        [Summary("добавляет команду.")]
         public async Task AddCommand()
         {
             var provider = new CustomCommandsProvider(Context.Guild);
@@ -357,7 +357,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("К")]
-        [Summary("В разработке. Кастомные команды.")]
+        [Summary("позволяет использовать кастомную команду.")]
         public async Task UseCommand(string name, params string[] args)
         {
             var provider = new CustomCommandsProvider(Context.Guild);
@@ -370,7 +370,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("УдалитьКоманду")]
-        [Summary("В разработке. Кастомные команды.")]
+        [Summary("удаляет команду.")]
         public async Task DeleteCommand(string name)
         {
             var serial = new CustomCommandsSerial(Context.Guild);

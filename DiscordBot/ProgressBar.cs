@@ -4,8 +4,8 @@ namespace DiscordBot
 {
     public class ProgressBar
     {
-        private readonly int count;
-        private int pos = 0;
+        private readonly double count;
+        private double pos = 0;
 
         public ProgressBar(int count)
         {
@@ -16,7 +16,7 @@ namespace DiscordBot
         {
             Console.SetCursorPosition(0, posY);
             pos++;
-            Console.WriteLine($"Done {pos / count * 100}%");
+            Console.WriteLine($"Done {Convert.ToInt32(pos / count * 100)}%");
         }
     }
 }

@@ -17,6 +17,8 @@ using DiscordBot.FileWorking;
 using Victoria;
 using DiscordBot.MusicOperations;
 using DiscordBot.Modules.MusicManaging;
+using System.Diagnostics;
+using System.Threading;
 
 namespace DiscordBot
 {
@@ -32,7 +34,7 @@ namespace DiscordBot
 
         public async Task RunBotAsync()
         {            
-            Console.WriteAscii("Discord Bot Console", Color.Blue);
+            Console.WriteAscii("Discord Bot Console", Color.Blue);                        
 
             ActivityType activityType = ActivityType.Watching;            
             Client = new DiscordSocketClient(new DiscordSocketConfig
