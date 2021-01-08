@@ -1,0 +1,113 @@
+2021-01-08 18:17:40.443  INFO 26536 --- [main] lavalink.server.Launcher                 : 
+
+[32m       .  [31m _                  _ _       _    [32m__ _ _
+[32m      /\\ [31m| | __ ___   ____ _| (_)_ __ | | __[32m\ \ \ \
+[32m     ( ( )[31m| |/ _` \ \ / / _` | | | '_ \| |/ /[32m \ \ \ \
+[32m      \\/ [31m| | (_| |\ V / (_| | | | | | |   < [32m  ) ) ) )
+[32m       '  [31m|_|\__,_| \_/ \__,_|_|_|_| |_|_|\_\[32m / / / /
+[0m    =========================================[32m/_/_/_/[0m
+
+	Version:        3.3.2.2
+	Build:          1155
+	Build time:     28.11.2020 11:50:13 UTC
+	Branch          dev
+	Commit:         23c883a
+	Commit time:    28.11.2020 11:42:10 UTC
+	JVM:            15.0.1
+	Lavaplayer      1.3.61
+
+2021-01-08 18:17:40.657  INFO 26536 --- [main] lavalink.server.Launcher                 : Starting Launcher on DESKTOP-P1PJ42S with PID 26536 (D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1\Lavalink.jar started by Денис in D:\Программы\СерверDiscord\DiscordBot\DiscordBot\bin\Debug\netcoreapp3.1)
+2021-01-08 18:17:40.658  INFO 26536 --- [main] lavalink.server.Launcher                 : No active profile set, falling back to default profiles: default
+2021-01-08 18:17:40.781  WARN 26536 --- [background-preinit] o.s.h.c.j.Jackson2ObjectMapperBuilder    : For Jackson Kotlin classes support please add "com.fasterxml.jackson.module:jackson-module-kotlin" to the classpath
+2021-01-08 18:17:42.416  WARN 26536 --- [main] io.undertow.websockets.jsr               : UT026010: Buffer pool was not set on WebSocketDeploymentInfo, the default pool will be used
+2021-01-08 18:17:42.453  INFO 26536 --- [main] io.undertow.servlet                      : Initializing Spring embedded WebApplicationContext
+2021-01-08 18:17:42.453  INFO 26536 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1723 ms
+2021-01-08 18:17:42.966  WARN 26536 --- [main] l.server.config.SentryConfiguration      : Turning off sentry
+2021-01-08 18:17:43.395  INFO 26536 --- [main] c.s.d.l.tools.GarbageCollectionMonitor   : GC monitoring enabled, reporting results every 2 minutes.
+2021-01-08 18:17:43.736  INFO 26536 --- [main] lavalink.server.config.KoeConfiguration  : OS: Windows 10, Arch: amd64
+2021-01-08 18:17:43.737  WARN 26536 --- [main] lavalink.server.config.KoeConfiguration  : This system and architecture appears to not support native audio sending! GC pauses may cause your bot to stutter during playback.
+2021-01-08 18:17:44.041  INFO 26536 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2021-01-08 18:17:44.408  INFO 26536 --- [main] org.xnio                                 : XNIO version 3.3.8.Final
+2021-01-08 18:17:44.425  INFO 26536 --- [main] org.xnio.nio                             : XNIO NIO Implementation Version 3.3.8.Final
+2021-01-08 18:17:44.517  INFO 26536 --- [main] o.s.b.w.e.u.UndertowServletWebServer     : Undertow started on port(s) 2333 (http) with context path ''
+2021-01-08 18:17:44.523  INFO 26536 --- [main] lavalink.server.Launcher                 : Started Launcher in 4.786 seconds (JVM running for 6.033)
+2021-01-08 18:17:44.525  INFO 26536 --- [main] lavalink.server.Launcher                 : You can safely ignore the big red warning about illegal reflection. See https://github.com/Frederikam/Lavalink/issues/295
+2021-01-08 18:18:47.299  INFO 26536 --- [XNIO-1 task-1] io.undertow.servlet                      : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2021-01-08 18:18:47.300  INFO 26536 --- [XNIO-1 task-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2021-01-08 18:18:47.307  INFO 26536 --- [XNIO-1 task-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 7 ms
+2021-01-08 18:18:47.335  INFO 26536 --- [XNIO-1 task-1] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:54885
+2021-01-08 18:18:47.431  INFO 26536 --- [XNIO-1 task-1] lavalink.server.io.SocketServer          : Connection successfully established from /127.0.0.1:54885
+2021-01-08 18:19:11.880  INFO 26536 --- [XNIO-1 I/O-9] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:54885 -- CloseStatus[code=1006, reason=]
+2021-01-08 18:19:11.880  INFO 26536 --- [XNIO-1 I/O-9] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
+2021-01-08 18:19:43.986  INFO 26536 --- [XNIO-1 task-2] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:54901
+2021-01-08 18:19:43.989  INFO 26536 --- [XNIO-1 task-2] lavalink.server.io.SocketServer          : Connection successfully established from /127.0.0.1:54901
+2021-01-08 18:19:57.431  INFO 26536 --- [XNIO-1 I/O-1] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:54901 -- CloseStatus[code=1006, reason=]
+2021-01-08 18:19:57.431  INFO 26536 --- [XNIO-1 I/O-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
+2021-01-08 18:56:00.569  INFO 26536 --- [XNIO-1 task-3] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:64755
+2021-01-08 18:56:00.573  INFO 26536 --- [XNIO-1 task-3] lavalink.server.io.SocketServer          : Connection successfully established from /127.0.0.1:64755
+2021-01-08 18:56:37.371  INFO 26536 --- [XNIO-1 task-4] l.server.player.AudioLoaderRestHandler   : Got request to load for identifier "ytsearch:Я кручу тебя волчком"
+2021-01-08 18:56:41.683  INFO 26536 --- [lava-daemon-pool-info-loader-2-thread-1] lavalink.server.player.AudioLoader       : Loaded playlist Search results for: Я кручу тебя волчком
+2021-01-08 18:56:41.756  INFO 26536 --- [XNIO-1 I/O-15] lavalink.server.io.SocketServer          : {"endTime":0,"track":"QAAAsQIAUtGPINC60YDRg9GH0YMg0YLQtdCx0Y8g0LLQvtC70YfQutC\u002B0Lwg0LzQvtC70L7Rh9C60L4g0LIg0YLQstC\u002B0LUg0L7Rh9C60L4gMSDRh9Cw0YEABVBha2F6AAAAAAA3CdgACzB1VHBsMUFXeHdRAAEAK2h0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3dhdGNoP3Y9MHVUcGwxQVd4d1EAB3lvdXR1YmUAAAAAAAAAAA==","noReplace":false,"startTime":0,"guildId":"777618262074458202","op":"play"}
+2021-01-08 18:56:48.255  INFO 26536 --- [XNIO-1 I/O-15] lavalink.server.io.SocketServer          : {"guildId":"777618262074458202","sessionId":"6dd37fffbb7223b96291123be027c908","event":{"token":"a2fb8a31e18be252","endpoint":"russia7540.discord.media:443"},"op":"voiceUpdate"}
+2021-01-08 19:00:44.758  INFO 26536 --- [XNIO-1 I/O-15] lavalink.server.io.SocketServer          : {"guildId":"777618262074458202","op":"stop"}
+2021-01-08 19:01:03.358  INFO 26536 --- [XNIO-1 I/O-15] lavalink.server.io.SocketServer          : {"guildId":"777618262074458202","op":"stop"}
+2021-01-08 19:01:03.359  INFO 26536 --- [XNIO-1 I/O-15] lavalink.server.io.SocketServer          : {"guildId":"777618262074458202","op":"destroy"}
+2021-01-08 19:01:12.378  INFO 26536 --- [XNIO-1 I/O-15] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:64755 -- CloseStatus[code=1006, reason=]
+2021-01-08 19:01:12.379  INFO 26536 --- [XNIO-1 I/O-15] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
+2021-01-08 19:28:43.012  INFO 26536 --- [XNIO-1 task-6] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:56045
+2021-01-08 19:28:43.016  INFO 26536 --- [XNIO-1 task-6] lavalink.server.io.SocketServer          : Connection successfully established from /127.0.0.1:56045
+2021-01-08 19:29:27.369  INFO 26536 --- [XNIO-1 task-7] l.server.player.AudioLoaderRestHandler   : Got request to load for identifier "https://www.youtube.com/watch?v=vuQR6Mj64jQ&ab_channel=VVTOP"
+2021-01-08 19:29:27.978  INFO 26536 --- [lava-daemon-pool-info-loader-2-thread-1] lavalink.server.player.AudioLoader       : Loaded track Serhat Durmus - Hislerim (ft. Zerrin)
+2021-01-08 19:29:28.079  INFO 26536 --- [XNIO-1 I/O-17] lavalink.server.io.SocketServer          : {"endTime":0,"track":"QAAAhQIAJVNlcmhhdCBEdXJtdXMgLSBIaXNsZXJpbSAoZnQuIFplcnJpbikABlZWIFRPUAAAAAAAAzwgAAt2dVFSNk1qNjRqUQABACtodHRwczovL3d3dy55b3V0dWJlLmNvbS93YXRjaD92PXZ1UVI2TWo2NGpRAAd5b3V0dWJlAAAAAAAAAAA=","noReplace":false,"startTime":0,"guildId":"777618262074458202","op":"play"}
+2021-01-08 19:29:28.434  INFO 26536 --- [XNIO-1 I/O-17] lavalink.server.io.SocketServer          : {"guildId":"777618262074458202","sessionId":"0d5c380eb1d84607231447264f598352","event":{"token":"62730191caf49136","endpoint":"russia5408.discord.media:443"},"op":"voiceUpdate"}
+2021-01-08 19:29:53.497  INFO 26536 --- [XNIO-1 I/O-17] lavalink.server.io.SocketServer          : {"guildId":"777618262074458202","op":"stop"}
+2021-01-08 19:30:10.018  INFO 26536 --- [XNIO-1 task-9] l.server.player.AudioLoaderRestHandler   : Got request to load for identifier "https://www.youtube.com/watch?v=vuQR6Mj64jQ&ab_channel=VVTOP"
+2021-01-08 19:30:12.589  INFO 26536 --- [lava-daemon-pool-info-loader-2-thread-1] lavalink.server.player.AudioLoader       : Loaded track Serhat Durmus - Hislerim (ft. Zerrin)
+2021-01-08 19:30:12.626  INFO 26536 --- [XNIO-1 I/O-17] lavalink.server.io.SocketServer          : {"endTime":0,"track":"QAAAhQIAJVNlcmhhdCBEdXJtdXMgLSBIaXNsZXJpbSAoZnQuIFplcnJpbikABlZWIFRPUAAAAAAAAzwgAAt2dVFSNk1qNjRqUQABACtodHRwczovL3d3dy55b3V0dWJlLmNvbS93YXRjaD92PXZ1UVI2TWo2NGpRAAd5b3V0dWJlAAAAAAAAAAA=","noReplace":false,"startTime":0,"guildId":"777618262074458202","op":"play"}
+2021-01-08 19:30:22.162  INFO 26536 --- [XNIO-1 I/O-17] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:56045 -- CloseStatus[code=1006, reason=]
+2021-01-08 19:30:22.163  INFO 26536 --- [XNIO-1 I/O-17] lavalink.server.io.SocketContext         : Shutting down 1 playing players.
+2021-01-08 19:30:56.444  INFO 26536 --- [XNIO-1 task-11] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:56093
+2021-01-08 19:30:56.446  INFO 26536 --- [XNIO-1 task-11] lavalink.server.io.SocketServer          : Connection successfully established from /127.0.0.1:56093
+2021-01-08 19:31:03.271  INFO 26536 --- [XNIO-1 task-12] l.server.player.AudioLoaderRestHandler   : Got request to load for identifier "https://www.youtube.com/watch?v=vuQR6Mj64jQ&ab_channel=VVTOP"
+2021-01-08 19:31:03.726  INFO 26536 --- [lava-daemon-pool-info-loader-2-thread-1] lavalink.server.player.AudioLoader       : Loaded track Serhat Durmus - Hislerim (ft. Zerrin)
+2021-01-08 19:31:03.778  INFO 26536 --- [XNIO-1 I/O-17] lavalink.server.io.SocketServer          : {"endTime":0,"track":"QAAAhQIAJVNlcmhhdCBEdXJtdXMgLSBIaXNsZXJpbSAoZnQuIFplcnJpbikABlZWIFRPUAAAAAAAAzwgAAt2dVFSNk1qNjRqUQABACtodHRwczovL3d3dy55b3V0dWJlLmNvbS93YXRjaD92PXZ1UVI2TWo2NGpRAAd5b3V0dWJlAAAAAAAAAAA=","noReplace":false,"startTime":0,"guildId":"777618262074458202","op":"play"}
+2021-01-08 19:31:36.082  INFO 26536 --- [XNIO-1 I/O-17] lavalink.server.io.SocketServer          : {"guildId":"777618262074458202","sessionId":"472f9a80bab32d71e2f277dd4654c238","event":{"token":"62730191caf49136","endpoint":"russia5408.discord.media:443"},"op":"voiceUpdate"}
+2021-01-08 19:32:08.592  INFO 26536 --- [XNIO-1 I/O-17] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:56093 -- CloseStatus[code=1006, reason=]
+2021-01-08 19:32:08.592  INFO 26536 --- [XNIO-1 I/O-17] lavalink.server.io.SocketContext         : Shutting down 1 playing players.
+2021-01-08 19:32:41.471  INFO 26536 --- [XNIO-1 task-14] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:56119
+2021-01-08 19:32:41.474  INFO 26536 --- [XNIO-1 task-14] lavalink.server.io.SocketServer          : Connection successfully established from /127.0.0.1:56119
+2021-01-08 19:32:48.193  INFO 26536 --- [XNIO-1 task-15] l.server.player.AudioLoaderRestHandler   : Got request to load for identifier "https://www.youtube.com/watch?v=vuQR6Mj64jQ&ab_channel=VVTOP"
+2021-01-08 19:32:48.716  INFO 26536 --- [lava-daemon-pool-info-loader-2-thread-1] lavalink.server.player.AudioLoader       : Loaded track Serhat Durmus - Hislerim (ft. Zerrin)
+2021-01-08 19:32:48.758  INFO 26536 --- [XNIO-1 I/O-19] lavalink.server.io.SocketServer          : {"endTime":0,"track":"QAAAhQIAJVNlcmhhdCBEdXJtdXMgLSBIaXNsZXJpbSAoZnQuIFplcnJpbikABlZWIFRPUAAAAAAAAzwgAAt2dVFSNk1qNjRqUQABACtodHRwczovL3d3dy55b3V0dWJlLmNvbS93YXRjaD92PXZ1UVI2TWo2NGpRAAd5b3V0dWJlAAAAAAAAAAA=","noReplace":false,"startTime":0,"guildId":"777618262074458202","op":"play"}
+2021-01-08 19:33:16.237  INFO 26536 --- [XNIO-1 I/O-19] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:56119 -- CloseStatus[code=1006, reason=]
+2021-01-08 19:33:16.238  INFO 26536 --- [XNIO-1 I/O-19] lavalink.server.io.SocketContext         : Shutting down 1 playing players.
+2021-01-08 19:33:49.915  INFO 26536 --- [XNIO-1 task-17] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:56134
+2021-01-08 19:33:49.917  INFO 26536 --- [XNIO-1 task-17] lavalink.server.io.SocketServer          : Connection successfully established from /127.0.0.1:56134
+2021-01-08 19:33:53.612  INFO 26536 --- [XNIO-1 task-18] l.server.player.AudioLoaderRestHandler   : Got request to load for identifier "https://www.youtube.com/watch?v=vuQR6Mj64jQ&ab_channel=VVTOP"
+2021-01-08 19:33:54.111  INFO 26536 --- [lava-daemon-pool-info-loader-2-thread-1] lavalink.server.player.AudioLoader       : Loaded track Serhat Durmus - Hislerim (ft. Zerrin)
+2021-01-08 19:33:54.165  INFO 26536 --- [XNIO-1 I/O-10] lavalink.server.io.SocketServer          : {"endTime":0,"track":"QAAAhQIAJVNlcmhhdCBEdXJtdXMgLSBIaXNsZXJpbSAoZnQuIFplcnJpbikABlZWIFRPUAAAAAAAAzwgAAt2dVFSNk1qNjRqUQABACtodHRwczovL3d3dy55b3V0dWJlLmNvbS93YXRjaD92PXZ1UVI2TWo2NGpRAAd5b3V0dWJlAAAAAAAAAAA=","noReplace":false,"startTime":0,"guildId":"777618262074458202","op":"play"}
+2021-01-08 19:34:21.904  INFO 26536 --- [XNIO-1 I/O-10] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:56134 -- CloseStatus[code=1006, reason=]
+2021-01-08 19:34:21.904  INFO 26536 --- [XNIO-1 I/O-10] lavalink.server.io.SocketContext         : Shutting down 1 playing players.
+2021-01-08 19:49:55.172  INFO 26536 --- [XNIO-1 task-20] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:56337
+2021-01-08 19:49:55.175  INFO 26536 --- [XNIO-1 task-20] lavalink.server.io.SocketServer          : Connection successfully established from /127.0.0.1:56337
+2021-01-08 19:50:10.088  INFO 26536 --- [XNIO-1 task-21] l.server.player.AudioLoaderRestHandler   : Got request to load for identifier "https://www.youtube.com/watch?v=vuQR6Mj64jQ&ab_channel=VVTOP"
+2021-01-08 19:50:11.055  INFO 26536 --- [lava-daemon-pool-info-loader-2-thread-1] lavalink.server.player.AudioLoader       : Loaded track Serhat Durmus - Hislerim (ft. Zerrin)
+2021-01-08 19:50:11.099  INFO 26536 --- [XNIO-1 I/O-21] lavalink.server.io.SocketServer          : {"endTime":0,"track":"QAAAhQIAJVNlcmhhdCBEdXJtdXMgLSBIaXNsZXJpbSAoZnQuIFplcnJpbikABlZWIFRPUAAAAAAAAzwgAAt2dVFSNk1qNjRqUQABACtodHRwczovL3d3dy55b3V0dWJlLmNvbS93YXRjaD92PXZ1UVI2TWo2NGpRAAd5b3V0dWJlAAAAAAAAAAA=","noReplace":false,"startTime":0,"guildId":"777618262074458202","op":"play"}
+2021-01-08 19:50:24.508  INFO 26536 --- [XNIO-1 I/O-21] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:56337 -- CloseStatus[code=1006, reason=]
+2021-01-08 19:50:24.509  INFO 26536 --- [XNIO-1 I/O-21] lavalink.server.io.SocketContext         : Shutting down 1 playing players.
+2021-01-08 20:08:21.613  INFO 26536 --- [XNIO-1 task-23] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:56553
+2021-01-08 20:08:21.615  INFO 26536 --- [XNIO-1 task-23] lavalink.server.io.SocketServer          : Connection successfully established from /127.0.0.1:56553
+2021-01-08 20:08:28.955  INFO 26536 --- [XNIO-1 task-24] l.server.player.AudioLoaderRestHandler   : Got request to load for identifier "https://www.youtube.com/watch?v=vuQR6Mj64jQ&ab_channel=VVTOP"
+2021-01-08 20:08:29.839  INFO 26536 --- [lava-daemon-pool-info-loader-2-thread-1] lavalink.server.player.AudioLoader       : Loaded track Serhat Durmus - Hislerim (ft. Zerrin)
+2021-01-08 20:08:29.887  INFO 26536 --- [XNIO-1 I/O-21] lavalink.server.io.SocketServer          : {"endTime":0,"track":"QAAAhQIAJVNlcmhhdCBEdXJtdXMgLSBIaXNsZXJpbSAoZnQuIFplcnJpbikABlZWIFRPUAAAAAAAAzwgAAt2dVFSNk1qNjRqUQABACtodHRwczovL3d3dy55b3V0dWJlLmNvbS93YXRjaD92PXZ1UVI2TWo2NGpRAAd5b3V0dWJlAAAAAAAAAAA=","noReplace":false,"startTime":0,"guildId":"777618262074458202","op":"play"}
+2021-01-08 20:09:10.498  INFO 26536 --- [XNIO-1 I/O-21] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:56553 -- CloseStatus[code=1006, reason=]
+2021-01-08 20:09:10.499  INFO 26536 --- [XNIO-1 I/O-21] lavalink.server.io.SocketContext         : Shutting down 1 playing players.
+2021-01-08 20:09:38.623  INFO 26536 --- [XNIO-1 task-26] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:56572
+2021-01-08 20:09:38.626  INFO 26536 --- [XNIO-1 task-26] lavalink.server.io.SocketServer          : Connection successfully established from /127.0.0.1:56572
+2021-01-08 20:09:42.659  INFO 26536 --- [XNIO-1 task-27] l.server.player.AudioLoaderRestHandler   : Got request to load for identifier "https://www.youtube.com/watch?v=vuQR6Mj64jQ&ab_channel=VVTOP"
+2021-01-08 20:09:43.398  INFO 26536 --- [lava-daemon-pool-info-loader-2-thread-1] lavalink.server.player.AudioLoader       : Loaded track Serhat Durmus - Hislerim (ft. Zerrin)
+2021-01-08 20:09:43.431  INFO 26536 --- [XNIO-1 I/O-16] lavalink.server.io.SocketServer          : {"endTime":0,"track":"QAAAhQIAJVNlcmhhdCBEdXJtdXMgLSBIaXNsZXJpbSAoZnQuIFplcnJpbikABlZWIFRPUAAAAAAAAzwgAAt2dVFSNk1qNjRqUQABACtodHRwczovL3d3dy55b3V0dWJlLmNvbS93YXRjaD92PXZ1UVI2TWo2NGpRAAd5b3V0dWJlAAAAAAAAAAA=","noReplace":false,"startTime":0,"guildId":"777618262074458202","op":"play"}
+2021-01-08 20:09:48.255  INFO 26536 --- [XNIO-1 I/O-16] lavalink.server.io.SocketServer          : {"guildId":"777618262074458202","sessionId":"9a2a0bab7833018b64084aebe3f21d81","event":{"token":"6536b098f7192cbd","endpoint":"russia5408.discord.media:443"},"op":"voiceUpdate"}
+2021-01-08 20:11:13.674  INFO 26536 --- [XNIO-1 I/O-16] lavalink.server.io.SocketServer          : {"guildId":"777618262074458202","op":"stop"}
+2021-01-08 20:12:19.566  INFO 26536 --- [XNIO-1 I/O-16] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:56572 -- CloseStatus[code=1006, reason=]
+2021-01-08 20:12:19.566  INFO 26536 --- [XNIO-1 I/O-16] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
