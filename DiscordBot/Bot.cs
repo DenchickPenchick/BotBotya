@@ -17,8 +17,7 @@ using DiscordBot.FileWorking;
 using Victoria;
 using DiscordBot.MusicOperations;
 using DiscordBot.Modules.MusicManaging;
-using System.Diagnostics;
-using System.Threading;
+
 
 namespace DiscordBot
 {
@@ -35,8 +34,8 @@ namespace DiscordBot
         public async Task RunBotAsync()
         {            
             Console.WriteAscii("Discord Bot Console", Color.Blue);                        
+            ActivityType activityType = ActivityType.Watching;                                    
 
-            ActivityType activityType = ActivityType.Watching;            
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 AlwaysDownloadUsers = true
@@ -52,7 +51,10 @@ namespace DiscordBot
                 .AddSingleton(Client)
                 .AddSingleton(interactiveService)
                 .AddSingleton<CommandService>()
-                .AddSingleton(new LavaNode(Client, new LavaConfig()))
+                .AddSingleton(new LavaNode(Client, new LavaConfig
+                {
+                    ResumeTimeout = TimeSpan.MaxValue
+                }))
                 .AddSingleton(new LavaConfig())
                 .AddLavaNode()
                 .AddSingleton<LavaOperations>()
@@ -110,7 +112,7 @@ namespace DiscordBot
                 if (message.Author.IsBot || message is null) return;                
                 if (message.HasStringPrefix(serGuild.Prefix, ref argsPos))
                 {
-                    if (message.Content.ToLower() == "!справка")
+                    if (message.Content.ToLower() == $"{serGuild.Prefix}справка")
                     {
                         int pos = 0;
                         int posit = 1;
