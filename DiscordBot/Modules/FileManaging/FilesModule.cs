@@ -175,6 +175,7 @@ namespace DiscordBot
                 ContentEnable = false,
                 CheckingContent = false,
                 HelloMessage = "Добро пожаловать на сервер./nЕсли ты в первый раз на сервере и не знаешь что я умею, тогда напиши команду \"справка\".",
+                Prefix = "!",
                 SystemCategories = new SerializableCategories
                 {
                     MainTextCategoryName = "💬Текстовые каналы",

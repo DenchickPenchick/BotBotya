@@ -84,3 +84,4 @@ D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcor
 D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.dll
 D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.pdb
 D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.genruntimeconfig.cache
+D:\Программы\СерверDiscord\DiscordBot\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csprojAssemblyReference.cache
