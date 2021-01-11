@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using DiscordBot.CustomCommands;
 using System.IO;
 using System.Xml.Serialization;
+using Victoria;
 
 namespace TestBot
 {
@@ -199,7 +200,7 @@ namespace TestBot
         [Summary("ставит на паузу трек")]
         public async Task PauseTrackAsync()
         {
-            await  LavaOperations.PauseTrackAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
+            await LavaOperations.PauseTrackAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
         }
 
         [Command("Воспроизведение")]
@@ -219,6 +220,28 @@ namespace TestBot
                 return;
             }
             await LavaOperations.SetVolumeAsync(Context.User as SocketGuildUser, vol, Context.Channel as SocketTextChannel);
+        }
+
+        [Command("Текст")]
+        [Summary("выводит текст проигрываемой песни")]
+        public async Task GetLyrics()
+        {
+            var hasPlayer = LavaOperations.LavaNode.TryGetPlayer(Context.Guild, out LavaPlayer player);
+            if (!hasPlayer)
+            {
+                await ReplyAsync("Нет плеера. Пригласи меня в канал или включи трек.");
+                return;
+            }
+            if (player.Track == null)
+            {
+                await ReplyAsync("Нет трека.");
+                return;
+            }
+
+            await ReplyAsync(await player.Track.FetchLyricsFromGeniusAsync(), embed: new EmbedBuilder 
+            {
+                Title = $"Текст песни {player.Track.Title}"
+            }.Build());
         }
         #endregion
 

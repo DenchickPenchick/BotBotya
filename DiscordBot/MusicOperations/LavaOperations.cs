@@ -12,7 +12,7 @@ namespace DiscordBot.MusicOperations
 {
     public class LavaOperations
     {
-        private readonly LavaNode LavaNode;
+        public readonly LavaNode LavaNode;
         private readonly DiscordSocketClient Client;
 
         private delegate Task UpdatePlayerHandler(IGuild guild);
