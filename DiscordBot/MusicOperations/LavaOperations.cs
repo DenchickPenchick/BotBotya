@@ -2,7 +2,9 @@
 using Discord.WebSocket;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Victoria;
 
@@ -10,15 +12,20 @@ namespace DiscordBot.MusicOperations
 {
     public class LavaOperations
     {
-        private readonly LavaNode LavaNode;
+        private readonly LavaNode LavaNode;        
+        
+        public List<ValueTuple<SocketGuild, SocketUserMessage>> GuildsPlayers = new List<(SocketGuild, SocketUserMessage)>();
 
-        public Hashtable GuildsPlayers { get; set; } = new Hashtable();
+        private readonly Thread ProgressBarsUpdaterThread;
 
         public LavaOperations(LavaNode lavaNode, DiscordSocketClient client)
         {
             LavaNode = lavaNode;
             foreach (var guild in client.Guilds)
-                GuildsPlayers.Add(guild, null);
+                GuildsPlayers.Add(new ValueTuple<SocketGuild, SocketUserMessage>(guild, null));
+
+            ProgressBarsUpdaterThread = new Thread(UpdateProgressBars);
+            ProgressBarsUpdaterThread.Start();
         }
         
         public async Task JoinAsync(SocketGuildUser user, SocketTextChannel contextChannel)
@@ -264,11 +271,18 @@ namespace DiscordBot.MusicOperations
             { 
                 Title = $"Плеер сервера {guild.Name}",                
                 Description = player.Track.Title,
+                Fields = new List<EmbedFieldBuilder>
+                { 
+                    new EmbedFieldBuilder
+                    { 
+                        Name = "Ползунок",
+                        Value = "----------"
+                    }
+                },
                 Color = Color.Blue,
                 Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url }                
             }.Build());
-
-
+           
             await mess.AddReactionsAsync(new Emoji[]
             {
                 new Emoji("⏯️"),
@@ -278,7 +292,53 @@ namespace DiscordBot.MusicOperations
                 new Emoji("❌")
             });
 
-            GuildsPlayers[guild] = mess;            
+            ValueTuple<SocketGuild, SocketUserMessage> playerMess = default;
+
+            foreach (var pl in GuildsPlayers)
+            {
+                if (pl.Item1 == guild)
+                    playerMess = pl;
+            }
+
+            GuildsPlayers.Remove(playerMess);
+            playerMess.Item2 = mess as SocketUserMessage;
+            GuildsPlayers.Add(playerMess);
+        }
+
+        private async void UpdateProgressBars()
+        {
+            while (true)
+            {
+                if (GuildsPlayers.Count > 0)
+                {
+                    foreach (var message in GuildsPlayers)
+                    {
+                        var mess = message.Item2;
+                        if (mess != null)
+                        {
+                            var player = LavaNode.GetPlayer((mess.Author as SocketGuildUser).Guild);
+                            var guild = (mess.Author as SocketGuildUser).Guild;
+                            double per = (double)player.Track.Position.Seconds / 10 / player.Track.Duration.Seconds;
+                            if (mess.Embeds != null)
+                                await mess.ModifyAsync(x => x.Embed = new Optional<Embed>(new EmbedBuilder
+                                {
+                                    Title = $"Плеер сервера {guild.Name}",
+                                    Description = player.Track.Title,
+                                    Fields = new List<EmbedFieldBuilder>
+                                {
+                                    new EmbedFieldBuilder
+                                    {
+                                        Value = $"{ (per >= 0.1 ? "#" : "-") }{ (per >= 0.2 ? "#" : "-") }{ (per >= 0.3 ? "#" : "-") }{ (per >= 0.4 ? "#" : "-") }{ (per >= 0.5 ? "#" : "-") }{ (per >= 0.6 ? "#" : "-") }{ (per >= 0.7 ? "#" : "-") }{ (per >= 0.8 ? "#" : "-") }{ (per >= 0.9 ? "#" : "-") }{ (per >= 1 ? "#" : "-") }"
+                                    }
+                                },
+                                    Color = Color.Blue,
+                                    Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url }
+                                }.Build()));
+                        }
+                        Thread.Sleep(TimeSpan.FromSeconds(10));
+                    }                        
+                }
+            }            
         }
 
         private enum ErrorType { Exception, NotConnected, BotNotConnected, NoTrack, NoName }

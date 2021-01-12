@@ -38,8 +38,12 @@ namespace DiscordBot.Modules.MusicManaging
         private async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
             IMessage message = await arg1.GetOrDownloadAsync();
-            var user = arg3.User.GetValueOrDefault() as SocketGuildUser;           
-            if (!user.IsBot && message.Id == ((IMessage)LavaOperations.GuildsPlayers[user.Guild]).Id)
+            var user = arg3.User.GetValueOrDefault() as SocketGuildUser;
+            ValueTuple<SocketGuild, SocketUserMessage> touple = default;
+            foreach (var t in LavaOperations.GuildsPlayers)
+                if (user.Guild == t.Item1)
+                    touple = t;            
+            if (!user.IsBot && message.Id == touple.Item2.Id)
             {
                 LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
 
@@ -60,8 +64,10 @@ namespace DiscordBot.Modules.MusicManaging
                         await player.StopAsync();
                         break;                    
                     case "❌":
-                        await ((RestUserMessage)LavaOperations.GuildsPlayers[user.Guild]).DeleteAsync();
-                        LavaOperations.GuildsPlayers[user.Guild] = null;
+                        await touple.Item2.DeleteAsync();
+                        LavaOperations.GuildsPlayers.Remove(touple);                        
+                        touple.Item2 = null;
+                        LavaOperations.GuildsPlayers.Add(touple);
                         break;
                     case "➕":
                         if(player.Volume + 10 <= 100)
@@ -92,7 +98,11 @@ namespace DiscordBot.Modules.MusicManaging
         private async Task LavaNode_OnTrackEnded(TrackEndedEventArgs arg)
         {                                           
             var guild = arg.Player.VoiceState.VoiceChannel.Guild;
-            var playerMessage = (RestUserMessage)LavaOperations.GuildsPlayers[guild];
+            ValueTuple<SocketGuild, SocketUserMessage> touple = default;
+            foreach (var t in LavaOperations.GuildsPlayers)
+                if (guild == t.Item1)
+                    touple = t;
+            var playerMessage = touple.Item2;
             await playerMessage.DeleteAsync();
         }        
     }
