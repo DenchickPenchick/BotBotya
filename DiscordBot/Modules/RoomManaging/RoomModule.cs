@@ -1,11 +1,10 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using DiscordBot.FileWorking;
-using DiscordBot.GuildManaging;
 using DiscordBot.Modules;
+using DiscordBot.Providers;
 using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace DiscordBot.RoomManaging
@@ -22,6 +21,7 @@ namespace DiscordBot.RoomManaging
         public void RunModule()
         {
             Client.Ready += Client_Ready;
+            Client.ChannelDestroyed += Client_ChannelDestroyed;
             Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;           
         }
 
@@ -30,30 +30,42 @@ namespace DiscordBot.RoomManaging
             await CheckRooms();
         }
 
-        private async Task Client_UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
+        private async Task Client_ChannelDestroyed(SocketChannel arg)
         {
-            if (FilesProvider.GetGuild((arg1 as SocketGuildUser).Guild).RoomsEnable)            
-                try
+            var channel = arg as SocketGuildChannel;
+            var guild = channel.Guild;
+            var provider = new GuildProvider(guild);
+            var serGuild = FilesProvider.GetGuild(guild);
+
+            if (serGuild.SystemChannels.CreateRoomChannelId == arg.Id && provider.RoomsCategoryChannel() != null)
+            {                
+                var createRoomChannel = await guild.CreateVoiceChannelAsync("➕Создать комнату", x => x.CategoryId = provider.RoomsCategoryChannel().Id);
+                serGuild.SystemChannels.CreateRoomChannelId = createRoomChannel.Id;
+                FilesProvider.RefreshGuild(serGuild);
+            }
+        }
+
+        private async Task Client_UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
+        {            
+            try
+            {
+                var channel = arg3.VoiceChannel;
+                var prevchannel = arg2.VoiceChannel;
+                SocketGuildUser socketGuildUser = arg1 as SocketGuildUser;
+                var guild = socketGuildUser.Guild;
+                GuildProvider provider = new GuildProvider(guild);
+                if (provider.RoomsCategoryChannel() != null)
                 {
-                    var channel = arg3.VoiceChannel;
-                    var prevchannel = arg2.VoiceChannel;
-                    SocketGuildUser socketGuildUser = arg1 as SocketGuildUser;
-                    var guild = socketGuildUser.Guild;
-                    GuildProvider provider = new GuildProvider(guild);
-                
                     if (channel != null && prevchannel != null && channel != prevchannel)
                     {
                         if (channel == provider.CreateRoomChannel())
-                        {
-                            if (prevchannel.Category == provider.RoomsCategoryChannel())
-                            {
-                                if (prevchannel.Name.Contains(socketGuildUser.Nickname) || prevchannel.Name.Contains(socketGuildUser.Username))
-                                    await socketGuildUser.ModifyAsync(x => x.Channel = prevchannel);
-                                else if (prevchannel.Users.Count == 0)
-                                    await prevchannel.DeleteAsync();
-                                else
-                                    await CreateRoom(socketGuildUser, provider);
-                            }
+                        {                                                        
+                            if (prevchannel.Name.Contains(socketGuildUser.Nickname) || prevchannel.Name.Contains(socketGuildUser.Username))
+                                await socketGuildUser.ModifyAsync(x => x.Channel = prevchannel);
+                            else if (prevchannel.Users.Count == 0 && prevchannel.Category == provider.RoomsCategoryChannel())
+                                await prevchannel.DeleteAsync();
+                            else
+                                await CreateRoom(socketGuildUser, provider);                            
                         }
                         else if (prevchannel != provider.CreateRoomChannel() && prevchannel.Category == provider.RoomsCategoryChannel() && prevchannel.Users.Count == 0)
                             await prevchannel.DeleteAsync();
@@ -67,26 +79,36 @@ namespace DiscordBot.RoomManaging
                         if (prevchannel.Users.Count == 0 && prevchannel.Category == provider.RoomsCategoryChannel() && prevchannel.Name != provider.CreateRoomChannel().Name)
                             await prevchannel.DeleteAsync();
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"Exception throwed while creating room: {e}", Color.Red);
-                }
+                    
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Exception throwed while creating room: {e}", Color.Red);
+            }
         }
 
         private async Task CheckRooms()
         {            
             foreach (var guild in Client.Guilds)
-            {
-                if (FilesProvider.GetGuild(guild).RoomsEnable)
-                {
-                    GuildProvider provider = new GuildProvider(guild);
+            {                   
+                GuildProvider provider = new GuildProvider(guild);
+                    
+                var RoomsCategory = provider.RoomsCategoryChannel();
+                var CreateRoomChannel = provider.CreateRoomChannel();                
 
-                    var MainCategory = Client.GetGuild(guild.Id).GetCategoryChannel(provider.GetCategoryId(GuildProvider.GetCategoryIdEnum.MainVoiceChannelsCategory));
-                    var RoomsCategory = Client.GetGuild(guild.Id).GetCategoryChannel(provider.GetCategoryId(GuildProvider.GetCategoryIdEnum.RoomVoiceChannelsCategory));
+                if (RoomsCategory != null)
+                {
+                    if (CreateRoomChannel == null)
+                    {
+                        var serGuild = FilesProvider.GetGuild(guild);                        
+                        var channel = await guild.CreateVoiceChannelAsync("➕Создать комнату", x => x.CategoryId = RoomsCategory.Id);
+                        serGuild.SystemChannels.CreateRoomChannelId = channel.Id;
+                        FilesProvider.RefreshGuild(serGuild);
+                    }
 
                     foreach (SocketVoiceChannel channel in provider.RoomsCategoryChannel().Channels)
-                        if (channel.Users.Count == 0 && !provider.MainVoiceChannels().Contains(channel) && channel != provider.CreateRoomChannel())
-                            await channel.DeleteAsync();                    
+                        if (channel.Users.Count == 0 && channel != provider.CreateRoomChannel())
+                            await channel.DeleteAsync();
 
                     foreach (var roomChannel in RoomsCategory.Channels)
                         if (roomChannel.Users.Count != 0 && roomChannel == provider.CreateRoomChannel())

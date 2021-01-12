@@ -14,19 +14,59 @@ using System.Collections.Generic;
 using DiscordBot.CustomCommands;
 using System.IO;
 using System.Xml.Serialization;
+using Victoria;
+using DiscordBot.Compiling;
+using DiscordBot.Modules.FileManaging;
+using System.Net;
+using System.Xml;
+using DiscordBot;
 
 namespace TestBot
 {
     public class Commands : InteractiveBase
     {
+        private readonly Bot Bot;
+
         private readonly LavaOperations LavaOperations;
 
-        public Commands(LavaOperations lavaOperations)
+        public Commands(LavaOperations lavaOperations, Bot bot)
         {
             LavaOperations = lavaOperations;
+            Bot = bot;
         }
 
         #region --СТАНДАРТНЫЕ КОМАНДЫ--
+        [Command("Справка")]
+        [Summary("позволяет узнать полный список команд")]
+        public async Task Help()
+        {
+            int pos = 0;
+            int posit = 1;
+
+            List<string> pages = new List<string>
+            {
+                null
+            };
+
+            foreach (var command in Bot.Commands.Commands)
+            {
+                if ((pages[pos] + $"\n{posit + 1}. Команда {command.Name} {command.Summary}").Length <= 2048)
+                    pages[pos] += $"\n{posit++}. Команда {command.Name} {command.Summary}";
+                else
+                {
+                    pages.Add($"\n{posit++}. Команда {command.Name} {command.Summary}");
+                    pos++;
+                }
+            }
+            
+            await PagedReplyAsync(pager: new PaginatedMessage
+            {
+                Title = "Справка",
+                Pages = pages,
+                Color = Color.Blue
+            });
+        }
+
         [Command("Новости")]
         [Summary("позволяет узнать последние новости")]
         public async Task UpdateNews()
@@ -159,6 +199,24 @@ namespace TestBot
             else if (time > 21600)
                 await ReplyAsync("Интервал не может быть больше 21600 секунд.");
         }
+
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Command("Рассылка")]
+        [Summary("делает рассылку сообщений всем участникам сервера")]
+        public async Task SendMessages(params string[] mess)
+        {
+            string message = null;
+
+            for (int i = 0; i < mess.Length; i++)            
+                message += i == 0 ? message : $" {message}";
+
+            foreach (var user in Context.Guild.Users)
+            {
+                var ch = await user.GetOrCreateDMChannelAsync();
+                await ch.SendMessageAsync(message);
+            }
+            await ReplyAsync("Рассылка произведена успешно.");
+        }
         #endregion
 
         #region --МУЗЫКАЛЬНЫЕ КОМАНДЫ--
@@ -199,7 +257,7 @@ namespace TestBot
         [Summary("ставит на паузу трек")]
         public async Task PauseTrackAsync()
         {
-            await  LavaOperations.PauseTrackAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
+            await LavaOperations.PauseTrackAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
         }
 
         [Command("Воспроизведение")]
@@ -219,6 +277,28 @@ namespace TestBot
                 return;
             }
             await LavaOperations.SetVolumeAsync(Context.User as SocketGuildUser, vol, Context.Channel as SocketTextChannel);
+        }
+
+        [Command("Текст")]
+        [Summary("выводит текст проигрываемой песни")]
+        public async Task GetLyrics()
+        {
+            var hasPlayer = LavaOperations.LavaNode.TryGetPlayer(Context.Guild, out LavaPlayer player);
+            if (!hasPlayer)
+            {
+                await ReplyAsync("Нет плеера. Пригласи меня в канал или включи трек.");
+                return;
+            }
+            if (player.Track == null)
+            {
+                await ReplyAsync("Нет трека.");
+                return;
+            }
+
+            await ReplyAsync(await player.Track.FetchLyricsFromGeniusAsync(), embed: new EmbedBuilder 
+            {
+                Title = $"Текст песни {player.Track.Title}"
+            }.Build());
         }
         #endregion
 
@@ -267,6 +347,7 @@ namespace TestBot
         public async Task ConfigureCommand()
         {
             List<CustomCommand.Action> actions = new List<CustomCommand.Action>();
+            Compiler compiler = new Compiler(Compiler.CompilerTypeEnum.Command);
             string name;
             string message = null;
             bool actionsEntering = false;
@@ -337,7 +418,8 @@ namespace TestBot
             XmlSerializer serializer = new XmlSerializer(typeof(CustomCommand));
             serializer.Serialize(stream, command);
             stream.Close();
-            await Context.Channel.SendFileAsync($"{Context.Guild.Id}.xml", "Твой файл. Если ты хочешь добавить данную команду, тогда скачай файл и пропиши соответствующую команду.");
+            var mess = await Context.Channel.SendFileAsync($"{Context.Guild.Id}.xml", "Твой файл. Если ты хочешь добавить данную команду, тогда скачай файл и пропиши соответствующую команду.");
+            await ReplyAsync(embed: compiler.Result(Context.Guild, mess));
             File.Delete($"{Context.Guild.Id}.xml");
         }
 
@@ -348,11 +430,7 @@ namespace TestBot
         {
             var provider = new CustomCommandsProvider(Context.Guild);
 
-            var res = await provider.AddCommand(Context);
-            if (res == CustomCommandsProvider.Result.Error)
-                await ReplyAsync("Возможно ты не прикрепил файл или же файл сконфигурирован неправильно.");
-            else
-                await ReplyAsync("Команда создана успешно");
+            await provider.AddCommand(Context);            
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
@@ -376,6 +454,305 @@ namespace TestBot
             var serial = new CustomCommandsSerial(Context.Guild);
             serial.DeleteCommand(name);
             await ReplyAsync($"Команда {name} удалена успешно");
+        }
+        #endregion
+
+        #region --КАСТОМИЗАЦИЯ--
+        [Command("Конфигурация")]
+        [Summary("получает конфигурацию сервера.")]
+        public async Task GetGuildConfig()
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            var links = Context.Guild.GetTextChannel(serGuild.SystemChannels.LinksChannelId);
+            var videos = Context.Guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId);
+            var rooms = Context.Guild.GetVoiceChannel(serGuild.SystemCategories.VoiceRoomsCategoryId);
+            await ReplyAsync(embed: new EmbedBuilder
+            {
+                Title = $"Конфигурация сервера {Context.Guild.Name}",
+                Description = $"Приветственные сообщения: {(serGuild.HelloMessageEnable == true ? "Включены" : "Выключены")}\n" +
+                $"Текст приветственного сообщения:\n{serGuild.HelloMessage}\n" +
+                $"{(links == null && videos == null ? null : $"Каналы контента: {links?.Mention} {videos?.Mention}")}\n" +
+                $"{(rooms == null ? null : $"Категория с комнатами: {rooms.Name}")}",                
+                Color = Color.Blue,
+                ImageUrl = Context.Guild.IconUrl
+            }.Build());
+        }
+
+        [Command("ПоменятьНикнеймБота")]
+        [Summary("меняет никнейм бота")]
+        public async Task ChangeBotNickname(params string[] NewNick)
+        {
+            SocketGuildUser bot = Context.Guild.GetUser(Context.Client.GetApplicationInfoAsync().Result.Id);
+            string prevName = bot.Nickname;
+            string name = null;
+            int argPos = 0;
+            var guild = Context.Guild;
+
+            foreach (string partOfName in NewNick)
+            {
+                name += argPos == 0 ? partOfName : $" {partOfName}";
+                argPos++;
+            }
+
+            await Context.Guild.GetUser(Context.Client.GetApplicationInfoAsync().Result.Id).ModifyAsync(x => x.Nickname = name);
+            await ReplyAsync($"Никнейм бота изменен с {prevName} на {name}");
+        }
+
+        [Command("СконфигурироватьСервер")]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Summary("конфигурирует сервер с соответствующим XML файлом")]
+        public async Task ConfigureGuild()
+        {
+            Compiler compiler = new Compiler(Compiler.CompilerTypeEnum.Guild);
+            WebClient webClient = new WebClient();
+            var attachedFile = Context.Message.Attachments.ToArray()[0];
+            if (Path.GetExtension(attachedFile.Filename) == ".xml")
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
+                bool deserializable = serializer.CanDeserialize(new XmlTextReader(webClient.OpenRead(attachedFile.Url)));
+                if (deserializable)
+                {
+                    var serGuild = (SerializableGuild)serializer.Deserialize(webClient.OpenRead(attachedFile.Url));
+                    var res = compiler.Result(Context.Guild, Context.Message);
+                    await ReplyAsync(embed: res);
+                    if (res.Color != Color.Red)
+                    {
+                        FilesProvider.RefreshGuild(serGuild);
+                        await ReplyAsync("Сервер успешно сконфигурирован");
+                    }                    
+                }
+                else
+                    await ReplyAsync("Неправильно сформирован файл");
+            }
+            else
+                await ReplyAsync("Неверный формат файла");
+        }
+
+        [Command("ФайлКонфигурации")]
+        [Summary("возвращает XML файл конфигурации сервера")]
+        public async Task GetConfigFile()
+        {
+            await Context.Channel.SendFileAsync($"{FilesProvider.GetBotDirectoryPath()}/BotGuilds/{Context.Guild.Id}.xml", $"Файл конфигурации сервера {Context.Guild.Name}");
+        }
+
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [Command("ДобавитьРольПоумолчанию", RunMode = RunMode.Async)]
+        [Summary("устанавливает роль по-умолчанию, которая будет выдаваться каждому пользователю (У тебя должно быть право на выполнение этой команды).\nДля того чтобы установить роль нужно ее отметить. Если отметить несколько ролей, то установлена будет только первая.")]
+        public async Task AddDefaultRole(params string[] str)
+        {
+            if (Context.Message.MentionedRoles.Count > 0)
+            {
+                var role = Context.Message.MentionedRoles.ToArray()[0];
+                SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
+
+                serializableGuild.DefaultRoleId = role.Id;
+
+                FilesProvider.RefreshGuild(serializableGuild);
+
+                await ReplyAsync("Роль успешно задана. Она будет выдаваться всем пользователям по-умолчанию. Цвет и другие параметры ты можешь натроить сам.");
+
+                foreach (var user in Context.Guild.Users)
+                    await user.AddRoleAsync(role);
+            }
+            else
+            {
+                await ReplyAsync("Роль не найдена в сообщении. Ты хочешь ее создать? Пиши +(да) или -(нет).");
+                var createRoleMessage = await NextMessageAsync();
+                if (createRoleMessage != null)
+                    switch (createRoleMessage.Content)
+                    {
+                        case "+":
+                            await ReplyAsync("Введи название роли(обязательно)");
+                            var roleMessage = await NextMessageAsync();
+                            if (roleMessage != null)
+                            {
+                                var role = await Context.Guild.CreateRoleAsync(roleMessage.Content,
+                                    new GuildPermissions().Modify(
+                                        createInstantInvite: true,
+                                        readMessageHistory: true,
+                                        connect: true,
+                                        sendMessages: true,
+                                        sendTTSMessages: true,
+                                        embedLinks: true,
+                                        attachFiles: true,
+                                        mentionEveryone: true,
+                                        useExternalEmojis: true,
+                                        speak: true,
+                                        useVoiceActivation: true),
+                                    Color.Default, false, null);
+
+                                SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
+
+                                serializableGuild.DefaultRoleId = role.Id;
+
+                                FilesProvider.RefreshGuild(serializableGuild);
+
+                                await ReplyAsync("Роль успешно задана. Она будет выдаваться всем пользователям по-умолчанию. Цвет и другие параметры ты можешь натроить сам.");
+
+                                foreach (var user in Context.Guild.Users)
+                                    await user.AddRoleAsync(role);
+                            }
+                            else
+                                await ReplyAsync("Ответ не получен в течении 5 минут. Команда аннулированна.");
+                            break;
+                        case "-":
+                            await ReplyAsync("Невозможно установить роль по-умолчанию. Команда аннулированна.");
+                            return;
+                    }
+                else
+                {
+                    await ReplyAsync("Ответ не получен в течении 5 минут. Команда аннулированна.");
+                    return;
+                }
+
+            }
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("ВключитьПриветствие")]
+        [Summary("выключает или включает приветственные сообщения. Отредактировать сообщение можно с помощью команды EditHelloMessage (У тебя должно быть право на выполнение этой команды).")]
+        public async Task EnableHelloMessage()
+        {
+            SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
+            serializableGuild.HelloMessageEnable = !serializableGuild.HelloMessageEnable;
+            FilesProvider.RefreshGuild(serializableGuild);
+
+            if (serializableGuild.HelloMessageEnable)
+                await ReplyAsync("Теперь приветственные сообщения будут присылаться каждому пользователю при входе на сервер. Изменить текст можно командой !EditHelloMessage");
+            else
+                await ReplyAsync("Теперь приветственные сообщения не будут присылаться каждому пользователю при входе на сервер.");
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("РедактироватьПриветственноеСообщение", RunMode = RunMode.Async)]
+        [Summary("редактирует приветственное сообщение (У тебя должно быть право на выполнение этой команды).")]
+        public async Task EditHelloMessage()
+        {
+            SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
+            await ReplyAsync("Введите текст сообщения");
+            var message = await NextMessageAsync();
+
+            if (message != null)
+            {
+                serializableGuild.HelloMessage = message.Content;
+                FilesProvider.RefreshGuild(serializableGuild);
+                await ReplyAsync("Приветственное сообщение отредактировано. Вот как оно выглядит:");
+                await ReplyAsync(serializableGuild.HelloMessage);
+            }
+            else
+                await ReplyAsync("Ответ не получен в течении 5 минут. Команда аннулированна.");
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("ПоменятьПрефикс")]
+        [Summary("редактирует префикс (У тебя должно быть право на выполнение этой команды).")]
+        public async Task EditPrefix(string newPrefix)
+        {
+            SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
+            FilesProvider.RefreshGuild(serializableGuild);
+
+            serializableGuild.Prefix = newPrefix;
+
+            FilesProvider.RefreshGuild(serializableGuild);
+            await ReplyAsync("Префикс сменен");
+        }
+
+        [RequireUserPermission(GuildPermission.ManageChannels)]
+        [Command("РежимКомнат")]
+        [Summary("включает/выключает режим приватных комнат (У тебя должно быть право на выполнение этой команды).")]
+        public async Task EnableRooms()
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            var category = await Context.Guild.CreateCategoryChannelAsync("🏠Комнаты");
+            var channel = await Context.Guild.CreateVoiceChannelAsync("➕Создать комнату", x => x.CategoryId = category.Id);
+
+            serGuild.SystemCategories.VoiceRoomsCategoryId = category.Id;
+            serGuild.SystemChannels.CreateRoomChannelId = channel.Id;
+
+            FilesProvider.RefreshGuild(serGuild);
+            await ReplyAsync("Режим комнат установлен");
+        }
+
+        [RequireUserPermission(GuildPermission.ManageChannels)]
+        [Command("КаналыКонтента")]
+        [Summary("включает/выключает каналы контента. У тебя должно быть право на выполнение этой команды.")]
+        public async Task EnableContent()
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            var category = await Context.Guild.CreateCategoryChannelAsync("⚡Контент");
+            var links = await Context.Guild.CreateTextChannelAsync("🌐ссылки", x => x.CategoryId = category.Id);
+            var videos = await Context.Guild.CreateTextChannelAsync("📹видео", x => x.CategoryId = category.Id);
+
+            serGuild.SystemCategories.ContentCategoryId = category.Id;
+            serGuild.SystemChannels.LinksChannelId = links.Id;
+            serGuild.SystemChannels.VideosChannelId = videos.Id;
+
+            FilesProvider.RefreshGuild(serGuild);
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("ПроверкаКонтента")]
+        [Summary("включает/выключает проверку контента (сортировку видео, ссылок по нужным каналам). Работает только при включенных каналах контента. У тебя должно быть право на выполнение этой команды.")]
+        public async Task EnableCheckingContent()
+        {
+            SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
+
+            serializableGuild.CheckingContent = !serializableGuild.CheckingContent;
+            FilesProvider.RefreshGuild(serializableGuild);
+
+            if (serializableGuild.CheckingContent)
+                await ReplyAsync("Проверка контента включена.");
+            else
+                await ReplyAsync("Проверка контента отключена.");
+        }
+
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Command("Уведомления", RunMode = RunMode.Async)]
+        [Summary("включает/выключает уведомления сервера. При бане, кике, добавлении на сервер пользователя бот тебя уведомит")]
+        public async Task EnableGuildNotifications()
+        {            
+            SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
+
+            serializableGuild.GuildNotifications = !serializableGuild.GuildNotifications;
+
+            if (serializableGuild.GuildNotifications)
+            {
+                await ReplyAsync("Упомяни канал куда нужно присылать логи.");
+                var respondChannelMessage = await NextMessageAsync();
+                if (respondChannelMessage != null)
+                {
+                    if (respondChannelMessage.MentionedChannels != null)
+                        serializableGuild.LoggerId = respondChannelMessage.MentionedChannels.ToArray()[0].Id;
+                    else
+                    {
+                        await ReplyAsync("Ни одного канала не найдено.");
+                        return;
+                    }
+                }
+                else
+                {
+                    await ReplyAsync("Ты не ответил в течении 5 минут. Команда аннулированна.");
+                    return;
+                }
+                await ReplyAsync("Уведомления включены.");
+            }
+            else
+                await ReplyAsync("Уведомления выключены.");
+
+            FilesProvider.RefreshGuild(serializableGuild);
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("ЭмодзиКомнаты")]
+        [Summary("устанавливает значок комнат.")]
+        public async Task SetRoomsEmoji(string emoji)
+        {            
+            SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
+
+            serializableGuild.EmojiOfRoom = emoji;
+            FilesProvider.RefreshGuild(serializableGuild);
+
+            await ReplyAsync("Значок комнат изменен успешно");
         }
         #endregion
 

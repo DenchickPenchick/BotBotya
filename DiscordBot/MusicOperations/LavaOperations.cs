@@ -12,22 +12,40 @@ namespace DiscordBot.MusicOperations
 {
     public class LavaOperations
     {
+<<<<<<< HEAD
         private readonly LavaNode LavaNode;        
         
         public List<ValueTuple<SocketGuild, SocketUserMessage>> GuildsPlayers = new List<(SocketGuild, SocketUserMessage)>();
 
         private readonly Thread ProgressBarsUpdaterThread;
+=======
+        public readonly LavaNode LavaNode;
+        private readonly DiscordSocketClient Client;
+
+        private delegate Task UpdatePlayerHandler(IGuild guild);
+        private event UpdatePlayerHandler UpdatePlayer;
+        
+        public Dictionary<IGuild, IUserMessage> PlayersMessagesCollection = new Dictionary<IGuild, IUserMessage>();
+>>>>>>> dev
 
         public LavaOperations(LavaNode lavaNode, DiscordSocketClient client)
         {
+            Client = client;
             LavaNode = lavaNode;
             foreach (var guild in client.Guilds)
+<<<<<<< HEAD
                 GuildsPlayers.Add(new ValueTuple<SocketGuild, SocketUserMessage>(guild, null));
 
             ProgressBarsUpdaterThread = new Thread(UpdateProgressBars);
             ProgressBarsUpdaterThread.Start();
         }
         
+=======
+                PlayersMessagesCollection.Add(guild, null);
+            UpdatePlayer += LavaOperations_UpdatePlayer;
+        }        
+
+>>>>>>> dev
         public async Task JoinAsync(SocketGuildUser user, SocketTextChannel contextChannel)
         {
             var voiceState = user.VoiceState;            
@@ -214,15 +232,18 @@ namespace DiscordBot.MusicOperations
         {
             try
             {
+                ushort conv = (ushort)(vol * ushort.MaxValue / 100);
+
                 var hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
                 if (!hasPlayer)
                     await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoTrack));
-                await player.UpdateVolumeAsync(vol);                
+                await player.UpdateVolumeAsync(conv);                
                 await contextChannel.SendMessageAsync(embed: new EmbedBuilder
                 {
-                    Description = $"Громкость установлена до {vol}",
+                    Description = $"Текущая громкость: {vol}%",
                     Color = Color.Blue
                 }.Build());
+                await UpdatePlayer.Invoke(user.Guild);
             }
             catch (Exception ex)
             {
@@ -265,11 +286,14 @@ namespace DiscordBot.MusicOperations
 
         private async Task SendPlayer(LavaPlayer player)
         {
-            var guild = player.VoiceChannel.Guild;            
-
+            var guild = player.VoiceChannel.Guild;
+            int h = player.Track.Position.Hours;
+            int m = player.Track.Position.Minutes;
+            int s = player.Track.Position.Seconds;
+            int part = s / player.Track.Duration.Seconds * 100;
             var mess = await (player.TextChannel ?? (guild as SocketGuild).DefaultChannel).SendMessageAsync(embed: new EmbedBuilder
-            { 
-                Title = $"Плеер сервера {guild.Name}",                
+            {
+                Title = $"Плеер сервера {guild.Name}",
                 Description = player.Track.Title,
                 Fields = new List<EmbedFieldBuilder>
                 { 
@@ -280,18 +304,32 @@ namespace DiscordBot.MusicOperations
                     }
                 },
                 Color = Color.Blue,
-                Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url }                
+                Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url },
+                Footer = new EmbedFooterBuilder
+                {
+                    Text = $"{(h < 10 ? $"0{h}" : h)}:{(m < 10 ? $"0{m}" : m)}:{(s < 10 ? $"0{s}" : s)} {(part >= 0 && part < 0.2 ? "◯" : "-")}{(part >= 0.2 && part < 0.3 ? "◯" : "-")}{(part >= 0.3 && part < 0.4 ? "◯" : "-")}{(part >= 0.4 && part < 0.5 ? "◯" : "-")}{(part >= 0.5 && part < 0.6 ? "◯" : "-")}{(part >= 0.6 && part < 0.7 ? "◯" : "-")}{(part >= 0.7 && part < 0.8 ? "◯" : "-")}{(part >= 0.8 && part < 0.9 ? "◯" : "-")}{(part >= 0.9 && part < 1 ? "◯" : "-")}{(part >= 1 ? "◯" : "-")}"
+                }
             }.Build());
+<<<<<<< HEAD
            
+=======
+
+>>>>>>> dev
             await mess.AddReactionsAsync(new Emoji[]
             {
                 new Emoji("⏯️"),
-                new Emoji("⏹"),                                
+                new Emoji("⏹"),
                 new Emoji("➖"),
                 new Emoji("➕"),
                 new Emoji("❌")
             });
+            
+            PlayersMessagesCollection.Remove(guild);
+            PlayersMessagesCollection.Add(guild, mess);
+            new Thread(UpdateTimeThreadTask).Start(guild);
+        }
 
+<<<<<<< HEAD
             ValueTuple<SocketGuild, SocketUserMessage> playerMess = default;
 
             foreach (var pl in GuildsPlayers)
@@ -339,6 +377,39 @@ namespace DiscordBot.MusicOperations
                     }                        
                 }
             }            
+=======
+        private async Task LavaOperations_UpdatePlayer(IGuild guild)
+        {
+            var message = PlayersMessagesCollection[guild];
+            var player = LavaNode.GetPlayer(guild);
+            int h = player.Track.Position.Hours;
+            int m = player.Track.Position.Minutes;
+            int s = player.Track.Position.Seconds;
+            double st = player.Track.Position.TotalSeconds;
+            double part = st / player.Track.Duration.TotalSeconds;
+            await message.ModifyAsync(x => x.Embed = new Optional<Embed>(new EmbedBuilder
+            {
+                Title = $"Плеер сервера {guild.Name}",
+                Description = player.Track.Title,                
+                Color = Color.Blue,
+                Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url },
+                Footer = new EmbedFooterBuilder
+                {
+                    Text = $"{(h < 10 ? $"0{h}" : h)}:{(m < 10 ? $"0{m}" : m)}:{(s < 10 ? $"0{s}" : s)} {(part >= 0 && part < 0.2 ? "◯" : "-")}{(part >= 0.2 && part < 0.3 ? "◯" : "-")}{(part >= 0.3 && part < 0.4 ? "◯" : "-")}{(part >= 0.4 && part < 0.5 ? "◯" : "-")}{(part >= 0.5 && part < 0.6 ? "◯" : "-")}{(part >= 0.6 && part < 0.7 ? "◯" : "-")}{(part >= 0.7 && part < 0.8 ? "◯" : "-")}{(part >= 0.8 && part < 0.9 ? "◯" : "-")}{(part >= 0.9 && part < 1 ? "◯" : "-")}{(part >= 1 ? "◯" : "-")}"
+                }
+            }.Build()));
+        }
+
+        private async void UpdateTimeThreadTask(object guild)
+        {
+            SocketGuild Guild = (SocketGuild)guild;
+            var player = LavaNode.GetPlayer(Guild);                        
+            while (player.Track != null)
+            {
+                await UpdatePlayer.Invoke(Guild);
+                Thread.Sleep(TimeSpan.FromSeconds(5));
+            }
+>>>>>>> dev
         }
 
         private enum ErrorType { Exception, NotConnected, BotNotConnected, NoTrack, NoName }

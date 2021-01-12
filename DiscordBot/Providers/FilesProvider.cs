@@ -8,10 +8,7 @@ using System.Drawing;
 using DiscordBot.Serializable;
 
 namespace DiscordBot.FileWorking
-{
-    /// <summary>
-    /// Класс, который отвечает за опеации с файлами бота.
-    /// </summary>
+{   
     public static class FilesProvider
     {
         public static SerializableNewsAndPlans GetNewsAndPlans()
@@ -61,32 +58,8 @@ namespace DiscordBot.FileWorking
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
             SerializableGuild serializableGuild = new SerializableGuild
             {
-                GuildId = guild.Id,
-                DefaultRoleId = 0,
-                HelloMessageEnable = false,
-                RoomsEnable = false,
-                ContentEnable = false,
-                CheckingContent = false,
-                HelloMessage = "Добро пожаловать на сервер.\nЕсли ты в первый раз на сервере и не знаешь что я умею, тогда напиши !help.",
-                EmojiOfRoom = "🎤",
-                Prefix = "!",
-                GuildNotifications = false,
-                SystemCategories = new SerializableCategories
-                {
-                    MainTextCategoryName = "💬Текстовые каналы",
-                    ContentCategoryName = "⚡Контент",
-                    MainVoiceCategoryName = "🎤Голосовые каналы",
-                    VoiceRoomsCategoryName = "🏠Комнаты",
-                    BotCategoryName = "🤖Бот"                    
-                },
-                SystemChannels = new SerializableChannels
-                {
-                    LinksChannelName = "🌐ссылки",
-                    VideosChannelName = "📹видео",
-                    CreateRoomChannelName = "➕Создать комнату",
-                    ConsoleChannelName = "🤖консоль-бота"
-                }
-            };
+                GuildId = guild.Id
+            };            
             using (FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/BotGuilds/{guild.Id}.xml", FileMode.Create))
                 serializer.Serialize(stream, serializableGuild);
             Console.WriteLine($"Guild({guild.Id}) serialized.", Color.Green);
@@ -94,8 +67,8 @@ namespace DiscordBot.FileWorking
 
         public static void RefreshGuild(SerializableGuild guild)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));                        
-            
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
+
             File.WriteAllText($@"{GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml", string.Empty);
             using FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml", FileMode.Open, FileAccess.ReadWrite);
             serializer.Serialize(stream, guild);

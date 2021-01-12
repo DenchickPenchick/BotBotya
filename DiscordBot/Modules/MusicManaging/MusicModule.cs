@@ -38,12 +38,17 @@ namespace DiscordBot.Modules.MusicManaging
         private async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
             IMessage message = await arg1.GetOrDownloadAsync();
+<<<<<<< HEAD
             var user = arg3.User.GetValueOrDefault() as SocketGuildUser;
             ValueTuple<SocketGuild, SocketUserMessage> touple = default;
             foreach (var t in LavaOperations.GuildsPlayers)
                 if (user.Guild == t.Item1)
                     touple = t;            
             if (!user.IsBot && message.Id == touple.Item2.Id)
+=======
+            var user = arg3.User.GetValueOrDefault() as SocketGuildUser;           
+            if (!user.IsBot && message.Id == LavaOperations.PlayersMessagesCollection[user.Guild].Id)
+>>>>>>> dev
             {
                 LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
 
@@ -64,18 +69,23 @@ namespace DiscordBot.Modules.MusicManaging
                         await player.StopAsync();
                         break;                    
                     case "❌":
+<<<<<<< HEAD
                         await touple.Item2.DeleteAsync();
                         LavaOperations.GuildsPlayers.Remove(touple);                        
                         touple.Item2 = null;
                         LavaOperations.GuildsPlayers.Add(touple);
+=======
+                        await ((RestUserMessage)LavaOperations.PlayersMessagesCollection[user.Guild]).DeleteAsync();
+                        LavaOperations.PlayersMessagesCollection[user.Guild] = null;
+>>>>>>> dev
                         break;
                     case "➕":
-                        if(player.Volume + 10 <= 100)
-                            await player.UpdateVolumeAsync((ushort)(player.Volume + 10));
+                        if(player.Volume + 100 <= ushort.MaxValue)
+                            await player.UpdateVolumeAsync((ushort)(player.Volume + 10));                        
                         break;
                     case "➖":
-                        if(player.Volume - 10 >= 0)
-                            await player.UpdateVolumeAsync((ushort)(player.Volume + 10));
+                        if(player.Volume - 100 >= ushort.MaxValue)
+                            await player.UpdateVolumeAsync((ushort)(player.Volume + 10));                        
                         break;
                 }
                 await message.RemoveReactionAsync(arg3.Emote, user);
@@ -98,11 +108,15 @@ namespace DiscordBot.Modules.MusicManaging
         private async Task LavaNode_OnTrackEnded(TrackEndedEventArgs arg)
         {                                           
             var guild = arg.Player.VoiceState.VoiceChannel.Guild;
+<<<<<<< HEAD
             ValueTuple<SocketGuild, SocketUserMessage> touple = default;
             foreach (var t in LavaOperations.GuildsPlayers)
                 if (guild == t.Item1)
                     touple = t;
             var playerMessage = touple.Item2;
+=======
+            var playerMessage = (RestUserMessage)LavaOperations.PlayersMessagesCollection[guild];
+>>>>>>> dev
             await playerMessage.DeleteAsync();
         }        
     }

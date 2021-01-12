@@ -4,6 +4,7 @@ using DiscordBot.GuildManaging;
 using System;
 using System.Threading.Tasks;
 using DiscordBot.FileWorking;
+using DiscordBot.Providers;
 
 namespace DiscordBot.Modules.ContentManaging
 {    
@@ -25,7 +26,7 @@ namespace DiscordBot.Modules.ContentManaging
         private async Task MessageUpdated(Cacheable<IMessage, ulong> arg1, SocketMessage arg2, ISocketMessageChannel arg3)
         {
             if (!((arg2 as SocketUserMessage).Author as SocketGuildUser).IsBot)
-                if (FilesProvider.GetGuild(((arg2 as SocketUserMessage).Author as SocketGuildUser).Guild).CheckingContent && FilesProvider.GetGuild(((arg2 as SocketUserMessage).Author as SocketGuildUser).Guild).ContentEnable)
+                if (FilesProvider.GetGuild(((arg2 as SocketUserMessage).Author as SocketGuildUser).Guild).CheckingContent)
                 {
                     var messUser = arg2.Author as SocketGuildUser;
                     GuildProvider provider = new GuildProvider(messUser.Guild);
@@ -76,7 +77,7 @@ namespace DiscordBot.Modules.ContentManaging
         private async Task CheckContent(SocketMessage arg)
         {
             if (!((arg as SocketUserMessage).Author as SocketGuildUser).IsBot)
-                if (FilesProvider.GetGuild(((arg as SocketUserMessage).Author as SocketGuildUser).Guild).CheckingContent && FilesProvider.GetGuild(((arg as SocketUserMessage).Author as SocketGuildUser).Guild).ContentEnable)
+                if (FilesProvider.GetGuild(((arg as SocketUserMessage).Author as SocketGuildUser).Guild).CheckingContent)
                 {
                     var messUser = arg.Author as SocketGuildUser;
                     GuildProvider provider = new GuildProvider(messUser.Guild);

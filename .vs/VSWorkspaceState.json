@@ -1,11 +1,6 @@
 {
   "ExpandedNodes": [
-    "",
-    "\\DiscordBot",
-    "\\DiscordBot\\Modules",
-    "\\DiscordBot\\Modules\\FileManaging",
-    "\\DiscordBot\\Modules\\GuildManaging",
-    "\\DiscordBot\\Modules\\MusicManaging"
+    ""
   ],
   "SelectedNode": "\\DiscordBot.sln",
   "PreviewInSolutionExplorer": false
