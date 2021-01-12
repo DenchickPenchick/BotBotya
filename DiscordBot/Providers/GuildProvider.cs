@@ -30,15 +30,9 @@ namespace DiscordBot.Providers
             await Guild.DefaultChannel.SendMessageAsync(embed: new EmbedBuilder
             {
                 Title = $"👋 Спасибо, что пригласили меня на сервер {Guild.Name} 👋",
-<<<<<<< HEAD
-                Description = $"Меня зовут {client.CurrentUser.Username}. Я очень много чего умею. Чтобы посмотреть что я умею пропиши !справка.\n" +
-                $"🤖 Мой сайт: https://botbotya.ru 🤖",
-                Color = Color.Blue                
-=======
                 Description = $"Меня зовут {client.CurrentUser.Username}. Я много что умею! Пропиши !Справка, чтобы узнать мой функционал.\n" +
                 $"🤖 Мой сайт: https://botbotya.ru 🤖",
                 Color = Color.Blue
->>>>>>> dev
             }.Build());
         }                
 
