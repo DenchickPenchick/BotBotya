@@ -15,6 +15,7 @@ using DiscordBot.Serializable;
 using System;
 using System.Text;
 using System.Threading;
+using DiscordBot.Providers;
 
 namespace DiscordBot
 {    
@@ -166,32 +167,10 @@ namespace DiscordBot
         private void AddGuild(SocketGuild guild)
         {            
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
-            SerializableGuild serializableGuild = new SerializableGuild
+            SerializableGuild serializableGuild = new SerializableGuild 
             {
-                GuildId = guild.Id,
-                DefaultRoleId = 0,
-                HelloMessageEnable = false,
-                RoomsEnable = false,
-                ContentEnable = false,
-                CheckingContent = false,
-                HelloMessage = "Добро пожаловать на сервер./nЕсли ты в первый раз на сервере и не знаешь что я умею, тогда напиши команду \"справка\".",
-                Prefix = "!",
-                SystemCategories = new SerializableCategories
-                {
-                    MainTextCategoryName = "💬Текстовые каналы",
-                    ContentCategoryName = "⚡Контент",
-                    MainVoiceCategoryName = "🎤Голосовые каналы",
-                    VoiceRoomsCategoryName = "🏠Комнаты",
-                    BotCategoryName = "🤖Бот"
-                },
-                SystemChannels = new SerializableChannels
-                { 
-                    LinksChannelName = "🌐ссылки",
-                    VideosChannelName = "📹видео",
-                    CreateRoomChannelName = "➕Создать комнату",
-                    ConsoleChannelName = "🤖консоль-бота"                    
-                }
-            };
+                GuildId = guild.Id
+            };            
             using (FileStream stream = new FileStream($@"{Bot.PathToBotDirectory}/BotGuilds/{guild.Id}.xml", FileMode.Create))
                 serializer.Serialize(stream, serializableGuild);         
             Console.WriteLine($"Guild({guild.Id}) serialized.", Color.Green);

@@ -12,12 +12,12 @@ using Console = Colorful.Console;
 using TestBot;
 using DiscordBot.GuildManaging;
 using DiscordBot.Modules.NotificationsManaging;
-using System.Collections.Generic;
 using DiscordBot.FileWorking;
 using Victoria;
 using DiscordBot.MusicOperations;
 using DiscordBot.Modules.MusicManaging;
-
+using System.Reflection;
+using DiscordBot.Providers;
 
 namespace DiscordBot
 {
@@ -48,9 +48,11 @@ namespace DiscordBot
                 DefaultTimeout = TimeSpan.FromMinutes(5)
             });
             Services = new ServiceCollection()
+                .AddSingleton(this)
                 .AddSingleton(Client)
                 .AddSingleton(interactiveService)
                 .AddSingleton<CommandService>()
+                .AddSingleton<Commands>()
                 .AddSingleton(new LavaNode(Client, new LavaConfig
                 {
                     ResumeTimeout = TimeSpan.MaxValue
@@ -106,107 +108,53 @@ namespace DiscordBot
             {
                 var message = arg as SocketUserMessage;
                 var provider = new GuildProvider((message.Author as SocketGuildUser).Guild);
-                var context = new SocketCommandContext(Client, message);
-                var interactive = new InteractiveService(Client);
+                var context = new SocketCommandContext(Client, message);                
                 var serGuild = FilesProvider.GetGuild((message.Author as SocketGuildUser).Guild);
+
                 if (message.Author.IsBot || message is null) return;                
                 if (message.HasStringPrefix(serGuild.Prefix, ref argsPos))
-                {
-                    if (message.Content.ToLower() == $"{serGuild.Prefix}справка")
+                {                                            
+                    IResult result = await Commands.ExecuteAsync(context, argsPos, Services);
+
+                    if (!result.IsSuccess)
                     {
-                        int pos = 0;
-                        int posit = 1;
-
-                        List<string> pages = new List<string>
+                        if (result.Error != CommandError.UnknownCommand)
                         {
-                            null
-                        };
-
-                        foreach (var command in Commands.Commands)
+                            Console.WriteLine(result.ErrorReason, Color.Red);
+                            Console.WriteLine("Command from:", Color.Red);
+                            Console.WriteLine(context.User.Username);
+                            Console.WriteLine("Command:", Color.Red);
+                            Console.WriteLine(message);
+                            Console.WriteLine("Command Status: Failed", Color.Red);
+                        }                            
+                        switch (result.Error)
                         {
-                            if ((pages[pos] + $"\n{posit+1}. Команда {command.Name} {command.Summary}").Length <= 2048)
-                                pages[pos] += $"\n{posit++}. Команда {command.Name} {command.Summary}";
-                            else
-                            {
-                                pages.Add($"\n{posit++}. Команда {command.Name} {command.Summary}");
-                                pos++;
-                            }                               
+                            case CommandError.UnknownCommand:
+                                await context.Channel.SendMessageAsync($"Неизвестная команда. У нас недавно прошла русификация команд. Поэтому пропиши команду {serGuild.Prefix}Справка");
+                                break;
+                            case CommandError.ParseFailed:
+                                await context.Channel.SendMessageAsync("Навеверное ты неправильно ввел данные.");
+                                break;
+                            case CommandError.BadArgCount:
+                                await context.Channel.SendMessageAsync("Ты указал либо больше, либо меньше параметров чем нужно.");
+                                break;
+                            case CommandError.ObjectNotFound:
+                                await context.Channel.SendMessageAsync("Объект не найден");
+                                break;
+                            case CommandError.MultipleMatches:
+                                await context.Channel.SendMessageAsync("Обнаружены множественные совпадения. Проверь данные и введи команду повторно.");
+                                break;
+                            case CommandError.UnmetPrecondition:
+                                await context.Channel.SendMessageAsync("У тебя нет доступа к этой команде.");
+                                break;
+                            case CommandError.Exception:
+                                await context.Channel.SendMessageAsync("В результате выполнения команды было сгенерировано исключение.");
+                                break;
+                            case CommandError.Unsuccessful:
+                                await context.Channel.SendMessageAsync("Команда выполнена неудачно.");
+                                break;
                         }
-
-                        foreach (var command in BotOptionsCommands.Commands)
-                        {
-                            if ((pages[pos] + $"\n{pos+1}. Консольная команда {command.Name} {command.Summary}").Length <= 2048)
-                                pages[pos] += $"\n{posit++}. Консольная команда {command.Name} {command.Summary}";
-                            else
-                            {
-                                pages.Add($"\n{posit++}. Консольная команда {command.Name} {command.Summary}");
-                                pos++;
-                            }
-                        }
-
-                        int num = 1;
-                        foreach (var page in pages)
-                            await context.Channel.SendMessageAsync(embed: new EmbedBuilder
-                            { 
-                                Author = new EmbedAuthorBuilder 
-                                { 
-                                    IconUrl = Client.CurrentUser.GetAvatarUrl(),
-                                    Name = "Ботя",
-                                    Url = "https://botbotya.ru"
-                                },
-                                Title = $"Страница справки {num++} из {pages.Count}",
-                                Description = page,
-                                Color = Color.Blue
-                            }.Build());
-                    }
-                    else
-                    {
-                        IResult result;
-                        if (message.Channel == provider.ConsoleChannel())
-                            result = await BotOptionsCommands.ExecuteAsync(context, argsPos, Services);
-                        else
-                            result = await Commands.ExecuteAsync(context, argsPos, Services);
-
-                        if (!result.IsSuccess)
-                        {
-                            if (result.Error != CommandError.UnknownCommand)
-                            {
-                                Console.WriteLine(result.ErrorReason, Color.Red);
-                                Console.WriteLine("Command from:", Color.Red);
-                                Console.WriteLine(context.User.Username);
-                                Console.WriteLine("Command:", Color.Red);
-                                Console.WriteLine(message);
-                                Console.WriteLine("Command Status: Failed", Color.Red);
-                            }                            
-                            switch (result.Error)
-                            {
-                                case CommandError.UnknownCommand:
-                                    await context.Channel.SendMessageAsync($"Неизвестная команда. У нас недавно прошла русификация команд. Поэтому пропиши команду {serGuild.Prefix}Справка");
-                                    break;
-                                case CommandError.ParseFailed:
-                                    await context.Channel.SendMessageAsync("Навеверное ты неправильно ввел данные.");
-                                    break;
-                                case CommandError.BadArgCount:
-                                    await context.Channel.SendMessageAsync("Ты указал либо больше, либо меньше параметров чем нужно.");
-                                    break;
-                                case CommandError.ObjectNotFound:
-                                    await context.Channel.SendMessageAsync("Объект не найден");
-                                    break;
-                                case CommandError.MultipleMatches:
-                                    await context.Channel.SendMessageAsync("Обнаружены множественные совпадения. Проверь данные и введи команду повторно.");
-                                    break;
-                                case CommandError.UnmetPrecondition:
-                                    await context.Channel.SendMessageAsync("У тебя нет доступа к этой команде.");
-                                    break;
-                                case CommandError.Exception:
-                                    await context.Channel.SendMessageAsync("В результате выполнения команды было сгенерировано исключение.");
-                                    break;
-                                case CommandError.Unsuccessful:
-                                    await context.Channel.SendMessageAsync("Команда выполнена неудачно.");
-                                    break;
-                            }
-                        }                        
-                    }
+                    }                                            
                 }
             }
             catch (NullReferenceException)
@@ -221,8 +169,7 @@ namespace DiscordBot
 
         private async Task RegisterCommandsAsync()
         {           
-            await Commands.AddModuleAsync<Commands>(Services);
-            await BotOptionsCommands.AddModuleAsync<BotOptionsCommands>(Services);                        
+            await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), Services);                                   
             Client.MessageReceived += HandleCommandAsync;
         }
     }

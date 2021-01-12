@@ -1,4 +1,5 @@
 ﻿using Discord;
+using DiscordBot.Compiling;
 using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.CustomCommands;
@@ -56,10 +57,11 @@ namespace DiscordBot.Providers
             return Result.Success;
         }
 
-        public Task<Result> AddCommand(SocketCommandContext context)
+        public async Task AddCommand(SocketCommandContext context)
         {
             var message = context.Message;
             var files = message.Attachments;
+            var compiler = new Compiler(Compiler.CompilerTypeEnum.Command);
 
             foreach (var file in files)
             {
@@ -67,21 +69,16 @@ namespace DiscordBot.Providers
                 {
                     string url = file.Url;
                     WebClient web = new WebClient();                    
-                    var serial = new CustomCommandsSerial(context.Guild);
+                    var serial = new CustomCommandsSerial(context.Guild);                    
+                    var command = (CustomCommand)new XmlSerializer(typeof(CustomCommand)).Deserialize(web.OpenRead(url));
+                    command.GuildId = context.Guild.Id;
+                    var res = compiler.Result(context.Guild, context.Message);
 
-                    try
-                    {                        
-                        var command = (CustomCommand)new XmlSerializer(typeof(CustomCommand)).Deserialize(web.OpenRead(url));
-                        command.GuildId = context.Guild.Id;
-                        serial.SerializeCommand(command);                       
-                    }
-                    catch
-                    {
-                        return Task.FromResult(Result.Error);
-                    }
+                    await context.Channel.SendMessageAsync(embed: res);
+                    if(res.Color != Color.Red)
+                        serial.SerializeCommand(command);                                           
                 }
-            }
-            return Task.FromResult(Result.Success);
+            }            
         }
 
         public enum Result { Success, Error }

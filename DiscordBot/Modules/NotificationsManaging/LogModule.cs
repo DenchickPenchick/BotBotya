@@ -110,19 +110,7 @@ namespace DiscordBot.Modules.NotificationsManaging
                 if (channel != null)
                     await channel.SendMessageAsync(embed: builder.Build());
                 else 
-                {
-                    await new GuildProvider(guild).ConsoleChannel().SendMessageAsync(embed: new EmbedBuilder
-                    {
-                        Title = $"Возникла ошибка при логировании событий сервера {guild.Name}",
-                        Description = $"Не был найден канал для логирования (id: {serGuild.LoggerId}).\n" +
-                        $"Оповещения отключены. Чтобы включить их снова нужно ввести команду !EnableGuildNotifications.",
-                        Color = Color.Red,
-                        Footer = new EmbedFooterBuilder
-                        {
-                            IconUrl = Client.CurrentUser.GetAvatarUrl(),
-                            Text = $"{time}\nСервер: {(user as SocketGuildUser).Guild.Name}"
-                        }
-                    }.Build());
+                {                   
                     serGuild.GuildNotifications = false;
                     serGuild.LoggerId = default;
                     FilesProvider.RefreshGuild(serGuild);
