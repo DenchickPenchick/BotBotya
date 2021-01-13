@@ -22,6 +22,16 @@ namespace DiscordBot.Serializable
                     news += $"{i + 1}. {News[i]}\n";
                 for (int i = 0; i < Plans.Count; i++)
                     plans += $"{i + 1}. {Plans[i]}\n";
+                if (news == null && plans == null)
+                    return new EmbedBuilder
+                    {
+                        Title = "Новостей на данный момент нет."
+                    }.Build();
+                if (news == null)
+                    news = "Новостей нету.";
+                if (plans == null)
+                    plans = "Планов нету.";
+
                 return new EmbedBuilder
                 {
                     Title = "Новости",                    

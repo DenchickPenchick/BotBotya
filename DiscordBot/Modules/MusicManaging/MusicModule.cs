@@ -1,16 +1,12 @@
 ﻿using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
-using DiscordBot.FileWorking;
-using DiscordBot.GuildManaging;
 using DiscordBot.MusicOperations;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.EventArgs;
-using Console = Colorful.Console;
 
 namespace DiscordBot.Modules.MusicManaging
 {
@@ -18,7 +14,7 @@ namespace DiscordBot.Modules.MusicManaging
     {
         private readonly DiscordSocketClient Client;
         private readonly LavaNode LavaNode;
-        private LavaOperations LavaOperations;
+        private readonly LavaOperations LavaOperations;
 
         public MusicModule(IServiceProvider services)
         {
@@ -32,7 +28,7 @@ namespace DiscordBot.Modules.MusicManaging
 
         public void RunModule()
         {
-            
+            //Метод пустой, т.к. не нужно запускать setup методов для модулей.
         }        
         
         private async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
@@ -83,10 +79,18 @@ namespace DiscordBot.Modules.MusicManaging
             if (arg1.Id == Client.CurrentUser.Id)
             {
                 if (prevChannel != null && channel == null)
+                {
                     await LavaNode.LeaveAsync(prevChannel);
+                    LavaOperations.PlayersMessagesCollection[prevChannel.Guild] = null;
+                }
+
             }
-            else if (prevChannel != null && prevChannel.Users.Count == 1)            
-                await LavaNode.LeaveAsync(prevChannel);            
+            else if (prevChannel != null && prevChannel.Users.Count == 1)
+            {
+                await LavaNode.LeaveAsync(prevChannel);
+                LavaOperations.PlayersMessagesCollection[prevChannel.Guild] = null;
+            }
+            
         }
 
         private async Task LavaNode_OnTrackEnded(TrackEndedEventArgs arg)
@@ -94,6 +98,7 @@ namespace DiscordBot.Modules.MusicManaging
             var guild = arg.Player.VoiceState.VoiceChannel.Guild;
             var playerMessage = (RestUserMessage)LavaOperations.PlayersMessagesCollection[guild];
             await playerMessage.DeleteAsync();
+            LavaOperations.PlayersMessagesCollection[guild] = null;
         }        
     }
 }

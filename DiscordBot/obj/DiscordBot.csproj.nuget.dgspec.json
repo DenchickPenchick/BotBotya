@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Денис\\Source\\Repos\\DenchickPenchick\\BotBotya\\DiscordBot\\DiscordBot.csproj": {}
+    "C:\\Users\\Денис\\source\\repos\\DenchickPenchick\\BotBotya\\DiscordBot\\DiscordBot.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Денис\\Source\\Repos\\DenchickPenchick\\BotBotya\\DiscordBot\\DiscordBot.csproj": {
+    "C:\\Users\\Денис\\source\\repos\\DenchickPenchick\\BotBotya\\DiscordBot\\DiscordBot.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Денис\\Source\\Repos\\DenchickPenchick\\BotBotya\\DiscordBot\\DiscordBot.csproj",
+        "projectUniqueName": "C:\\Users\\Денис\\source\\repos\\DenchickPenchick\\BotBotya\\DiscordBot\\DiscordBot.csproj",
         "projectName": "DiscordBot",
-        "projectPath": "C:\\Users\\Денис\\Source\\Repos\\DenchickPenchick\\BotBotya\\DiscordBot\\DiscordBot.csproj",
+        "projectPath": "C:\\Users\\Денис\\source\\repos\\DenchickPenchick\\BotBotya\\DiscordBot\\DiscordBot.csproj",
         "packagesPath": "C:\\Users\\Денис\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Денис\\Source\\Repos\\DenchickPenchick\\BotBotya\\DiscordBot\\obj\\",
+        "outputPath": "C:\\Users\\Денис\\source\\repos\\DenchickPenchick\\BotBotya\\DiscordBot\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Денис\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -85,7 +85,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
         }
       }
     }

@@ -39,14 +39,14 @@ namespace TestBot
         [Command("Справка")]
         [Summary("позволяет узнать полный список команд")]
         public async Task Help()
-        {
+        {            
             int pos = 0;
             int posit = 1;
 
             List<string> pages = new List<string>
             {
                 null
-            };
+            };                        
 
             foreach (var command in Bot.Commands.Commands)
             {
@@ -216,7 +216,7 @@ namespace TestBot
                 await ch.SendMessageAsync(message);
             }
             await ReplyAsync("Рассылка произведена успешно.");
-        }
+        }        
         #endregion
 
         #region --МУЗЫКАЛЬНЫЕ КОМАНДЫ--
@@ -465,12 +465,13 @@ namespace TestBot
             var serGuild = FilesProvider.GetGuild(Context.Guild);
             var links = Context.Guild.GetTextChannel(serGuild.SystemChannels.LinksChannelId);
             var videos = Context.Guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId);
-            var rooms = Context.Guild.GetVoiceChannel(serGuild.SystemCategories.VoiceRoomsCategoryId);
+            var rooms = Context.Guild.GetVoiceChannel(serGuild.SystemCategories.VoiceRoomsCategoryId);            
+
             await ReplyAsync(embed: new EmbedBuilder
             {
                 Title = $"Конфигурация сервера {Context.Guild.Name}",
                 Description = $"Приветственные сообщения: {(serGuild.HelloMessageEnable == true ? "Включены" : "Выключены")}\n" +
-                $"Текст приветственного сообщения:\n{serGuild.HelloMessage}\n" +
+                $"{(serGuild.HelloMessage != null && serGuild.HelloMessageEnable == true ? $"Текст приветственного сообщения: {serGuild.HelloMessage}\n" : null)}" +
                 $"{(links == null && videos == null ? null : $"Каналы контента: {links?.Mention} {videos?.Mention}")}\n" +
                 $"{(rooms == null ? null : $"Категория с комнатами: {rooms.Name}")}",                
                 Color = Color.Blue,
@@ -517,6 +518,7 @@ namespace TestBot
                     await ReplyAsync(embed: res);
                     if (res.Color != Color.Red)
                     {
+                        serGuild.GuildId = Context.Guild.Id;
                         FilesProvider.RefreshGuild(serGuild);
                         await ReplyAsync("Сервер успешно сконфигурирован");
                     }                    
@@ -659,7 +661,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageChannels)]
         [Command("РежимКомнат")]
-        [Summary("включает/выключает режим приватных комнат (У тебя должно быть право на выполнение этой команды).")]
+        [Summary("создает канал с возможностью создания комнат. Возможно удаление комнат. У тебя должно быть право на выполнение этой команды.")]
         public async Task EnableRooms()
         {
             var serGuild = FilesProvider.GetGuild(Context.Guild);
@@ -675,7 +677,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageChannels)]
         [Command("КаналыКонтента")]
-        [Summary("включает/выключает каналы контента. У тебя должно быть право на выполнение этой команды.")]
+        [Summary("создает каналы контента. Возможно удаление каналов. У тебя должно быть право на выполнение этой команды.")]
         public async Task EnableContent()
         {
             var serGuild = FilesProvider.GetGuild(Context.Guild);
