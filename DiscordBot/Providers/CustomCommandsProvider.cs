@@ -1,4 +1,24 @@
-﻿using Discord;
+﻿/*
+_________________________________________________________________________
+|                                                                       |
+|██████╗░░█████╗░████████╗  ██████╗░░█████╗░████████╗██╗░░░██╗░█████╗░  |
+|██╔══██╗██╔══██╗╚══██╔══╝  ██╔══██╗██╔══██╗╚══██╔══╝╚██╗░██╔╝██╔══██╗  |
+|██████╦╝██║░░██║░░░██║░░░  ██████╦╝██║░░██║░░░██║░░░░╚████╔╝░███████║  |
+|██╔══██╗██║░░██║░░░██║░░░  ██╔══██╗██║░░██║░░░██║░░░░░╚██╔╝░░██╔══██║  |
+|██████╦╝╚█████╔╝░░░██║░░░  ██████╦╝╚█████╔╝░░░██║░░░░░░██║░░░██║░░██║  |
+|╚═════╝░░╚════╝░░░░╚═╝░░░  ╚═════╝░░╚════╝░░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝  |
+|______________________________________________________________________ |
+|Author: Denis Voitenko.                                                |
+|GitHub: https://github.com/DenchickPenchick                            |
+|DEV: https://dev.to/denchickpenchick                                   |
+|_____________________________Project__________________________________ |
+|GitHub: https://github.com/DenchickPenchick/BotBotya                   |
+|______________________________________________________________________ |
+|© Denis Voitenko                                                       |
+_________________________________________________________________________
+ */
+
+using Discord;
 using DiscordBot.Compiling;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -7,6 +27,7 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using DiscordBot.Serializable;
 
 namespace DiscordBot.Providers
 {
@@ -31,11 +52,11 @@ namespace DiscordBot.Providers
             {
                 switch (action)
                 {
-                    case CustomCommand.Action.Message:
+                    case SerializableCommand.Action.Message:
                         await context.Channel.SendMessageAsync(command.Message);
                         break;
-                    case CustomCommand.Action.Kick:
-                        if (command.Actions.Contains(CustomCommand.Action.Ban))
+                    case SerializableCommand.Action.Kick:
+                        if (command.Actions.Contains(SerializableCommand.Action.Ban))
                             return Result.Error;
                         var usersToKick = context.Message.MentionedUsers;
                         if (usersToKick.Count == 0)                        
@@ -43,8 +64,8 @@ namespace DiscordBot.Providers
                         foreach (var user in usersToKick)                        
                             await (user as SocketGuildUser).KickAsync();                        
                         break;
-                    case CustomCommand.Action.Ban:
-                        if (command.Actions.Contains(CustomCommand.Action.Kick))
+                    case SerializableCommand.Action.Ban:
+                        if (command.Actions.Contains(SerializableCommand.Action.Kick))
                             return Result.Error;
                         var usersToBan = context.Message.MentionedUsers;
                         if (usersToBan.Count == 0)
@@ -70,7 +91,7 @@ namespace DiscordBot.Providers
                     string url = file.Url;
                     WebClient web = new WebClient();                    
                     var serial = new CustomCommandsSerial(context.Guild);                    
-                    var command = (CustomCommand)new XmlSerializer(typeof(CustomCommand)).Deserialize(web.OpenRead(url));
+                    var command = (SerializableCommand)new XmlSerializer(typeof(SerializableCommand)).Deserialize(web.OpenRead(url));
                     command.GuildId = context.Guild.Id;
                     var res = compiler.Result(context.Guild, context.Message);
 

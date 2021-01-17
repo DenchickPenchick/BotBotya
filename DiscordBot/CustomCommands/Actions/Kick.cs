@@ -18,11 +18,24 @@ _________________________________________________________________________
 _________________________________________________________________________
  */
 
-namespace DiscordBot.Serializable
+using System.Collections.Generic;
+using Discord;
+
+namespace DiscordBot.CustomCommands.Actions
 {
-    public class SerializableConfig
+    public class Kick : IAction
     {
-        public string Token { get; set; } = "NOTSETED";
-        public string Path { get; set; } = "NOTSETED";
+        private readonly IEnumerable<IGuildUser> users = null;
+
+        public Kick(IEnumerable<IGuildUser> users)
+        {
+            this.users = users;
+        }
+
+        public async void DoAction()
+        {
+            foreach (var user in users)            
+                await user.KickAsync();            
+        }
     }
 }

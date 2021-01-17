@@ -18,11 +18,10 @@ _________________________________________________________________________
 _________________________________________________________________________
  */
 
-namespace DiscordBot.Serializable
+namespace DiscordBot.CustomCommands
 {
-    public class SerializableConfig
+    public interface IAction
     {
-        public string Token { get; set; } = "NOTSETED";
-        public string Path { get; set; } = "NOTSETED";
+        void DoAction();
     }
 }

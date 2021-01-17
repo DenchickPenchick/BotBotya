@@ -1,5 +1,26 @@
-﻿using Discord.WebSocket;
+﻿/*
+_________________________________________________________________________
+|                                                                       |
+|██████╗░░█████╗░████████╗  ██████╗░░█████╗░████████╗██╗░░░██╗░█████╗░  |
+|██╔══██╗██╔══██╗╚══██╔══╝  ██╔══██╗██╔══██╗╚══██╔══╝╚██╗░██╔╝██╔══██╗  |
+|██████╦╝██║░░██║░░░██║░░░  ██████╦╝██║░░██║░░░██║░░░░╚████╔╝░███████║  |
+|██╔══██╗██║░░██║░░░██║░░░  ██╔══██╗██║░░██║░░░██║░░░░░╚██╔╝░░██╔══██║  |
+|██████╦╝╚█████╔╝░░░██║░░░  ██████╦╝╚█████╔╝░░░██║░░░░░░██║░░░██║░░██║  |
+|╚═════╝░░╚════╝░░░░╚═╝░░░  ╚═════╝░░╚════╝░░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝  |
+|______________________________________________________________________ |
+|Author: Denis Voitenko.                                                |
+|GitHub: https://github.com/DenchickPenchick                            |
+|DEV: https://dev.to/denchickpenchick                                   |
+|_____________________________Project__________________________________ |
+|GitHub: https://github.com/DenchickPenchick/BotBotya                   |
+|______________________________________________________________________ |
+|© Denis Voitenko                                                       |
+_________________________________________________________________________
+ */
+
+using Discord.WebSocket;
 using DiscordBot.FileWorking;
+using DiscordBot.Serializable;
 using System.IO;
 using System.Xml.Serialization;
 
@@ -14,19 +35,19 @@ namespace DiscordBot.CustomCommands
             Guild = guild;
         }
 
-        public void SerializeCommand(CustomCommand command)
+        public void SerializeCommand(SerializableCommand command)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(CustomCommands));
-            CustomCommands commands;
-            string pathToFile = $"{FilesProvider.GetBotDirectoryPath()}/CustomCommandsDirectory/{Guild.Id}.xml";
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializableCommands));
+            SerializableCommands commands;
+            string pathToFile = $"{FilesProvider.GetBotDirectoryPath()}/SerializableCommandsDirectory/{Guild.Id}.xml";
 
             if (!File.Exists(pathToFile))
                 using (FileStream fs = new FileStream(pathToFile, FileMode.Create))
-                    new XmlSerializer(typeof(CustomCommands)).Serialize(fs, new CustomCommands());
+                    new XmlSerializer(typeof(SerializableCommands)).Serialize(fs, new SerializableCommands());
 
             using (StreamReader reader = new StreamReader(pathToFile))
             {
-                commands = (CustomCommands)new XmlSerializer(typeof(CustomCommands)).Deserialize(reader);
+                commands = (SerializableCommands)new XmlSerializer(typeof(SerializableCommands)).Deserialize(reader);
             }
             command.Name = command.Name.Replace(" ", string.Empty);
             commands.Commands.Add(command);
@@ -39,9 +60,9 @@ namespace DiscordBot.CustomCommands
         public void DeleteCommand(string name)
         {
             var commands = GetCustomCommands();
-            XmlSerializer serializer = new XmlSerializer(typeof(CustomCommands));
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializableCommands));
             var command = GetCustomCommand(name);
-            string pathToFile = $"{FilesProvider.GetBotDirectoryPath()}/CustomCommandsDirectory/{Guild.Id}.xml";
+            string pathToFile = $"{FilesProvider.GetBotDirectoryPath()}/SerializableCommandsDirectory/{Guild.Id}.xml";
 
             if (File.Exists(pathToFile))
                 using (StreamWriter writer = new StreamWriter(pathToFile))                
@@ -53,18 +74,18 @@ namespace DiscordBot.CustomCommands
                     }                                    
         }
 
-        public CustomCommands GetCustomCommands()
+        public SerializableCommands GetCustomCommands()
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(CustomCommands));
-            string pathToFile = $"{FilesProvider.GetBotDirectoryPath()}/CustomCommandsDirectory/{Guild.Id}.xml";
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializableCommands));
+            string pathToFile = $"{FilesProvider.GetBotDirectoryPath()}/SerializableCommandsDirectory/{Guild.Id}.xml";
             if (File.Exists(pathToFile))
                 using (StreamReader reader = new StreamReader(pathToFile))
-                    return (CustomCommands)serializer.Deserialize(reader);            
+                    return (SerializableCommands)serializer.Deserialize(reader);            
             else
                 return null;
         }
 
-        public CustomCommand GetCustomCommand(string name)
+        public SerializableCommand GetCustomCommand(string name)
         {
             var commands = GetCustomCommands().Commands;
 

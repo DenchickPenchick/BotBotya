@@ -18,11 +18,24 @@ _________________________________________________________________________
 _________________________________________________________________________
  */
 
-namespace DiscordBot.Serializable
+using Discord;
+
+namespace DiscordBot.CustomCommands.Actions
 {
-    public class SerializableConfig
+    public class Message : IAction
     {
-        public string Token { get; set; } = "NOTSETED";
-        public string Path { get; set; } = "NOTSETED";
+        private readonly string message = null;
+        private readonly ITextChannel textChannel = null;
+
+        public Message(string message, ITextChannel channel)
+        {
+            this.message = message;
+            textChannel = channel;
+        }
+
+        public async void DoAction()
+        {
+            await textChannel.SendMessageAsync(message);
+        }
     }
 }

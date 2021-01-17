@@ -1,4 +1,24 @@
-﻿using Discord;
+﻿/*
+_________________________________________________________________________
+|                                                                       |
+|██████╗░░█████╗░████████╗  ██████╗░░█████╗░████████╗██╗░░░██╗░█████╗░  |
+|██╔══██╗██╔══██╗╚══██╔══╝  ██╔══██╗██╔══██╗╚══██╔══╝╚██╗░██╔╝██╔══██╗  |
+|██████╦╝██║░░██║░░░██║░░░  ██████╦╝██║░░██║░░░██║░░░░╚████╔╝░███████║  |
+|██╔══██╗██║░░██║░░░██║░░░  ██╔══██╗██║░░██║░░░██║░░░░░╚██╔╝░░██╔══██║  |
+|██████╦╝╚█████╔╝░░░██║░░░  ██████╦╝╚█████╔╝░░░██║░░░░░░██║░░░██║░░██║  |
+|╚═════╝░░╚════╝░░░░╚═╝░░░  ╚═════╝░░╚════╝░░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝  |
+|______________________________________________________________________ |
+|Author: Denis Voitenko.                                                |
+|GitHub: https://github.com/DenchickPenchick                            |
+|DEV: https://dev.to/denchickpenchick                                   |
+|_____________________________Project__________________________________ |
+|GitHub: https://github.com/DenchickPenchick/BotBotya                   |
+|______________________________________________________________________ |
+|© Denis Voitenko                                                       |
+_________________________________________________________________________
+ */
+
+using Discord;
 using Discord.WebSocket;
 using System.IO;
 using System.Text.Json;
@@ -9,12 +29,10 @@ using System.Xml.Serialization;
 using DiscordBot.Modules.FileManaging;
 using System.Threading.Tasks;
 using DiscordBot.FileWorking;
-using DiscordBot.GuildManaging;
 using System.Collections.Generic;
 using DiscordBot.Serializable;
 using System;
 using System.Text;
-using System.Threading;
 using DiscordBot.Providers;
 
 namespace DiscordBot

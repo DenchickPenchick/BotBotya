@@ -18,11 +18,24 @@ _________________________________________________________________________
 _________________________________________________________________________
  */
 
-namespace DiscordBot.Serializable
+using Discord;
+using System.Collections.Generic;
+
+namespace DiscordBot.CustomCommands.Actions
 {
-    public class SerializableConfig
+    public class Ban : IAction
     {
-        public string Token { get; set; } = "NOTSETED";
-        public string Path { get; set; } = "NOTSETED";
+        private readonly IEnumerable<IGuildUser> users = null;
+
+        public Ban(IEnumerable<IGuildUser> users)
+        {
+            this.users = users;
+        }
+
+        public async void DoAction()
+        {
+            foreach (var user in users)
+                await user.BanAsync();
+        }
     }
 }

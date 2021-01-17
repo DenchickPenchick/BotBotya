@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "IIl6oCeF9fy1nHCB8ZeSqbBm3iU8tb4cDMT/Oo8j6n4/Henyr5fMhMDc2bbNgrJY13IsG4WkxlhseimPrSMiiw==",
+  "dgSpecHash": "d+s/xoTmCRr9iiWHQ06raYihjHKF6xjfA8wUNVF68CofuXFI29W8dQ5D72rkB5UlMJ/gj+E+oU7en3pE6G9voA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Денис\\source\\repos\\DenchickPenchick\\BotBotya\\DiscordBot\\DiscordBot.csproj",
+  "projectFilePath": "C:\\Users\\Денис\\source\\repos\\BotBotya\\DiscordBot\\DiscordBot.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Денис\\.nuget\\packages\\colorful.console\\1.2.15\\colorful.console.1.2.15.nupkg.sha512",
     "C:\\Users\\Денис\\.nuget\\packages\\discord.addons.interactive\\2.0.0\\discord.addons.interactive.2.0.0.nupkg.sha512",

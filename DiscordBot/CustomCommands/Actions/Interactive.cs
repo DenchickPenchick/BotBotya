@@ -18,11 +18,24 @@ _________________________________________________________________________
 _________________________________________________________________________
  */
 
-namespace DiscordBot.Serializable
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Discord;
+using Discord.Addons.Interactive;
+
+namespace DiscordBot.CustomCommands.Actions
 {
-    public class SerializableConfig
+    public class Interactive : IAction
     {
-        public string Token { get; set; } = "NOTSETED";
-        public string Path { get; set; } = "NOTSETED";
+        public Interactive(Intera)
+        { 
+        
+        }
+
+        public void DoAction()
+        {
+            
+        }
     }
 }

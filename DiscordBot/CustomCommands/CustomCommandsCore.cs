@@ -18,11 +18,13 @@ _________________________________________________________________________
 _________________________________________________________________________
  */
 
-namespace DiscordBot.Serializable
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace DiscordBot.CustomCommands
 {
-    public class SerializableConfig
+    public class CustomCommandsCore
     {
-        public string Token { get; set; } = "NOTSETED";
-        public string Path { get; set; } = "NOTSETED";
     }
 }

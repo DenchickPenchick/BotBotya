@@ -1,4 +1,24 @@
-﻿using Discord;
+﻿/*
+_________________________________________________________________________
+|                                                                       |
+|██████╗░░█████╗░████████╗  ██████╗░░█████╗░████████╗██╗░░░██╗░█████╗░  |
+|██╔══██╗██╔══██╗╚══██╔══╝  ██╔══██╗██╔══██╗╚══██╔══╝╚██╗░██╔╝██╔══██╗  |
+|██████╦╝██║░░██║░░░██║░░░  ██████╦╝██║░░██║░░░██║░░░░╚████╔╝░███████║  |
+|██╔══██╗██║░░██║░░░██║░░░  ██╔══██╗██║░░██║░░░██║░░░░░╚██╔╝░░██╔══██║  |
+|██████╦╝╚█████╔╝░░░██║░░░  ██████╦╝╚█████╔╝░░░██║░░░░░░██║░░░██║░░██║  |
+|╚═════╝░░╚════╝░░░░╚═╝░░░  ╚═════╝░░╚════╝░░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝  |
+|______________________________________________________________________ |
+|Author: Denis Voitenko.                                                |
+|GitHub: https://github.com/DenchickPenchick                            |
+|DEV: https://dev.to/denchickpenchick                                   |
+|_____________________________Project__________________________________ |
+|GitHub: https://github.com/DenchickPenchick/BotBotya                   |
+|______________________________________________________________________ |
+|© Denis Voitenko                                                       |
+_________________________________________________________________________
+ */
+
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
@@ -20,6 +40,7 @@ using DiscordBot.Modules.FileManaging;
 using System.Net;
 using System.Xml;
 using DiscordBot;
+using DiscordBot.Serializable;
 
 namespace TestBot
 {
@@ -321,13 +342,13 @@ namespace TestBot
                 foreach (var action in actions)                
                     switch (action)
                     {
-                        case CustomCommand.Action.Message:
+                        case SerializableCommand.Action.Message:
                             allComm += $"\n{arg - 1}.{argPos++}) Отправляет сообщение ({command.Message}).";
                             break;
-                        case CustomCommand.Action.Kick:
+                        case SerializableCommand.Action.Kick:
                             allComm += $"\n{arg - 1}.{argPos++}) Кикает с сервера.";
                             break;
-                        case CustomCommand.Action.Ban:
+                        case SerializableCommand.Action.Ban:
                             allComm += $"\n{arg - 1}.{argPos++}) Банит на сервере.";
                             break;
                     }                
@@ -346,7 +367,7 @@ namespace TestBot
         [Summary("конфигурирует команду и возвращает XML файл.")]
         public async Task ConfigureCommand()
         {
-            List<CustomCommand.Action> actions = new List<CustomCommand.Action>();
+            List<SerializableCommand.Action> actions = new List<SerializableCommand.Action>();
             Compiler compiler = new Compiler(Compiler.CompilerTypeEnum.Command);
             string name;
             string message = null;
@@ -371,15 +392,15 @@ namespace TestBot
                     switch (replyForAction.Content.ToLower())
                     {
                         case "сообщение":
-                            actions.Add(CustomCommand.Action.Message);
+                            actions.Add(SerializableCommand.Action.Message);
                             await ReplyAsync("Действие добавлено");
                             break;
                         case "кик":
-                            actions.Add(CustomCommand.Action.Kick);
+                            actions.Add(SerializableCommand.Action.Kick);
                             await ReplyAsync("Действие добавлено");
                             break;
                         case "бан":
-                            actions.Add(CustomCommand.Action.Ban);
+                            actions.Add(SerializableCommand.Action.Ban);
                             await ReplyAsync("Действие добавлено");
                             break;
                         case "стоп":
@@ -399,7 +420,7 @@ namespace TestBot
                 }
             }
 
-            if (actions.Contains(CustomCommand.Action.Message))
+            if (actions.Contains(SerializableCommand.Action.Message))
             {
                 await ReplyAsync("Введи сообщение, которое ты хочешь отправить");
                 var replyForMessage = await NextMessageAsync();
@@ -407,7 +428,7 @@ namespace TestBot
                     message = replyForMessage.Content;
             }                        
 
-            var command = new CustomCommand
+            var command = new SerializableCommand
             {
                 Name = name,
                 Actions = actions,
@@ -415,7 +436,7 @@ namespace TestBot
                 Message = message
             };
             using FileStream stream = new FileStream($"{Context.Guild.Id}.xml", FileMode.CreateNew);
-            XmlSerializer serializer = new XmlSerializer(typeof(CustomCommand));
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializableCommand));
             serializer.Serialize(stream, command);
             stream.Close();
             var mess = await Context.Channel.SendFileAsync($"{Context.Guild.Id}.xml", "Твой файл. Если ты хочешь добавить данную команду, тогда скачай файл и пропиши соответствующую команду.");
