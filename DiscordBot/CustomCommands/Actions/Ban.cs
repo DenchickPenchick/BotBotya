@@ -39,7 +39,10 @@ namespace DiscordBot.CustomCommands.Actions
             List<string> usersL = new List<string>();
             foreach (var user in users)
             {
-                await user.BanAsync();
+                try
+                { await user.BanAsync(); }
+                catch { }
+                
                 usersL.Add(user.Username);
             }
             return usersL;

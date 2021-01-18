@@ -22,16 +22,13 @@ using System;
 using System.Collections.Generic;
 
 namespace DiscordBot.Serializable
-{
-    [Serializable]
+{    
     public class SerializableCommand
     {
         public ulong GuildId { get; set; } = 0;
         public string Name { get; set; } = null;
-        public List<Tuple<ActionType, object>> Actions { get; set; } = new List<Tuple<ActionType, object>>();
-        public List<string> Variables { get; set; } = new List<string>();
-
-        public string Message { get; set; }
-        public enum ActionType { Ban, Interactive, Kick, Message }
+        public List<ValueTuple<CommandActionType, object>> Actions { get; set; } = new List<ValueTuple<CommandActionType, object>>();        
+                
+        public enum CommandActionType { Ban, Interactive, Kick, Message }
     }
 }

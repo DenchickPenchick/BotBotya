@@ -41,6 +41,7 @@ using System.Net;
 using System.Xml;
 using DiscordBot;
 using DiscordBot.Serializable;
+using DiscordBot.Serializable.SerializableActions;
 
 namespace TestBot
 {
@@ -340,16 +341,19 @@ namespace TestBot
                 var actions = command.Actions;
                 int argPos = 1;
                 foreach (var action in actions)                
-                    switch (action)
+                    switch (action.Item1)
                     {
-                        case SerializableCommand.Action.Message:
-                            allComm += $"\n{arg - 1}.{argPos++}) Отправляет сообщение ({command.Message}).";
+                        case SerializableCommand.CommandActionType.Message:
+                            allComm += $"\n{arg - 1}.{argPos++}) Отправляет сообщение ({(action.Item2 as SerializableMessage).Message}).";
                             break;
-                        case SerializableCommand.Action.Kick:
+                        case SerializableCommand.CommandActionType.Kick:
                             allComm += $"\n{arg - 1}.{argPos++}) Кикает с сервера.";
                             break;
-                        case SerializableCommand.Action.Ban:
+                        case SerializableCommand.CommandActionType.Ban:
                             allComm += $"\n{arg - 1}.{argPos++}) Банит на сервере.";
+                            break;
+                        case SerializableCommand.CommandActionType.Interactive:
+                            allComm += $"\n{arg - 1}.{argPos++}) Ожидает нового сообщения.";
                             break;
                     }                
             }
@@ -363,86 +367,41 @@ namespace TestBot
             }.Build());
         }
 
-        [Command("СконфигурироватьКоманду", RunMode = RunMode.Async)]
-        [Summary("конфигурирует команду и возвращает XML файл.")]
-        public async Task ConfigureCommand()
+        [Command("ПримерКоманды")]
+        [Summary("отправляет XML файл с примером кастомной команды")]
+        public async Task SendExample()
         {
-            List<SerializableCommand.Action> actions = new List<SerializableCommand.Action>();
-            Compiler compiler = new Compiler(Compiler.CompilerTypeEnum.Command);
-            string name;
-            string message = null;
-            bool actionsEntering = false;
-            await ReplyAsync("Введи название команды");
-            var replyForName = await NextMessageAsync();
+            string name = "example.xml";
 
-            if (replyForName != null)
-                name = replyForName.Content.Replace(" ", string.Empty);
-            else
+            try
             {
-                await ReplyAsync("Ответ не получен в течение 5 минут. Команда аннулированна");
-                return;
-            }
-
-            while (!actionsEntering)
-            {
-                await ReplyAsync("Добавить действие (Сообщение (отправить сообщение), Кик(Кикнуть пользователя), Бан(Забанить пользователя)). Если все действия добавлены введи \"Стоп\". Если нужно остановить процесс введи \"Остановить\"");
-                var replyForAction = await NextMessageAsync();
-                if (replyForAction != null)
+                var example = new SerializableCommand
                 {
-                    switch (replyForAction.Content.ToLower())
-                    {
-                        case "сообщение":
-                            actions.Add(SerializableCommand.Action.Message);
-                            await ReplyAsync("Действие добавлено");
-                            break;
-                        case "кик":
-                            actions.Add(SerializableCommand.Action.Kick);
-                            await ReplyAsync("Действие добавлено");
-                            break;
-                        case "бан":
-                            actions.Add(SerializableCommand.Action.Ban);
-                            await ReplyAsync("Действие добавлено");
-                            break;
-                        case "стоп":
-                            actionsEntering = true;
-                            break;
-                        case "остановить":
-                            return;
-                        default:
-                            await ReplyAsync("Неверное действие");
-                            break;
-                    }                    
-                }                
-                else
+                    GuildId = Context.Guild.Id,
+                    Name = "ПриветМир",
+                    Actions = new List<ValueTuple<SerializableCommand.CommandActionType, object>>
+                { new ValueTuple<SerializableCommand.CommandActionType, object>(SerializableCommand.CommandActionType.Message, new SerializableMessage { Message = "Привет мир!", DataFromBuffer = false }) }
+                };
+                using (FileStream fs = new FileStream(name, FileMode.Create))
                 {
-                    await ReplyAsync("Ответ не получен в течение 5 минут. Команда аннулированна");
-                    return;
+                    var xml = new XmlSerializer(typeof(SerializableCommand), new[] { typeof(SerializableBan), typeof(SerializableKick), typeof(SerializableMessage) });
+                    xml.Serialize(fs, example);
                 }
+
+                await Context.Channel.SendFileAsync(name, "Пример кастомной команды");
+
+                File.Delete(name);
             }
-
-            if (actions.Contains(SerializableCommand.Action.Message))
+            catch (Exception ex)
             {
-                await ReplyAsync("Введи сообщение, которое ты хочешь отправить");
-                var replyForMessage = await NextMessageAsync();
-                if (replyForName != null)
-                    message = replyForMessage.Content;
-            }                        
-
-            var command = new SerializableCommand
+                Console.WriteLine($"Ex: {ex}");
+            }
+            finally
             {
-                Name = name,
-                Actions = actions,
-                GuildId = Context.Guild.Id,
-                Message = message
-            };
-            using FileStream stream = new FileStream($"{Context.Guild.Id}.xml", FileMode.CreateNew);
-            XmlSerializer serializer = new XmlSerializer(typeof(SerializableCommand));
-            serializer.Serialize(stream, command);
-            stream.Close();
-            var mess = await Context.Channel.SendFileAsync($"{Context.Guild.Id}.xml", "Твой файл. Если ты хочешь добавить данную команду, тогда скачай файл и пропиши соответствующую команду.");
-            await ReplyAsync(embed: compiler.Result(Context.Guild, mess));
-            File.Delete($"{Context.Guild.Id}.xml");
-        }
+                if (File.Exists(name))
+                    File.Delete(name);
+            }
+        }        
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("ДобавитьКоманду")]
@@ -459,12 +418,9 @@ namespace TestBot
         [Summary("позволяет использовать кастомную команду.")]
         public async Task UseCommand(string name, params string[] args)
         {
-            var provider = new CustomCommandsProvider(Context.Guild);
+            CustomCommandsCore core = new CustomCommandsCore(Context);
 
-            var res = await provider.ExecuteCustomCommandAsync(Context, name);
-
-            if (res == CustomCommandsProvider.Result.Error)
-                await ReplyAsync("Возможно ты указал не все параметры, которые нужны команде. Либо же в команде стоят две (или более) несовместимых действий (например, кик и бан). Также команды может вообще не существовать!");
+            await core.ExecuteCommand(name);            
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
@@ -534,15 +490,27 @@ namespace TestBot
                 bool deserializable = serializer.CanDeserialize(new XmlTextReader(webClient.OpenRead(attachedFile.Url)));
                 if (deserializable)
                 {
-                    var serGuild = (SerializableGuild)serializer.Deserialize(webClient.OpenRead(attachedFile.Url));
-                    var res = compiler.Result(Context.Guild, Context.Message);
-                    await ReplyAsync(embed: res);
-                    if (res.Color != Color.Red)
+                    try
                     {
-                        serGuild.GuildId = Context.Guild.Id;
-                        FilesProvider.RefreshGuild(serGuild);
-                        await ReplyAsync("Сервер успешно сконфигурирован");
-                    }                    
+                        var serGuild = (SerializableGuild)serializer.Deserialize(webClient.OpenRead(attachedFile.Url));
+                        var res = compiler.Result(Context.Guild, Context.Message);
+                        await ReplyAsync(embed: res);
+                        if (res.Color != Color.Red)
+                        {
+                            serGuild.GuildId = Context.Guild.Id;
+                            FilesProvider.RefreshGuild(serGuild);
+                            await ReplyAsync("Сервер успешно сконфигурирован");
+                        }
+                    }
+                    catch
+                    {
+                        await ReplyAsync(embed: new CompilerEmbed
+                        { 
+                        Errors = new List<ErrorField>
+                        { 
+                        new ErrorField("Нарушена типовая структура сервера. Возможный вариант решения проблемы: проверьте написание команд, тегов и т.д.")
+                        }}.Build());
+                    }
                 }
                 else
                     await ReplyAsync("Неправильно сформирован файл");

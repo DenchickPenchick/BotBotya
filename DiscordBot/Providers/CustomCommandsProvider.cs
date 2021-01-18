@@ -28,6 +28,8 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using DiscordBot.Serializable;
+using DiscordBot.Serializable.SerializableActions;
+using System.Collections.Generic;
 
 namespace DiscordBot.Providers
 {
@@ -54,11 +56,22 @@ namespace DiscordBot.Providers
                     string url = file.Url;
                     WebClient web = new WebClient();                    
                     var serial = new CustomCommandsSerial(context.Guild);                    
-                    var command = (SerializableCommand)new XmlSerializer(typeof(SerializableCommand)).Deserialize(web.OpenRead(url));
+                    var command = (SerializableCommand)new XmlSerializer(typeof(SerializableCommand), new[] { typeof(SerializableBan), typeof(SerializableKick), typeof(SerializableMessage) }).Deserialize(web.OpenRead(url));
                     command.GuildId = context.Guild.Id;
                     var res = compiler.Result(context.Guild, context.Message);
 
-                    await context.Channel.SendMessageAsync(embed: res);
+                    List<string> CommandsNames = new List<string>();
+
+                    foreach (var _command in serial.GetCustomCommands().Commands)
+                    {
+                        CommandsNames.Add(_command.Name);
+                    }
+
+                    if (CommandsNames.Contains(command.Name))
+                        await context.Channel.SendMessageAsync($"Команда с именем {command.Name} уже существует.");
+
+                    await context.Channel.SendMessageAsync(embed: res);                    
+
                     if(res.Color != Color.Red)
                         serial.SerializeCommand(command);                                           
                 }
