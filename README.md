@@ -20,6 +20,4 @@
 
 Если Вы хотите создать какой-нибудь модуль, команду или что-нибудь подобное, тогда прочтите wiki.
 
-<a href="https://top.gg/bot/749991391639109673">
-    <img src="https://top.gg/api/widget/749991391639109673.svg" alt="Ботя" />
-</a>
+<img src="https://top.gg/api/widget/status/749991391639109673.svg">
