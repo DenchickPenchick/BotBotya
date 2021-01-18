@@ -19,11 +19,13 @@ _________________________________________________________________________
  */
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Discord;
+using DiscordBot.CustomCommands.Entities;
 
 namespace DiscordBot.CustomCommands.Actions
 {
-    public class Kick : IAction
+    public class Kick : IAction<IEnumerable<string>>
     {
         private readonly IEnumerable<IGuildUser> users = null;
 
@@ -32,10 +34,15 @@ namespace DiscordBot.CustomCommands.Actions
             this.users = users;
         }
 
-        public async void DoAction()
+        public async Task<IEnumerable<string>> DoAction()
         {
-            foreach (var user in users)            
-                await user.KickAsync();            
+            List<string> usersL = new List<string>();
+            foreach (var user in users)
+            {
+                await user.KickAsync();
+                usersL.Add(user.Username);
+            }
+            return usersL;
         }
     }
 }

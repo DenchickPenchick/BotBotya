@@ -18,53 +18,13 @@ _________________________________________________________________________
 _________________________________________________________________________
  */
 
-using Discord;
-using DiscordBot.Compiling;
-using Discord.Commands;
-using Discord.WebSocket;
-using DiscordBot.CustomCommands;
-using System.IO;
-using System.Net;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using DiscordBot.Serializable;
+using System;
 
-namespace DiscordBot.Providers
+namespace DiscordBot.Serializable.SerializableActions
 {
-    public class CustomCommandsProvider
-    {        
-        private SocketGuild Guild { get; set; }
-        private CustomCommandsSerial CustomCommandsSerial { get => new CustomCommandsSerial(Guild); }
-
-        public CustomCommandsProvider(SocketGuild guild)
-        {
-            Guild = guild;            
-        }
-
-        public async Task AddCommand(SocketCommandContext context)
-        {
-            var message = context.Message;
-            var files = message.Attachments;
-            var compiler = new Compiler(Compiler.CompilerTypeEnum.Command);
-
-            foreach (var file in files)
-            {
-                if (Path.GetExtension(file.Filename) == ".xml")
-                {
-                    string url = file.Url;
-                    WebClient web = new WebClient();                    
-                    var serial = new CustomCommandsSerial(context.Guild);                    
-                    var command = (SerializableCommand)new XmlSerializer(typeof(SerializableCommand)).Deserialize(web.OpenRead(url));
-                    command.GuildId = context.Guild.Id;
-                    var res = compiler.Result(context.Guild, context.Message);
-
-                    await context.Channel.SendMessageAsync(embed: res);
-                    if(res.Color != Color.Red)
-                        serial.SerializeCommand(command);                                           
-                }
-            }            
-        }
-
-        public enum Result { Success, Error }
+    [Serializable]
+    public class SerializableKick : IBufferable
+    {
+        public bool DataFromBuffer { get; set; } = false;
     }
 }

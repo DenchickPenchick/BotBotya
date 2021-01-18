@@ -18,7 +18,6 @@ _________________________________________________________________________
 _________________________________________________________________________
  */
 
-using DiscordBot.CustomCommands;
 using System;
 using System.Collections.Generic;
 
@@ -29,10 +28,10 @@ namespace DiscordBot.Serializable
     {
         public ulong GuildId { get; set; } = 0;
         public string Name { get; set; } = null;
-        public List<IAction> Actions { get; set; } = new List<IAction>();
+        public List<Tuple<ActionType, object>> Actions { get; set; } = new List<Tuple<ActionType, object>>();
+        public List<string> Variables { get; set; } = new List<string>();
 
         public string Message { get; set; }
-
-        //public enum Action { Message, Kick, Ban }
+        public enum ActionType { Ban, Interactive, Kick, Message }
     }
 }

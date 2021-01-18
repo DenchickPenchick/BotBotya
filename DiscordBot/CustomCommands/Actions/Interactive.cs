@@ -18,24 +18,35 @@ _________________________________________________________________________
 _________________________________________________________________________
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Discord;
 using Discord.Addons.Interactive;
+using Discord.Commands;
+using DiscordBot.CustomCommands.Entities;
+using System;
+using System.Threading.Tasks;
 
 namespace DiscordBot.CustomCommands.Actions
 {
-    public class Interactive : IAction
+    [Serializable]
+    public class Interactive : IAction<string>, IVariable<int>
     {
-        public Interactive(Intera)
-        { 
-        
+        private readonly SocketCommandContext context;
+
+        public Interactive(SocketCommandContext ctx)
+        {
+            context = ctx;
         }
 
-        public void DoAction()
-        {
-            
+        public int Value { get; set; }
+
+        public async Task<string> DoAction()
+        {            
+            var client = context.Client;
+            var interactive = new InteractiveService(client);
+            var message = await interactive.NextMessageAsync(context);
+
+            if (message != null)
+                return message.Content;
+            return null;
         }
     }
 }

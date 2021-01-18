@@ -18,10 +18,10 @@ _________________________________________________________________________
 _________________________________________________________________________
  */
 
-namespace DiscordBot.CustomCommands
+namespace DiscordBot.Serializable.SerializableActions
 {
-    public interface IAction
+    public interface IBufferable
     {
-        void DoAction();
+        bool DataFromBuffer { get; set; }
     }
 }

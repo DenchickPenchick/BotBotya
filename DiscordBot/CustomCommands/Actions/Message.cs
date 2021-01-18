@@ -19,23 +19,27 @@ _________________________________________________________________________
  */
 
 using Discord;
+using Discord.WebSocket;
+using DiscordBot.CustomCommands.Entities;
+using System.Threading.Tasks;
 
 namespace DiscordBot.CustomCommands.Actions
 {
-    public class Message : IAction
+    public class Message : IAction<ulong>
     {
         private readonly string message = null;
-        private readonly ITextChannel textChannel = null;
+        private readonly ISocketMessageChannel textChannel = null;
 
-        public Message(string message, ITextChannel channel)
+        public Message(string message, ISocketMessageChannel channel)
         {
             this.message = message;
             textChannel = channel;
         }
 
-        public async void DoAction()
+        public async Task<ulong> DoAction()
         {
-            await textChannel.SendMessageAsync(message);
+            var mess =  await textChannel.SendMessageAsync(message);
+            return mess.Id;
         }
     }
 }
