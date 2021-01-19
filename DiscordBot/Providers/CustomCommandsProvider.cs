@@ -59,13 +59,14 @@ namespace DiscordBot.Providers
                     var command = (SerializableCommand)new XmlSerializer(typeof(SerializableCommand), new[] { typeof(SerializableBan), typeof(SerializableKick), typeof(SerializableMessage) }).Deserialize(web.OpenRead(url));
                     command.GuildId = context.Guild.Id;
                     var res = compiler.Result(context.Guild, context.Message);
+                    var ser = serial.GetCustomCommands();
 
                     List<string> CommandsNames = new List<string>();
-
-                    foreach (var _command in serial.GetCustomCommands().Commands)
-                    {
-                        CommandsNames.Add(_command.Name);
-                    }
+                    if(ser != null)
+                        foreach (var _command in ser.Commands)
+                        {
+                            CommandsNames.Add(_command.Name);
+                        }
 
                     if (CommandsNames.Contains(command.Name))
                         await context.Channel.SendMessageAsync($"Команда с именем {command.Name} уже существует.");

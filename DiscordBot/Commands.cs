@@ -601,7 +601,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("ВключитьПриветствие")]
-        [Summary("выключает или включает приветственные сообщения. Отредактировать сообщение можно с помощью команды EditHelloMessage (У тебя должно быть право на выполнение этой команды).")]
+        [Summary("выключает или включает приветственные сообщения. Отредактировать сообщение можно с помощью команды РедактироватьПриветственноеСообщение (У тебя должно быть право на выполнение этой команды).")]
         public async Task EnableHelloMessage()
         {
             SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
