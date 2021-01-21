@@ -14,20 +14,18 @@ _________________________________________________________________________
 |_____________________________Project__________________________________ |
 |GitHub: https://github.com/DenchickPenchick/BotBotya                   |
 |______________________________________________________________________ |
-|© Denis Voitenko                                                       |
+|© Copyright 2021 Denis Voitenko                                        |
+|© Copyright 2021 All rights reserved                                   |
+|License: http://opensource.org/licenses/MIT                            |
 _________________________________________________________________________
- */
+*/
 
 using System;
 using Discord;
 using Discord.WebSocket;
-using Discord.Webhook;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using DiscordBot.FileWorking;
-using DiscordBot.GuildManaging;
-using DiscordBot.RoomManaging;
-using System.Threading;
+using DiscordBot.Providers;
 
 namespace DiscordBot.Modules.NotificationsManaging
 {

@@ -14,12 +14,13 @@ _________________________________________________________________________
 |_____________________________Project__________________________________ |
 |GitHub: https://github.com/DenchickPenchick/BotBotya                   |
 |______________________________________________________________________ |
-|© Denis Voitenko                                                       |
+|© Copyright 2021 Denis Voitenko                                        |
+|© Copyright 2021 All rights reserved                                   |
+|License: http://opensource.org/licenses/MIT                            |
 _________________________________________________________________________
- */
+*/
 
 using Discord.WebSocket;
-using DiscordBot.FileWorking;
 using DiscordBot.Modules;
 using System.Threading.Tasks;
 using Console = Colorful.Console;
@@ -27,7 +28,7 @@ using Discord;
 using DiscordBot.Providers;
 
 namespace DiscordBot.GuildManaging
-{    
+{
     public class GuildModule : IModule
     {        
         private readonly DiscordSocketClient Client;        

@@ -14,14 +14,14 @@ _________________________________________________________________________
 |_____________________________Project__________________________________ |
 |GitHub: https://github.com/DenchickPenchick/BotBotya                   |
 |______________________________________________________________________ |
-|© Denis Voitenko                                                       |
+|© Copyright 2021 Denis Voitenko                                        |
+|© Copyright 2021 All rights reserved                                   |
+|License: http://opensource.org/licenses/MIT                            |
 _________________________________________________________________________
- */
+*/
 
 using Discord;
 using Discord.WebSocket;
-using DiscordBot.CustomCommands;
-using DiscordBot.CustomCommands.Actions;
 using DiscordBot.Modules.FileManaging;
 using DiscordBot.Serializable;
 using DiscordBot.Serializable.SerializableActions;

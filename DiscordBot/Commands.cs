@@ -14,9 +14,11 @@ _________________________________________________________________________
 |_____________________________Project__________________________________ |
 |GitHub: https://github.com/DenchickPenchick/BotBotya                   |
 |______________________________________________________________________ |
-|© Denis Voitenko                                                       |
+|© Copyright 2021 Denis Voitenko                                        |
+|© Copyright 2021 All rights reserved                                   |
+|License: http://opensource.org/licenses/MIT                            |
 _________________________________________________________________________
- */
+*/
 
 using Discord;
 using Discord.Commands;
@@ -27,7 +29,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord.Addons.Interactive;
 using Console = Colorful.Console;
-using DiscordBot.FileWorking;
 using DiscordBot.MusicOperations;
 using DiscordBot.Providers;
 using System.Collections.Generic;
@@ -744,6 +745,19 @@ namespace TestBot
             FilesProvider.RefreshGuild(serializableGuild);
 
             await ReplyAsync("Значок комнат изменен успешно");
+        }
+        #endregion
+
+        #region --КОММУНИКАЦИЯ--
+        [Command("ДобавитьСоединение")]
+        public async Task AddConnection(params ulong[] id)
+        {
+            FilesProvider.AddConnector(Context.Guild, new SerializableConnector
+            {
+                HostId = Context.Channel.Id,
+                EndPointsId = id.ToList()
+            });
+            await ReplyAsync("Completed");
         }
         #endregion
 

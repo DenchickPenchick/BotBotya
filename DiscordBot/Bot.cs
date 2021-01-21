@@ -14,9 +14,11 @@ _________________________________________________________________________
 |_____________________________Project__________________________________ |
 |GitHub: https://github.com/DenchickPenchick/BotBotya                   |
 |______________________________________________________________________ |
-|© Denis Voitenko                                                       |
+|© Copyright 2021 Denis Voitenko                                        |
+|© Copyright 2021 All rights reserved                                   |
+|License: http://opensource.org/licenses/MIT                            |
 _________________________________________________________________________
- */
+*/
 
 using System;
 using System.Threading.Tasks;
@@ -32,12 +34,13 @@ using Console = Colorful.Console;
 using TestBot;
 using DiscordBot.GuildManaging;
 using DiscordBot.Modules.NotificationsManaging;
-using DiscordBot.FileWorking;
 using Victoria;
 using DiscordBot.MusicOperations;
 using DiscordBot.Modules.MusicManaging;
 using System.Reflection;
 using DiscordBot.Providers;
+using DiscordBot.Modules.ServersConnectingManaging;
+using DiscordBot.Providers.FileManaging;
 
 namespace DiscordBot
 {
@@ -80,7 +83,7 @@ namespace DiscordBot
                 .AddSingleton(new LavaConfig())
                 .AddLavaNode()
                 .AddSingleton<LavaOperations>()
-                .BuildServiceProvider();                                  
+                .BuildServiceProvider();
 
             new ProcessingModule(new ProcessingConfiguration
             {
@@ -90,7 +93,8 @@ namespace DiscordBot
                 FileModule = new FilesModule(this),
                 GuildModule = new GuildModule(Client),
                 NotificationsModule = new LogModule(Client),
-                MusicModule = new MusicModule(Services)
+                MusicModule = new MusicModule(Services),
+                ServersConnector = new ServersConnector(Client)
             }).RunModule();
 
             Client.Ready += Client_Ready;

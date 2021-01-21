@@ -14,9 +14,11 @@ _________________________________________________________________________
 |_____________________________Project__________________________________ |
 |GitHub: https://github.com/DenchickPenchick/BotBotya                   |
 |______________________________________________________________________ |
-|© Denis Voitenko                                                       |
+|© Copyright 2021 Denis Voitenko                                        |
+|© Copyright 2021 All rights reserved                                   |
+|License: http://opensource.org/licenses/MIT                            |
 _________________________________________________________________________
- */
+*/
 
 using Discord;
 using Discord.WebSocket;
@@ -28,15 +30,13 @@ using DiscordBot.Modules;
 using System.Xml.Serialization;
 using DiscordBot.Modules.FileManaging;
 using System.Threading.Tasks;
-using DiscordBot.FileWorking;
 using System.Collections.Generic;
 using DiscordBot.Serializable;
 using System;
 using System.Text;
-using DiscordBot.Providers;
 
-namespace DiscordBot
-{    
+namespace DiscordBot.Providers.FileManaging
+{
     public class FilesModule : IModule
     {
         public Bot Bot { get; set; }
@@ -128,6 +128,16 @@ namespace DiscordBot
             }
             else
                 Console.WriteLine("CustomCommandsDirectory found", Color.Green);
+
+            Console.WriteLine("Checking directory ServerConnectorsHandlers...");
+            if (!Directory.Exists(@$"{Bot.PathToBotDirectory}/ServerConnectorsHandlers"))
+            {
+                Console.WriteLine("ServerConnectorsHandlers not found", Color.Red);
+                Directory.CreateDirectory($@"{Bot.PathToBotDirectory}/ServerConnectorsHandlers");
+                Console.WriteLine("ServerConnectorsHandlers created", Color.Green);
+            }
+            else
+                Console.WriteLine("ServerConnectorsHandlers found", Color.Green);
 
             Console.WriteLine("Checking files...", Color.Blue);
            

@@ -14,19 +14,20 @@ _________________________________________________________________________
 |_____________________________Project__________________________________ |
 |GitHub: https://github.com/DenchickPenchick/BotBotya                   |
 |______________________________________________________________________ |
-|© Denis Voitenko                                                       |
+|© Copyright 2021 Denis Voitenko                                        |
+|© Copyright 2021 All rights reserved                                   |
+|License: http://opensource.org/licenses/MIT                            |
 _________________________________________________________________________
- */
+*/
 
 using Discord;
 using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
-using DiscordBot.FileWorking;
 using DiscordBot.Providers;
 
 namespace DiscordBot.Modules.ContentManaging
-{    
+{
     public class ContentModule : IModule
     {
         private DiscordSocketClient Client { get; set; }

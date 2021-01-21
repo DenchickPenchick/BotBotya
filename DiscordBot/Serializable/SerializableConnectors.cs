@@ -20,35 +20,13 @@ _________________________________________________________________________
 _________________________________________________________________________
 */
 
-using Discord.Addons.Interactive;
-using Discord.Commands;
-using DiscordBot.CustomCommands.Entities;
-using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 
-namespace DiscordBot.CustomCommands.Actions
+namespace DiscordBot.Serializable
 {
-    [Serializable]
-    public class Interactive : IAction<string>, IVariable<int>
+    public class SerializableConnectors
     {
-        private readonly SocketCommandContext context;
-
-        public Interactive(SocketCommandContext ctx)
-        {
-            context = ctx;
-        }
-
-        public int Value { get; set; }
-
-        public async Task<string> DoAction()
-        {            
-            var client = context.Client;
-            var interactive = new InteractiveService(client);
-            var message = await interactive.NextMessageAsync(context);
-
-            if (message != null)
-                return message.Content;
-            return null;
-        }
+        public ulong GuildId { get; set; }
+        public List<SerializableConnector> SerializableConnectorsChannels { get; set; } = new List<SerializableConnector>();
     }
 }
