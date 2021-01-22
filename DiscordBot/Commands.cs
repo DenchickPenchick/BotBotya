@@ -65,6 +65,7 @@ namespace TestBot
         {            
             int pos = 0;
             int posit = 1;
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
 
             List<string> pages = new List<string>
             {
@@ -73,28 +74,21 @@ namespace TestBot
 
             foreach (var command in Bot.Commands.Commands)
             {
-                if ((pages[pos] + $"\n{posit + 1}. Команда {command.Name} {command.Summary}").Length <= 2048)
-                    pages[pos] += $"\n{posit++}. Команда {command.Name} {command.Summary}";
+                if ((pages[pos] + $"\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}").Length <= 2048)
+                    pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}";
                 else
                 {
-                    pages.Add($"\n{posit++}. Команда {command.Name} {command.Summary}");
+                    pages.Add($"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}");
                     pos++;
                 }
             }
             
             await PagedReplyAsync(pager: new PaginatedMessage
             {
-                Title = "Справка",
+                Title = "Справка по командам",
                 Pages = pages,
                 Color = Color.Blue
             });
-        }
-
-        [Command("Новости")]
-        [Summary("позволяет узнать последние новости")]
-        public async Task UpdateNews()
-        {
-            await ReplyAsync(embed: FilesProvider.GetNewsAndPlans().GetNewsAndPlansEmbed(Context.Client));
         }
 
         [Command("Очистить", RunMode = RunMode.Async)]
@@ -184,7 +178,34 @@ namespace TestBot
         [Summary("позволяет кикнуть пользователя с сервера (У тебя должно быть право на эту команду).")]
         public async Task Kick(params string[] NameOfUser)
         {
+            var contextRoles = (Context.User as SocketGuildUser).Roles;
+            int contextMaxPos = 0;
+
+            foreach (var role in contextRoles)            
+                if (role.Position > contextMaxPos)
+                    contextMaxPos = role.Position;            
+
             SocketGuildUser user = GetSocketGuildUser(NameOfUser);
+
+            var toKickRoles = user.Roles;
+            int toKickMaxPos = 0;
+
+            foreach (var role in toKickRoles)
+                if (role.Position > toKickMaxPos)
+                    toKickMaxPos = role.Position;
+
+            if (contextMaxPos == toKickMaxPos)
+            {
+                await ReplyAsync("Ты не можешь его кикнуть, т.к. ты стоишь в ролевой иерархии вместе с ним/ее.");
+                return;
+            }
+
+            if (contextMaxPos < toKickMaxPos)
+            {
+                await ReplyAsync("Ты не можешь его кикнуть, т.к. ты стоишь ниже него/его в ролевой иерархии.");
+                return;
+            }
+
             if (user != null)
                 await user.KickAsync();
             else
@@ -196,7 +217,34 @@ namespace TestBot
         [Summary("позволяет забанить пользователя на сервере (У тебя должно быть право на эту команду).")]
         public async Task Ban(params string[] NameOfUser)
         {
+            var contextRoles = (Context.User as SocketGuildUser).Roles;
+            int contextMaxPos = 0;
+
+            foreach (var role in contextRoles)
+                if (role.Position > contextMaxPos)
+                    contextMaxPos = role.Position;
+
             SocketGuildUser user = GetSocketGuildUser(NameOfUser);
+
+            var toBanRoles = user.Roles;
+            int toBanMaxPos = 0;
+
+            foreach (var role in toBanRoles)
+                if (role.Position > toBanMaxPos)
+                    toBanMaxPos = role.Position;
+
+            if (contextMaxPos == toBanMaxPos)
+            {
+                await ReplyAsync("Ты не можешь его забанить, т.к. ты стоишь в ролевой иерархии вместе с ним/ее.");
+                return;
+            }
+
+            if (contextMaxPos < toBanMaxPos)
+            {
+                await ReplyAsync("Ты не можешь его забанить, т.к. ты стоишь ниже него/его в ролевой иерархии.");
+                return;
+            }
+
             if (user != null)
                 await user.BanAsync();
             else
@@ -231,12 +279,17 @@ namespace TestBot
             string message = null;
 
             for (int i = 0; i < mess.Length; i++)            
-                message += i == 0 ? message : $" {message}";
+                message += i == 0 ? mess[i] : $" {mess[i]}";
 
             foreach (var user in Context.Guild.Users)
             {
-                var ch = await user.GetOrCreateDMChannelAsync();
-                await ch.SendMessageAsync(message);
+                if (!user.IsBot)
+                {
+                    var ch = await user.GetOrCreateDMChannelAsync();
+                    if(ch != null)
+                        await ch.SendMessageAsync(message);
+                }
+                
             }
             await ReplyAsync("Рассылка произведена успешно.");
         }        
@@ -300,7 +353,7 @@ namespace TestBot
                 return;
             }
             await LavaOperations.SetVolumeAsync(Context.User as SocketGuildUser, vol, Context.Channel as SocketTextChannel);
-        }
+        }               
 
         [Command("Текст")]
         [Summary("выводит текст проигрываемой песни")]

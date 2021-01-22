@@ -139,27 +139,7 @@ namespace DiscordBot.Providers.FileManaging
             else
                 Console.WriteLine("ServerConnectorsHandlers found", Color.Green);
 
-            Console.WriteLine("Checking files...", Color.Blue);
-           
-            Console.WriteLine("Checking file UpdateNewsDescription.xml...");
-            if (!File.Exists($@"{Bot.PathToBotDirectory}/UpdateNewsAndPlans.xml"))
-            {
-                Console.WriteLine("UpdateNewsAndPlans.xml not found", Color.Red);
-                using (FileStream fileStream = new FileStream($@"{Bot.PathToBotDirectory}/UpdateNewsAndPlans.xml", FileMode.Create))
-                {
-                    XmlSerializer serializer = new XmlSerializer(typeof(SerializableNewsAndPlans));
-                    serializer.Serialize(fileStream, new SerializableNewsAndPlans
-                    {
-                        ShouldSend = false,
-                        News = new List<string>(),
-                        Plans = new List<string>()
-                    });
-                                        
-                }
-                Console.WriteLine("UpdateNewsAndPlans.xml created", Color.Green);
-            }
-            else
-                Console.WriteLine("UpdateNewsAndPlans.xml found", Color.Green);
+            Console.WriteLine("Checking files...", Color.Blue);          
         }
 
         private async void SetupBotGuildData()

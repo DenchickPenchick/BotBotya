@@ -58,17 +58,17 @@ namespace DiscordBot.Modules.NotificationsManaging
                 if (arg2.VoiceChannel != null && arg3.VoiceChannel != null)
                     await SendLog(arg1, new EmbedBuilder
                     {
-                        Description = $"Участник {user.Username} покинул канал {arg2.VoiceChannel.Name} и присоединился к каналу {arg3.VoiceChannel.Name}."
+                        Description = $"Участник `{user.Mention}` покинул канал {arg2.VoiceChannel.Name} и присоединился к каналу {arg3.VoiceChannel.Name}."
                     });
                 else if (arg2.VoiceChannel != null && arg3.VoiceChannel == null)
                     await SendLog(arg1, new EmbedBuilder
                     {
-                        Description = $"Участник {user.Username} покинул канал {arg2.VoiceChannel.Name}."
+                        Description = $"Участник `{user.Mention}` покинул канал {arg2.VoiceChannel.Name}."
                     });
                 else if (arg3.VoiceChannel != null && arg2.VoiceChannel == null)
                     await SendLog(arg1, new EmbedBuilder
                     {
-                        Description = $"Участник {user.Username} присоединился к каналу {arg3.VoiceChannel.Name}."
+                        Description = $"Участник `{user.Mention}` присоединился к каналу {arg3.VoiceChannel.Name}."
                     });
             }            
         }        
@@ -77,13 +77,13 @@ namespace DiscordBot.Modules.NotificationsManaging
         {
             await SendLog((arg2 as SocketUserMessage).Author, new EmbedBuilder
             {
-                Description = $"Участник {arg2.Author.Username} отредактировал сообщение.",
+                Description = $"Участник {(arg2.Author as SocketGuildUser).Mention} отредактировал сообщение.",
                 Fields =  new List<EmbedFieldBuilder> 
                 {                    
                     new EmbedFieldBuilder
                     {
                         Name = "Cодержание сообщения:",
-                        Value = arg2.Content,
+                        Value = $"`{arg2.Content}`",
                         IsInline = false
                     }
                 }
@@ -94,7 +94,7 @@ namespace DiscordBot.Modules.NotificationsManaging
         {
             await SendLog(arg, new EmbedBuilder
             {
-                Description = $"Новый участник сервера {arg.Username}"                
+                Description = $"Новый участник сервера `{arg.Mention}`"                
             });
         }
 
@@ -102,7 +102,7 @@ namespace DiscordBot.Modules.NotificationsManaging
         {
             await SendLog(arg, new EmbedBuilder
             {
-                Description = $"Участник {arg.Username} покинул сервер."                
+                Description = $"Участник `{arg.Mention}` покинул сервер."                
             });
         }       
 
@@ -112,11 +112,8 @@ namespace DiscordBot.Modules.NotificationsManaging
             var serGuild = FilesProvider.GetGuild(guild);
             if (FilesProvider.GetGuild((user as SocketGuildUser).Guild).GuildNotifications && serGuild.LoggerId != default)
             {                                
-                string time;
-                if (DateTime.Now.Minute < 10)
-                    time = $"Время: { DateTime.Now.Hour}:0{DateTime.Now.Minute}";
-                else
-                    time = $"Время: { DateTime.Now.Hour}:{DateTime.Now.Minute}";
+                string time = $"Время: {DateTime.Now.ToShortTimeString()}";                
+
                 builder.Footer = new EmbedFooterBuilder
                 {
                     Text = $"{time}\nСервер: {(user as SocketGuildUser).Guild.Name}",

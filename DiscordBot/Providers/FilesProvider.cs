@@ -33,29 +33,7 @@ using System.Collections.Generic;
 namespace DiscordBot.Providers
 {   
     public static class FilesProvider
-    {
-        public static SerializableNewsAndPlans GetNewsAndPlans()
-        {
-            XmlSerializer serializer = new XmlSerializer(typeof(SerializableNewsAndPlans));
-            FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/UpdateNewsAndPlans.xml", FileMode.Open);
-
-            var newsAndPlans = (SerializableNewsAndPlans)serializer.Deserialize(stream);
-            stream.Dispose();
-            return newsAndPlans;
-        }
-
-        public static void ChangeNewsAndPlansToFalse()
-        {
-            var newsAndPlans = GetNewsAndPlans();
-            newsAndPlans.ShouldSend = false;
-            XmlSerializer serializer = new XmlSerializer(typeof(SerializableNewsAndPlans));                        
-            File.WriteAllText($@"{GetBotDirectoryPath()}/UpdateNewsAndPlans.xml", string.Empty);
-
-            FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/UpdateNewsAndPlans.xml", FileMode.Open);
-            serializer.Serialize(stream, newsAndPlans);
-            stream.Dispose();
-        }
-
+    {        
         public static string GetHelloText(SocketGuild guild) => GetGuild(guild).HelloMessage;
 
         public static string GetBotDirectoryPath()
@@ -139,16 +117,29 @@ namespace DiscordBot.Providers
                 XmlSerializer serializer = new XmlSerializer(typeof(SerializableConnectors));
                 string pathToNewFile = $"{GetBotDirectoryPath()}/ServerConnectorsHandlers/{guild.Id}.xml";
 
-                using FileStream fs = new FileStream(pathToNewFile, FileMode.Create);
-                serializer.Serialize(fs, new SerializableConnectors
+                conn = new SerializableConnectors
                 {
                     GuildId = guild.Id,
                     SerializableConnectorsChannels = new List<SerializableConnector>()
-                });
+                };
+
+                using FileStream fs = new FileStream(pathToNewFile, FileMode.Create);
+                serializer.Serialize(fs, conn);
             }
 
             if (!conn.SerializableConnectorsChannels.Contains(connector))
             {
+                List<ulong> hostsId = new List<ulong>();
+
+                foreach (var connect in conn.SerializableConnectorsChannels)                
+                    hostsId.Add(connect.HostId);
+
+                if (hostsId.Contains(connector.HostId))
+                {
+                    var toDelete = conn.SerializableConnectorsChannels[hostsId.IndexOf(connector.HostId)];
+                    conn.SerializableConnectorsChannels.Remove(toDelete);
+                }
+
                 conn.SerializableConnectorsChannels.Add(connector);
                 RefreshConnectors(conn);
             }            

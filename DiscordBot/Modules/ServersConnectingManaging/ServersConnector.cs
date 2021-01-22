@@ -68,18 +68,19 @@ namespace DiscordBot.Modules.ServersConnectingManaging
                     return;
 
                 var messageEmbed = GenerateUserMessage(arg);
-                foreach (ulong id in connector.EndPointsId)
-                {
-                    SocketTextChannel channel = (SocketTextChannel)Client.GetChannel(id);
-                    if (channel != null)
+                if(!arg.Author.IsBot && arg.Author.Id != Client.CurrentUser.Id)
+                    foreach (ulong id in connector.EndPointsId)
                     {
-                        WebClient webClient = new WebClient();
-                        await channel.SendMessageAsync(embed: messageEmbed);
-                        if (arg.Attachments.Count > 0)
-                            foreach (var attach in arg.Attachments)
-                                await channel.SendFileAsync(webClient.OpenRead(attach.Url), attach.Filename, "Входящий файл");
+                        SocketTextChannel channel = (SocketTextChannel)Client.GetChannel(id);
+                        if (channel != null)
+                        {
+                            WebClient webClient = new WebClient();
+                            await channel.SendMessageAsync(embed: messageEmbed);
+                            if (arg.Attachments.Count > 0)
+                                foreach (var attach in arg.Attachments)
+                                    await channel.SendFileAsync(webClient.OpenRead(attach.Url), attach.Filename, "Входящий файл");
+                        }
                     }
-                }
             }
             catch (Exception ex)
             {
@@ -104,7 +105,7 @@ namespace DiscordBot.Modules.ServersConnectingManaging
                 },
                 Footer = new EmbedFooterBuilder
                 { 
-                Text = $"{message.Timestamp.DateTime.ToShortTimeString()} | {message.Timestamp.DateTime.ToShortDateString()}"
+                Text = $"{DateTime.Now.ToShortTimeString()} | {DateTime.Now.ToShortDateString()}"
                 },
                 Color = Color.Blue
             }.Build();

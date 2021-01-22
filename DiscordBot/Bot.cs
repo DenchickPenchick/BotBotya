@@ -41,6 +41,7 @@ using System.Reflection;
 using DiscordBot.Providers;
 using DiscordBot.Modules.ServersConnectingManaging;
 using DiscordBot.Providers.FileManaging;
+using System.Threading;
 
 namespace DiscordBot
 {
@@ -103,9 +104,10 @@ namespace DiscordBot
 
             await Client.LoginAsync(TokenType.Bot, TOKEN);
 
-            await Client.StartAsync();            
+            await Client.StartAsync();
 
-            await Client.SetGameAsync("https://botbotya.ru", "https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991", activityType);                                  
+            //await Client.SetGameAsync("https://botbotya.ru", "https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991", activityType);                                  
+            UpdateStatus();
 
             await Task.Delay(-1);
         }
@@ -195,6 +197,29 @@ namespace DiscordBot
         {           
             await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), Services);                                   
             Client.MessageReceived += HandleCommandAsync;
+        }
+
+        private void UpdateStatus()
+        {
+            new Thread(async x =>
+            {
+                int index = 0;
+                while (true)
+                {
+                    switch (index)
+                    {
+                        case 0:
+                            await Client.SetGameAsync("https://botbotya.ru", "https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991", ActivityType.CustomStatus);
+                            index++;
+                            break;
+                        case 1:
+                            await Client.SetGameAsync($"{Client.Guilds.Count} серверах", "https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991", ActivityType.CustomStatus);
+                            index = 0;
+                            break;
+                    }
+                    Thread.Sleep(TimeSpan.FromSeconds(30));
+                }
+            }).Start();            
         }
     }
 }
