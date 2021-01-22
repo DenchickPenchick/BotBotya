@@ -23,3 +23,7 @@
 Если Вы хотите создать какой-нибудь модуль, команду или что-нибудь подобное, тогда прочтите wiki.
 
 <img src="https://top.gg/api/widget/status/749991391639109673.svg">
+
+© Copyright 2021 Denis Voitenko. All rights reserved.
+
+License: https://opensource.org/licenses/MIT
