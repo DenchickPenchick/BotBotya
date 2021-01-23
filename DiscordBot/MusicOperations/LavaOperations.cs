@@ -302,7 +302,7 @@ namespace DiscordBot.MusicOperations
                     Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url },
                     Footer = new EmbedFooterBuilder
                     {
-                        Text = $"{(h < 10 ? $"0{h}" : h.ToString())}:{(m < 10 ? $"0{m}" : m.ToString())}:{(s < 10 ? $"0{s}" : s.ToString())} {(part >= 0 && part < 0.2 ? "◯" : "-")}{(part >= 0.2 && part < 0.3 ? "◯" : "-")}{(part >= 0.3 && part < 0.4 ? "◯" : "-")}{(part >= 0.4 && part < 0.5 ? "◯" : "-")}{(part >= 0.5 && part < 0.6 ? "◯" : "-")}{(part >= 0.6 && part < 0.7 ? "◯" : "-")}{(part >= 0.7 && part < 0.8 ? "◯" : "-")}{(part >= 0.8 && part < 0.9 ? "◯" : "-")}{(part >= 0.9 && part < 0.95 ? "◯" : "-")}{(part >= 0.95 ? "◯" : "-")}"
+                        Text = $"{(h < 10 ? $"0{h}" : h.ToString())}:{(m < 10 ? $"0{m}" : m.ToString())}:{(s < 10 ? $"0{s}" : s.ToString())} {(part >= 0 && part < 0.2 ? "◯" : "─")}{(part >= 0.2 && part < 0.3 ? "◯" : "─")}{(part >= 0.3 && part < 0.4 ? "◯" : "─")}{(part >= 0.4 && part < 0.5 ? "◯" : "─")}{(part >= 0.5 && part < 0.6 ? "◯" : "─")}{(part >= 0.6 && part < 0.7 ? "◯" : "─")}{(part >= 0.7 && part < 0.8 ? "◯" : "─")}{(part >= 0.8 && part < 0.9 ? "◯" : "─")}{(part >= 0.9 && part < 0.95 ? "◯" : "─")}{(part >= 0.95 ? "◯" : "─")}"
                     }
                 }.Build());
 
@@ -344,7 +344,7 @@ namespace DiscordBot.MusicOperations
                     Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url },
                     Footer = new EmbedFooterBuilder
                     {
-                        Text = $"{(h < 10 ? $"0{h}" : h.ToString())}:{(m < 10 ? $"0{m}" : m.ToString())}:{(s < 10 ? $"0{s}" : s.ToString())} {(part >= 0 && part < 0.2 ? "◯" : "-")}{(part >= 0.2 && part < 0.3 ? "◯" : "-")}{(part >= 0.3 && part < 0.4 ? "◯" : "-")}{(part >= 0.4 && part < 0.5 ? "◯" : "-")}{(part >= 0.5 && part < 0.6 ? "◯" : "-")}{(part >= 0.6 && part < 0.7 ? "◯" : "-")}{(part >= 0.7 && part < 0.8 ? "◯" : "-")}{(part >= 0.8 && part < 0.9 ? "◯" : "-")}{(part >= 0.9 && part < 0.95 ? "◯" : "-")}{(part >= 0.95 ? "◯" : "-")}"
+                        Text = $"{(h < 10 ? $"0{h}" : h.ToString())}:{(m < 10 ? $"0{m}" : m.ToString())}:{(s < 10 ? $"0{s}" : s.ToString())} {(part >= 0 && part < 0.2 ? "◯" : "─")}{(part >= 0.2 && part < 0.3 ? "◯" : "─")}{(part >= 0.3 && part < 0.4 ? "◯" : "─")}{(part >= 0.4 && part < 0.5 ? "◯" : "─")}{(part >= 0.5 && part < 0.6 ? "◯" : "─")}{(part >= 0.6 && part < 0.7 ? "◯" : "─")}{(part >= 0.7 && part < 0.8 ? "◯" : "─")}{(part >= 0.8 && part < 0.9 ? "◯" : "─")}{(part >= 0.9 && part < 0.95 ? "◯" : "─")}{(part >= 0.95 ? "◯" : "─")}"
                     }
                 }.Build()));
             }

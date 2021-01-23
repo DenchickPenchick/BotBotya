@@ -48,12 +48,14 @@ namespace DiscordBot.GuildManaging
         {
             var serGuild = FilesProvider.GetGuild(arg.Guild);
             var defaultRole = arg.Guild.GetRole(serGuild.DefaultRoleId);
+            var newUsers = arg.Guild.GetTextChannel(serGuild.SystemChannels.NewUsersChannelId);
 
-            if(serGuild.DefaultRoleId != default)
+            if (serGuild.DefaultRoleId != default)
                 await arg.AddRoleAsync(defaultRole);
             if(serGuild.HelloMessageEnable && serGuild.HelloMessage != null)
                 await arg.GetOrCreateDMChannelAsync().Result.SendMessageAsync(serGuild.HelloMessage);
-            await arg.Guild.DefaultChannel.SendMessageAsync($"Поприветстуем малоуважемого {arg.Username}!");
+            if(newUsers != null)
+                await arg.Guild.GetTextChannel(serGuild.SystemChannels.NewUsersChannelId).SendMessageAsync($"Поприветстуем малоуважемого {arg.Mention}!");
         }
 
         private async Task Client_JoinedGuild(SocketGuild arg)

@@ -20,14 +20,11 @@ _________________________________________________________________________
 _________________________________________________________________________
 */
 
-using System;
 
-namespace DiscordBot.Modules.FileManaging
-{ 
-    [Serializable]
-    public class SerializableCategories
+namespace DiscordBot.Attributes
+{
+    public class MusicCommandAttribute : CommandCategoryAttribute
     {
-        public ulong ContentCategoryId { get; set; } = 0;    
-        public ulong VoiceRoomsCategoryId { get; set; } = 0;
+        public override string CategoryName { get => "Музыкальные команды"; }
     }
 }

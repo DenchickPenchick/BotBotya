@@ -57,8 +57,7 @@ namespace DiscordBot
 
         public async Task RunBotAsync()
         {            
-            Console.WriteAscii("Discord Bot Console", Color.Blue);                        
-            ActivityType activityType = ActivityType.Watching;                                    
+            Console.WriteAscii("Discord Bot Console", Color.Blue);                                                                   
 
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
@@ -105,8 +104,7 @@ namespace DiscordBot
             await Client.LoginAsync(TokenType.Bot, TOKEN);
 
             await Client.StartAsync();
-
-            //await Client.SetGameAsync("https://botbotya.ru", "https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991", activityType);                                  
+                                           
             UpdateStatus();
 
             await Task.Delay(-1);
@@ -156,7 +154,7 @@ namespace DiscordBot
                         switch (result.Error)
                         {
                             case CommandError.UnknownCommand:
-                                await context.Channel.SendMessageAsync($"Неизвестная команда. У нас недавно прошла русификация команд. Поэтому пропиши команду {serGuild.Prefix}Справка");
+                                await context.Channel.SendMessageAsync($"Неизвестная команда. Пропиши команду {serGuild.Prefix}Хелп.");
                                 break;
                             case CommandError.ParseFailed:
                                 await context.Channel.SendMessageAsync("Навеверное ты неправильно ввел данные.");
@@ -217,7 +215,7 @@ namespace DiscordBot
                             index = 0;
                             break;
                     }
-                    Thread.Sleep(TimeSpan.FromSeconds(30));
+                    Thread.Sleep(TimeSpan.FromSeconds(60));
                 }
             }).Start();            
         }

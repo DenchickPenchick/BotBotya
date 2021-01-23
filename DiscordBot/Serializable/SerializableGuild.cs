@@ -33,7 +33,7 @@ namespace DiscordBot.Modules.FileManaging
         public bool HelloMessageEnable { get; set; } = false;        
         public bool CheckingContent { get; set; } = false;
         public bool GuildNotifications { get; set; } = false;
-        public string HelloMessage { get; set; } = null;
+        public string HelloMessage { get; set; } = null;        
         public string EmojiOfRoom { get; set; } = "🎤";
         public string Prefix { get; set; } = "!";
         public SerializableCategories SystemCategories { get; set; } = new SerializableCategories();

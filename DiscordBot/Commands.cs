@@ -41,6 +41,7 @@ using DiscordBot.Modules.FileManaging;
 using System.Net;
 using System.Xml;
 using DiscordBot;
+using DiscordBot.Attributes;
 using DiscordBot.Serializable;
 using DiscordBot.Serializable.SerializableActions;
 
@@ -56,42 +57,74 @@ namespace TestBot
         {
             LavaOperations = lavaOperations;
             Bot = bot;
-        }
+        }        
 
         #region --СТАНДАРТНЫЕ КОМАНДЫ--
-        [Command("Справка")]
+        [Command("Хелп")]
+        [StandartCommand]
         [Summary("позволяет узнать полный список команд")]
         public async Task Help()
         {            
             int pos = 0;
             int posit = 1;
+            int catpos = 0;
             var serGuild = FilesProvider.GetGuild(Context.Guild);
 
             List<string> pages = new List<string>
             {
                 null
-            };                        
+            };
+
+            CommandCategoryAttribute prevCategoryAttribute = new StandartCommandAttribute();
 
             foreach (var command in Bot.Commands.Commands)
-            {
-                if ((pages[pos] + $"\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}").Length <= 2048)
-                    pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}";
+            { 
+                CommandCategoryAttribute categoryAttribute;
+
+                if (command.Attributes.Contains(new StandartCommandAttribute()))
+                    categoryAttribute = new StandartCommandAttribute();
+                else if (command.Attributes.Contains(new CustomisationCommandAttribute()))
+                    categoryAttribute = new CustomisationCommandAttribute();
+                else if (command.Attributes.Contains(new CustomCommandAttribute()))
+                    categoryAttribute = new CustomCommandAttribute();
+                else if (command.Attributes.Contains(new MusicCommandAttribute()))
+                    categoryAttribute = new MusicCommandAttribute();
                 else
+                    categoryAttribute = new StandartCommandAttribute();                
+
+                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}".Length >= 2048)
                 {
-                    pages.Add($"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}");
+                    if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName)                    
+                        posit = 1;                                            
+                    
+                    pages.Add($"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}");                    
                     pos++;
                 }
+                else if (catpos == 0)
+                {
+                    pages[0] += $"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}";
+                    catpos++;
+                }
+                else
+                    pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}";
+                prevCategoryAttribute = categoryAttribute;
             }
             
             await PagedReplyAsync(pager: new PaginatedMessage
             {
                 Title = "Справка по командам",
                 Pages = pages,
-                Color = Color.Blue
+                Color = Color.Blue,
+                Options = new PaginatedAppearanceOptions
+                { 
+                    Jump = null,
+                    Info = null                    
+                }
             });
         }
 
         [Command("Очистить", RunMode = RunMode.Async)]
+        [StandartCommand]
         [Summary("позволяет очистить сообщений (до 100). Если сообщения отправлены более двух недель назад, то эти сообщения не удалятся.")]
         public async Task Clear(int count)
         {
@@ -124,6 +157,7 @@ namespace TestBot
         }
 
         [Command("Жалоба", RunMode = RunMode.Async)]
+        [StandartCommand]
         [Summary("отпраляет жалобу на участника сервера.")]
         public async Task ReportUser()
         {
@@ -175,6 +209,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.KickMembers)]
         [Command("Кик")]
+        [StandartCommand]
         [Summary("позволяет кикнуть пользователя с сервера (У тебя должно быть право на эту команду).")]
         public async Task Kick(params string[] NameOfUser)
         {
@@ -253,6 +288,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageChannels)]
         [Command("МедленныйРежим")]
+        [StandartCommand]
         [Summary("позволяет включить медленный режим в канале (У тебя должно быть право на эту команду).")]
         public async Task ChangePosOfSlowMode(int time = 0)
         {
@@ -273,6 +309,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.Administrator)]
         [Command("Рассылка")]
+        [StandartCommand]
         [Summary("делает рассылку сообщений всем участникам сервера")]
         public async Task SendMessages(params string[] mess)
         {
@@ -292,11 +329,49 @@ namespace TestBot
                 
             }
             await ReplyAsync("Рассылка произведена успешно.");
-        }        
+        }
+        #endregion
+
+        #region --КОММУНИКАЦИЯ--
+        [Command("ДобавитьСоединение")]
+        [Summary("добаляет соединение с каналами других серверов.")]
+        [StandartCommand]
+        public async Task AddConnection(params ulong[] id)
+        {
+            FilesProvider.AddConnector(Context.Guild, new SerializableConnector
+            {
+                HostId = Context.Channel.Id,
+                EndPointsId = id.ToList()
+            });
+            await ReplyAsync("Соединение добавлено.");
+        }
+
+        [Command("УдалитьСоединение")]
+        [Summary("удаляет соединение с каналами других серверов.")]
+        [StandartCommand]
+        public async Task DeleteConnection()
+        {            
+            var connectors = FilesProvider.GetConnectors(Context.Guild);
+            SerializableConnector connector = null;
+            if (connectors != null)
+                foreach (var conn in connectors.SerializableConnectorsChannels)
+                    if (Context.Channel.Id == conn.HostId)
+                        connector = conn;
+
+            if (connector != null)
+            {
+                connectors.SerializableConnectorsChannels.Remove(connector);
+                FilesProvider.RefreshConnectors(connectors);
+                await ReplyAsync("Удаление произведено успешно");
+            }
+            else
+                await ReplyAsync("В данном канале не существует соединения.");
+        }
         #endregion
 
         #region --МУЗЫКАЛЬНЫЕ КОМАНДЫ--
         [Command("Подключиться")]
+        [MusicCommand]
         [Summary("подключает бота к голосовому каналу")]
         public async Task JoinAsync()
         {
@@ -304,6 +379,7 @@ namespace TestBot
         }
 
         [Command("Покинуть")]
+        [MusicCommand]
         [Summary("отключает бота от канала")]
         public async Task LeaveAsync()
         {
@@ -311,6 +387,7 @@ namespace TestBot
         }
 
         [Command("Играть")]
+        [MusicCommand]
         [Summary("включает трек, который задан url")]
         public async Task PlayTrackAsync(params string[] query)
         {
@@ -323,13 +400,15 @@ namespace TestBot
         }
 
         [Command("Остановить")]
-        [Summary("включает трек, который задан url")]
+        [MusicCommand]
+        [Summary("выключает трек, который задан url")]
         public async Task StopTrackAsync()
         {
             await LavaOperations.StopTrackAsync(Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
         }
 
         [Command("Пауза")]
+        [MusicCommand]
         [Summary("ставит на паузу трек")]
         public async Task PauseTrackAsync()
         {
@@ -337,6 +416,7 @@ namespace TestBot
         }
 
         [Command("Воспроизведение")]
+        [MusicCommand]
         [Summary("продолжает трек, который стоит на паузе")]
         public async Task ResumeTrackAsync()
         {
@@ -344,6 +424,7 @@ namespace TestBot
         }
 
         [Command("Громкость")]
+        [MusicCommand]
         [Summary("устанавливает громкость бота")]
         public async Task SetVolumeAsync(ushort vol)
         {
@@ -356,6 +437,7 @@ namespace TestBot
         }               
 
         [Command("Текст")]
+        [MusicCommand]
         [Summary("выводит текст проигрываемой песни")]
         public async Task GetLyrics()
         {
@@ -380,6 +462,7 @@ namespace TestBot
 
         #region --КАСТОМНЫЕ КОМАНДЫ--
         [Command("ВсеКоманды")]
+        [CustomCommand]
         [Summary("выводит все кастомные команды.")]
         public async Task GetAllCustomCommands()
         {
@@ -422,6 +505,7 @@ namespace TestBot
         }
 
         [Command("ПримерКоманды")]
+        [CustomCommand]
         [Summary("отправляет XML файл с примером кастомной команды")]
         public async Task SendExample()
         {
@@ -459,6 +543,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("ДобавитьКоманду")]
+        [CustomCommand]
         [Summary("добавляет команду.")]
         public async Task AddCommand()
         {
@@ -469,6 +554,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("К")]
+        [CustomCommand]
         [Summary("позволяет использовать кастомную команду.")]
         public async Task UseCommand(string name, params string[] args)
         {
@@ -479,6 +565,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("УдалитьКоманду")]
+        [CustomCommand]
         [Summary("удаляет команду.")]
         public async Task DeleteCommand(string name)
         {
@@ -490,6 +577,7 @@ namespace TestBot
 
         #region --КАСТОМИЗАЦИЯ--
         [Command("Конфигурация")]
+        [CustomisationCommand]
         [Summary("получает конфигурацию сервера.")]
         public async Task GetGuildConfig()
         {
@@ -511,6 +599,7 @@ namespace TestBot
         }
 
         [Command("ПоменятьНикнеймБота")]
+        [CustomisationCommand]
         [Summary("меняет никнейм бота")]
         public async Task ChangeBotNickname(params string[] NewNick)
         {
@@ -532,6 +621,7 @@ namespace TestBot
 
         [Command("СконфигурироватьСервер")]
         [RequireUserPermission(GuildPermission.ManageGuild)]
+        [CustomisationCommand]
         [Summary("конфигурирует сервер с соответствующим XML файлом")]
         public async Task ConfigureGuild()
         {
@@ -574,6 +664,7 @@ namespace TestBot
         }
 
         [Command("ФайлКонфигурации")]
+        [CustomisationCommand]
         [Summary("возвращает XML файл конфигурации сервера")]
         public async Task GetConfigFile()
         {
@@ -581,6 +672,7 @@ namespace TestBot
         }
 
         [RequireUserPermission(GuildPermission.ManageRoles)]
+        [CustomisationCommand]
         [Command("ДобавитьРольПоумолчанию", RunMode = RunMode.Async)]
         [Summary("устанавливает роль по-умолчанию, которая будет выдаваться каждому пользователю (У тебя должно быть право на выполнение этой команды).\nДля того чтобы установить роль нужно ее отметить. Если отметить несколько ролей, то установлена будет только первая.")]
         public async Task AddDefaultRole(params string[] str)
@@ -656,6 +748,7 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("ВключитьПриветствие")]
         [Summary("выключает или включает приветственные сообщения. Отредактировать сообщение можно с помощью команды РедактироватьПриветственноеСообщение (У тебя должно быть право на выполнение этой команды).")]
+        [CustomisationCommand]
         public async Task EnableHelloMessage()
         {
             SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
@@ -671,6 +764,7 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("РедактироватьПриветственноеСообщение", RunMode = RunMode.Async)]
         [Summary("редактирует приветственное сообщение (У тебя должно быть право на выполнение этой команды).")]
+        [CustomisationCommand]
         public async Task EditHelloMessage()
         {
             SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
@@ -691,6 +785,7 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("ПоменятьПрефикс")]
         [Summary("редактирует префикс (У тебя должно быть право на выполнение этой команды).")]
+        [CustomisationCommand]
         public async Task EditPrefix(string newPrefix)
         {
             SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
@@ -705,6 +800,7 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.ManageChannels)]
         [Command("РежимКомнат")]
         [Summary("создает канал с возможностью создания комнат. Возможно удаление комнат. У тебя должно быть право на выполнение этой команды.")]
+        [CustomisationCommand]
         public async Task EnableRooms()
         {
             var serGuild = FilesProvider.GetGuild(Context.Guild);
@@ -721,6 +817,7 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.ManageChannels)]
         [Command("КаналыКонтента")]
         [Summary("создает каналы контента. Возможно удаление каналов. У тебя должно быть право на выполнение этой команды.")]
+        [CustomisationCommand]
         public async Task EnableContent()
         {
             var serGuild = FilesProvider.GetGuild(Context.Guild);
@@ -738,6 +835,7 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("ПроверкаКонтента")]
         [Summary("включает/выключает проверку контента (сортировку видео, ссылок по нужным каналам). Работает только при включенных каналах контента. У тебя должно быть право на выполнение этой команды.")]
+        [CustomisationCommand]
         public async Task EnableCheckingContent()
         {
             SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
@@ -754,6 +852,7 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.Administrator)]
         [Command("Уведомления", RunMode = RunMode.Async)]
         [Summary("включает/выключает уведомления сервера. При бане, кике, добавлении на сервер пользователя бот тебя уведомит")]
+        [CustomisationCommand]
         public async Task EnableGuildNotifications()
         {            
             SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
@@ -789,6 +888,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("ЭмодзиКомнаты")]
+        [CustomisationCommand]
         [Summary("устанавливает значок комнат.")]
         public async Task SetRoomsEmoji(string emoji)
         {            
@@ -799,20 +899,7 @@ namespace TestBot
 
             await ReplyAsync("Значок комнат изменен успешно");
         }
-        #endregion
-
-        #region --КОММУНИКАЦИЯ--
-        [Command("ДобавитьСоединение")]
-        public async Task AddConnection(params ulong[] id)
-        {
-            FilesProvider.AddConnector(Context.Guild, new SerializableConnector
-            {
-                HostId = Context.Channel.Id,
-                EndPointsId = id.ToList()
-            });
-            await ReplyAsync("Completed");
-        }
-        #endregion
+        #endregion        
 
         private SocketGuildUser GetSocketGuildUser(params string[] NameOfUser)
         {

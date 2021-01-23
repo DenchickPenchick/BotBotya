@@ -23,6 +23,7 @@ _________________________________________________________________________
 using Discord;
 using Discord.WebSocket;
 using DiscordBot.Providers;
+using DiscordBot.Serializable;
 using System;
 using System.Net;
 using System.Threading.Tasks;
@@ -46,15 +47,20 @@ namespace DiscordBot.Modules.ServersConnectingManaging
         }
 
         private Task Client_ChannelDestroyed(SocketChannel arg)
-        {            
-            var connector = FilesProvider.GetConnector(arg.Id);
+        {
+            var connectors = FilesProvider.GetConnectors((arg as SocketTextChannel).Guild);
+            SerializableConnector connector = null;
+            if (connectors != null)
+                foreach (var conn in connectors.SerializableConnectorsChannels)
+                    if ((arg as SocketTextChannel).Id == conn.HostId)
+                        connector = conn;
+
             if (connector != null)
             {
-                var guild = (arg as SocketGuildChannel).Guild;
-                var connectors = FilesProvider.GetConnectors(guild);
                 connectors.SerializableConnectorsChannels.Remove(connector);
-                FilesProvider.RefreshConnectors(connectors);
+                FilesProvider.RefreshConnectors(connectors);                
             }
+
             return Task.CompletedTask;
         }
 

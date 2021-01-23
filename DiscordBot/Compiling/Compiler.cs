@@ -84,6 +84,8 @@ namespace DiscordBot.Compiling
                                 embed.Warnings.Add(new WarningField($"Канала для ссылок с Id {serGuild.SystemChannels.LinksChannelId} не существует."));
                             if (guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId) == null && serGuild.SystemChannels.VideosChannelId != 0)
                                 embed.Warnings.Add(new WarningField($"Канала для видео с Id {serGuild.SystemChannels.VideosChannelId} не существует."));
+                            if (guild.GetTextChannel(serGuild.SystemChannels.NewUsersChannelId) == null && serGuild.SystemChannels.NewUsersChannelId != 0)
+                                embed.Warnings.Add(new WarningField($"Канала для новых пользователей с Id {serGuild.SystemChannels.NewUsersChannelId} не существует."));
                         }
                         catch (Exception ex) { Console.WriteLine(ex); }
                         break;

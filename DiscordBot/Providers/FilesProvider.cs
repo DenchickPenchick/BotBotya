@@ -143,7 +143,7 @@ namespace DiscordBot.Providers
                 conn.SerializableConnectorsChannels.Add(connector);
                 RefreshConnectors(conn);
             }            
-        }
+        }        
 
         public static void RefreshConnectors(SerializableConnectors connectors)
         {

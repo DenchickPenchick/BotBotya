@@ -26,7 +26,7 @@ namespace DiscordBot.Serializable
 {
     public class SerializableConnectors
     {
-        public ulong GuildId { get; set; }
+        public ulong GuildId { get; set; } = 0;
         public List<SerializableConnector> SerializableConnectorsChannels { get; set; } = new List<SerializableConnector>();
     }
 }
