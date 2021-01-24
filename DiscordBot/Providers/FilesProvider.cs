@@ -153,5 +153,37 @@ namespace DiscordBot.Providers
             using FileStream stream = new FileStream($"{GetBotDirectoryPath()}/ServerConnectorsHandlers/{connectors.GuildId}.xml", FileMode.Open, FileAccess.ReadWrite);
             serializer.Serialize(stream, connectors);
         }
+
+        public static SerializableEconomicGuild GetEconomicGuild(SocketGuild guild)
+        {
+            string path = $"{GetBotDirectoryPath()}/EconomicGuilds/{guild.Id}.xml";
+            if (File.Exists(path))
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(SerializableEconomicGuild));
+                using FileStream fs = new FileStream(path, FileMode.Open);
+                return (SerializableEconomicGuild)serializer.Deserialize(fs);
+            }
+            else
+                return null;
+        }
+
+        public static SerializableEconomicGuildUser GetEconomicGuildUser(SocketGuildUser user)
+        {
+            var guild = GetEconomicGuild(user.Guild);
+
+            foreach (var economUser in guild.SerializableEconomicUsers)            
+                if (economUser.Id == user.Id)
+                    return economUser;
+            return null;
+        }
+
+        public static void RefreshEconomicGuild(SerializableEconomicGuild guild)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializableConnectors));
+
+            File.WriteAllText($"{GetBotDirectoryPath()}/EconomicGuilds/{guild.Id}.xml", string.Empty);
+            using FileStream stream = new FileStream($"{GetBotDirectoryPath()}/EconomicGuilds/{guild.Id}.xml", FileMode.Open, FileAccess.ReadWrite);
+            serializer.Serialize(stream, guild);
+        }
     }
 }
