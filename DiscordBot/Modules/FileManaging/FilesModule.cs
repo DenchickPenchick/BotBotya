@@ -139,7 +139,15 @@ namespace DiscordBot.Providers.FileManaging
             else
                 Console.WriteLine("ServerConnectorsHandlers found", Color.Green);
 
-            Console.WriteLine("Checking files...", Color.Blue);          
+            Console.WriteLine("Checking directory EconomicGuilds...");
+            if (!Directory.Exists(@$"{Bot.PathToBotDirectory}/EconomicGuilds"))
+            {
+                Console.WriteLine("ServerConnectorsHandlers not found", Color.Red);
+                Directory.CreateDirectory($@"{Bot.PathToBotDirectory}/EconomicGuilds");
+                Console.WriteLine("EconomicGuilds created", Color.Green);
+            }
+            else
+                Console.WriteLine("EconomicGuilds found", Color.Green);                
         }
 
         private async void SetupBotGuildData()

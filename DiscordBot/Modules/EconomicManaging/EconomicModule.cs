@@ -28,14 +28,27 @@ namespace DiscordBot.Modules.EconomicManaging
 {
     public class EconomicModule : IModule
     {        
+        private DiscordSocketClient Client { get; set; }
+
         public EconomicModule(DiscordSocketClient client)
-        {    
+        {
+            Client = client;
             client.MessageReceived += Client_MessageReceived;
+            client.Ready += Client_Ready;
         }
 
         public void RunModule()
         {
             
+        }
+
+        private Task Client_Ready()
+        {
+            foreach (var guild in Client.Guilds)
+            { 
+                
+            }
+            return Task.CompletedTask;
         }
 
         private Task Client_MessageReceived(SocketMessage arg)

@@ -460,6 +460,10 @@ namespace TestBot
         }
         #endregion
 
+        #region --РОЛЕВЫЕ КОМАНДЫ--
+
+        #endregion
+
         #region --КАСТОМНЫЕ КОМАНДЫ--
         [Command("ВсеКоманды")]
         [CustomCommand]
