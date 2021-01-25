@@ -21,26 +21,33 @@ _________________________________________________________________________
 */
 
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using DiscordBot.Providers;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.EconomicManaging
 {
     public class EconomicModule : IModule
-    {
-        private DiscordSocketClient Client { get; set; }
-
+    {        
         public EconomicModule(DiscordSocketClient client)
-        {
-            Client = client;
+        {    
             client.MessageReceived += Client_MessageReceived;
         }
 
         public void RunModule()
         {
             
+        }
+
+        private Task Client_MessageReceived(SocketMessage arg)
+        {
+            var user = arg.Author as SocketGuildUser;
+            var guild = user.Guild;
+            var provider = new EconomicProvider(guild);
+
+            if(provider.EconomicGuild.RewardForMessage > 0)
+                provider.AddBalance(user, provider.EconomicGuild.RewardForMessage);
+
+            return Task.CompletedTask;
         }
     }
 }
