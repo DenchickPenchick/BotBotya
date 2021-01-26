@@ -44,10 +44,8 @@ namespace DiscordBot.Modules.EconomicManaging
 
         private Task Client_Ready()
         {
-            foreach (var guild in Client.Guilds)
-            { 
-                
-            }
+            foreach (var guild in Client.Guilds)            
+                FilesProvider.AddEconomicGuild(guild);                            
             return Task.CompletedTask;
         }
 
@@ -56,9 +54,9 @@ namespace DiscordBot.Modules.EconomicManaging
             var user = arg.Author as SocketGuildUser;
             var guild = user.Guild;
             var provider = new EconomicProvider(guild);
-
-            if(provider.EconomicGuild.RewardForMessage > 0)
-                provider.AddBalance(user, provider.EconomicGuild.RewardForMessage);
+            if (provider.EconomicGuild != null)            
+                if (provider.EconomicGuild.RewardForMessage > 0)
+                    provider.AddBalance(user, provider.EconomicGuild.RewardForMessage);            
 
             return Task.CompletedTask;
         }

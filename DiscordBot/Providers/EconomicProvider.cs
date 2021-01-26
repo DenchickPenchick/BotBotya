@@ -43,19 +43,21 @@ namespace DiscordBot.Providers
         {
             SerializableEconomicGuildUser economicGuildUser = GetEconomicGuildUser(user.Id);           
             var economGuild = EconomicGuild;
+            if (economGuild != null && economicGuildUser != null)
+            {
+                int indexOf = economGuild.SerializableEconomicUsers.IndexOf(economicGuildUser);
 
-            int indexOf = economGuild.SerializableEconomicUsers.IndexOf(economicGuildUser);
+                if (economicGuildUser == null)
+                    economGuild.SerializableEconomicUsers.Add(new SerializableEconomicGuildUser
+                    {
+                        Id = user.Id
+                    });
 
-            if (economicGuildUser == null)            
-                economGuild.SerializableEconomicUsers.Add(new SerializableEconomicGuildUser
-                { 
-                    Id = user.Id
-                });                        
+                economicGuildUser.Balance = count;
+                economGuild.SerializableEconomicUsers[indexOf] = economicGuildUser;
 
-            economicGuildUser.Balance = count;
-            economGuild.SerializableEconomicUsers[indexOf] = economicGuildUser;
-
-            FilesProvider.RefreshEconomicGuild(economGuild);
+                FilesProvider.RefreshEconomicGuild(economGuild);
+            }            
         }
 
         public void ClearBalance(IUser user)
@@ -71,80 +73,94 @@ namespace DiscordBot.Providers
         public void AddBalance(IUser user, int count)
         {
             var economicGuildUser = GetEconomicGuildUser(user.Id);
-            int newBalance = economicGuildUser.Balance + count;
+            if (economicGuildUser != null)
+            {
+                int newBalance = economicGuildUser.Balance + count;
 
-            SetBalance(user, newBalance);
+                SetBalance(user, newBalance);
+            }            
         }
 
         public void MinusBalance(IUser user, int count)
         {
             var economicGuildUser = GetEconomicGuildUser(user.Id);
-            int newBalance = economicGuildUser.Balance - count;
+            if (economicGuildUser != null)
+            {
+                int newBalance = economicGuildUser.Balance - count;
 
-            SetBalance(user, newBalance);
+                SetBalance(user, newBalance);
+            }            
         }
 
         public Result BuyRole(IRole role, IGuildUser user)
         {
             var economGuild = EconomicGuild;
 
-            var rolesCosts = economGuild.RolesAndCostList;
-            ulong roleId = 0;
-            int cost = 0;
-
-            foreach (var roleCost in rolesCosts)
+            if (economGuild != null)
             {
-                if (roleCost.Item1 == role.Id)
-                {
-                    roleId = roleCost.Item1;
-                    cost = roleCost.Item2;
-                }                
-            }
+                var rolesCosts = economGuild.RolesAndCostList;
+                ulong roleId = 0;
+                int cost = 0;
 
-            if (roleId > 0)            
-                try
+                foreach (var roleCost in rolesCosts)
                 {
-                    var stEconomUser = FilesProvider.GetEconomicGuildUser(user);
-                    var economUser = FilesProvider.GetEconomicGuildUser(user);
-
-                    if (economUser.Balance - cost > 0)
+                    if (roleCost.Item1 == role.Id)
                     {
-                        user.AddRoleAsync(role).GetAwaiter();
-                        economUser.Balance -= cost;
-                        economGuild.SerializableEconomicUsers[economGuild.SerializableEconomicUsers.IndexOf(stEconomUser)] = economUser;
-                        FilesProvider.RefreshEconomicGuild(economGuild);
-                        return Result.Succesfull;
+                        roleId = roleCost.Item1;
+                        cost = roleCost.Item2;
                     }
-                    else
-                        return Result.NoBalance;                    
                 }
-                catch (Exception)
-                {
-                    return Result.Error;
-                }            
-            else
-                return Result.NoRole;
+
+                if (roleId > 0)
+                    try
+                    {
+                        var stEconomUser = FilesProvider.GetEconomicGuildUser(user);
+                        var economUser = FilesProvider.GetEconomicGuildUser(user);
+
+                        if (economUser.Balance - cost > 0)
+                        {
+                            user.AddRoleAsync(role).GetAwaiter();
+                            economUser.Balance -= cost;
+                            economGuild.SerializableEconomicUsers[economGuild.SerializableEconomicUsers.IndexOf(stEconomUser)] = economUser;
+                            FilesProvider.RefreshEconomicGuild(economGuild);
+                            return Result.Succesfull;
+                        }
+                        else
+                            return Result.NoBalance;
+                    }
+                    catch (Exception)
+                    {
+                        return Result.Error;
+                    }
+                else
+                    return Result.NoRole;
+            }
+            return Result.Succesfull;
         }
 
         public Result AddRole(IRole role, int cost)
         {
             var economGuild = EconomicGuild;
-            List<ulong> rolesId = new List<ulong>();
-
-            foreach (var roleCost in EconomicGuild.RolesAndCostList)            
-                rolesId.Add(roleCost.Item1);
-
-            if (!rolesId.Contains(role.Id))            
-                economGuild.RolesAndCostList.Add((role.Id, cost));                            
-            else
+            if (economGuild != null)
             {
-                int indexOf = rolesId.IndexOf(role.Id);
-                var roleCost = EconomicGuild.RolesAndCostList[indexOf];
-                roleCost.Item2 = cost;                
-            }
-            
-            FilesProvider.RefreshEconomicGuild(economGuild);
+                List<ulong> rolesId = new List<ulong>();
 
+                foreach (var roleCost in EconomicGuild.RolesAndCostList)
+                    rolesId.Add(roleCost.Item1);
+
+                if (!rolesId.Contains(role.Id))
+                    economGuild.RolesAndCostList.Add((role.Id, cost));
+                else
+                {
+                    int indexOf = rolesId.IndexOf(role.Id);
+                    var roleCost = EconomicGuild.RolesAndCostList[indexOf];
+                    roleCost.Item2 = cost;
+                }
+
+                FilesProvider.RefreshEconomicGuild(economGuild);
+
+                return Result.Succesfull;
+            }
             return Result.Succesfull;
         }
 

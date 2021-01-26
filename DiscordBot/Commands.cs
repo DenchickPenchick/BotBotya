@@ -89,6 +89,8 @@ namespace TestBot
                     categoryAttribute = new CustomCommandAttribute();
                 else if (command.Attributes.Contains(new MusicCommandAttribute()))
                     categoryAttribute = new MusicCommandAttribute();
+                else if (command.Attributes.Contains(new RolesCommandAttribute()))
+                    categoryAttribute = new RolesCommandAttribute();
                 else
                     categoryAttribute = new StandartCommandAttribute();                
 
@@ -536,7 +538,7 @@ namespace TestBot
                     economProvider.AddBalance(user, count);
                     var economUser = FilesProvider.GetEconomicGuildUser(user as SocketGuildUser);
 
-                    usersList += $"\n`{user.Mention}` Баланс: {economUser.Balance}";
+                    usersList += $"\n`{user.Mention}` Баланс: {economUser.Balance + count}";
                 }
 
                 await ReplyAsync(embed: new EmbedBuilder

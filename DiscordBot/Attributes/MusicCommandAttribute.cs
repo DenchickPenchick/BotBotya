@@ -20,7 +20,6 @@ _________________________________________________________________________
 _________________________________________________________________________
 */
 
-
 namespace DiscordBot.Attributes
 {
     public class MusicCommandAttribute : CommandCategoryAttribute

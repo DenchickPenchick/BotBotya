@@ -38,8 +38,7 @@ namespace DiscordBot.CustomCommands
         public SocketCommandContext CommandContext { get; private set; }
 
         public CustomCommandsCore(SocketCommandContext context)
-        {
-            CommandBuilder builder = new CommandBuilder();
+        {            
             CommandContext = context;
         }
 

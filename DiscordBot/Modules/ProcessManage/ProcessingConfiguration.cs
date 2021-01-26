@@ -23,6 +23,7 @@ _________________________________________________________________________
 using Discord.WebSocket;
 using DiscordBot.GuildManaging;
 using DiscordBot.Modules.ContentManaging;
+using DiscordBot.Modules.EconomicManaging;
 using DiscordBot.Modules.MusicManaging;
 using DiscordBot.Modules.NotificationsManaging;
 using DiscordBot.Modules.ServersConnectingManaging;
@@ -42,6 +43,7 @@ namespace DiscordBot.Modules.ProcessManage
         public LogModule NotificationsModule { get; set; }            
         public MusicModule MusicModule { get; set; }
         public ServersConnector ServersConnector { get; set; }
-        public List<IModule> GetAllModules() => new List<IModule> { FileModule, GuildModule, RoomModule, ContentModule, NotificationsModule, MusicModule, ServersConnector };        
+        public EconomicModule EconomicModule { get; set; }
+        public List<IModule> GetAllModules() => new List<IModule> { FileModule, GuildModule, RoomModule, ContentModule, NotificationsModule, MusicModule, ServersConnector, EconomicModule };        
     }
 }

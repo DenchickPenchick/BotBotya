@@ -174,12 +174,26 @@ namespace DiscordBot.Providers
             foreach (var economUser in guild.SerializableEconomicUsers)            
                 if (economUser.Id == user.Id)
                     return economUser;
-            return null;
+            return new SerializableEconomicGuildUser
+            {
+                Id = user.Id
+            };
+        }
+
+        public static void AddEconomicGuild(IGuild guild)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializableEconomicGuild));
+            SerializableEconomicGuild serializableGuild = new SerializableEconomicGuild
+            {
+                Id = guild.Id
+            };
+            using FileStream stream = new FileStream($"{GetBotDirectoryPath()}/EconomicGuilds/{guild.Id}.xml", FileMode.Create);
+            serializer.Serialize(stream, serializableGuild);
         }
 
         public static void RefreshEconomicGuild(SerializableEconomicGuild guild)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(SerializableConnectors));
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializableEconomicGuild));
 
             File.WriteAllText($"{GetBotDirectoryPath()}/EconomicGuilds/{guild.Id}.xml", string.Empty);
             using FileStream stream = new FileStream($"{GetBotDirectoryPath()}/EconomicGuilds/{guild.Id}.xml", FileMode.Open, FileAccess.ReadWrite);

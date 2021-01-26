@@ -42,6 +42,7 @@ using DiscordBot.Providers;
 using DiscordBot.Modules.ServersConnectingManaging;
 using DiscordBot.Providers.FileManaging;
 using System.Threading;
+using DiscordBot.Modules.EconomicManaging;
 
 namespace DiscordBot
 {
@@ -94,7 +95,8 @@ namespace DiscordBot
                 GuildModule = new GuildModule(Client),
                 NotificationsModule = new LogModule(Client),
                 MusicModule = new MusicModule(Services),
-                ServersConnector = new ServersConnector(Client)
+                ServersConnector = new ServersConnector(Client),
+                EconomicModule = new EconomicModule(Client)
             }).RunModule();
 
             Client.Ready += Client_Ready;

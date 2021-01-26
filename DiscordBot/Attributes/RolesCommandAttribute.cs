@@ -1,11 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿/*
+_________________________________________________________________________
+|                                                                       |
+|██████╗░░█████╗░████████╗  ██████╗░░█████╗░████████╗██╗░░░██╗░█████╗░  |
+|██╔══██╗██╔══██╗╚══██╔══╝  ██╔══██╗██╔══██╗╚══██╔══╝╚██╗░██╔╝██╔══██╗  |
+|██████╦╝██║░░██║░░░██║░░░  ██████╦╝██║░░██║░░░██║░░░░╚████╔╝░███████║  |
+|██╔══██╗██║░░██║░░░██║░░░  ██╔══██╗██║░░██║░░░██║░░░░░╚██╔╝░░██╔══██║  |
+|██████╦╝╚█████╔╝░░░██║░░░  ██████╦╝╚█████╔╝░░░██║░░░░░░██║░░░██║░░██║  |
+|╚═════╝░░╚════╝░░░░╚═╝░░░  ╚═════╝░░╚════╝░░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝  |
+|______________________________________________________________________ |
+|Author: Denis Voitenko.                                                |
+|GitHub: https://github.com/DenchickPenchick                            |
+|DEV: https://dev.to/denchickpenchick                                   |
+|_____________________________Project__________________________________ |
+|GitHub: https://github.com/DenchickPenchick/BotBotya                   |
+|______________________________________________________________________ |
+|© Copyright 2021 Denis Voitenko                                        |
+|© Copyright 2021 All rights reserved                                   |
+|License: http://opensource.org/licenses/MIT                            |
+_________________________________________________________________________
+*/
 
 namespace DiscordBot.Attributes
 {
-   public class RolesCommandAttribute : CommandCategoryAttribute
+    public class RolesCommandAttribute : CommandCategoryAttribute
     {
-        public override string CategoryName => "Магазин ролей";
+        public override string CategoryName { get => "Магазин ролей"; }
     }
 }
