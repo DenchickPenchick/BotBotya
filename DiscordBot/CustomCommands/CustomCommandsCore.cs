@@ -22,6 +22,7 @@ _________________________________________________________________________
 
 using Discord;
 using Discord.Commands;
+using Discord.Commands.Builders;
 using Discord.WebSocket;
 using DiscordBot.CustomCommands.Actions;
 using DiscordBot.Serializable;
@@ -38,6 +39,7 @@ namespace DiscordBot.CustomCommands
 
         public CustomCommandsCore(SocketCommandContext context)
         {
+            CommandBuilder builder = new CommandBuilder();
             CommandContext = context;
         }
 

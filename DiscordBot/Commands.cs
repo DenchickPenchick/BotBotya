@@ -79,7 +79,7 @@ namespace TestBot
 
             foreach (var command in Bot.Commands.Commands)
             { 
-                CommandCategoryAttribute categoryAttribute;
+                CommandCategoryAttribute categoryAttribute;                
 
                 if (command.Attributes.Contains(new StandartCommandAttribute()))
                     categoryAttribute = new StandartCommandAttribute();
@@ -124,7 +124,7 @@ namespace TestBot
         }
 
         [Command("Очистить", RunMode = RunMode.Async)]
-        [StandartCommand]
+        [StandartCommand]        
         [Summary("позволяет очистить сообщений (до 100). Если сообщения отправлены более двух недель назад, то эти сообщения не удалятся.")]
         public async Task Clear(int count)
         {
@@ -461,7 +461,95 @@ namespace TestBot
         #endregion
 
         #region --РОЛЕВЫЕ КОМАНДЫ--
+        [Command("ДобавитьРоль")]
+        [RolesCommand]
+        [Summary("добавляет роль на продажу. Ее нужно упомянуть")]
+        public async Task AddEconomicRole(int price, params string[] str)
+        {
+            if (Context.Message.MentionedRoles.Count > 0)
+            {
+                var economProvider = new EconomicProvider(Context.Guild);
+                var role = Context.Message.MentionedRoles.First();
 
+                var res = economProvider.AddRole(role, price);
+                if (res != EconomicProvider.Result.RoleAlreadyAdded)
+                    await ReplyAsync("Роль добавлена на продажу.");
+                else
+                    await ReplyAsync("Роль уже добавлена на продажу.");
+            }
+            else
+                await ReplyAsync("Не могу найти роль в сообщении.");
+        }
+
+        [Command("УбратьРоль")]
+        [RolesCommand]
+        [Summary("снимает роль с продажи. Ее нужно упомянуть.")]
+        public async Task DeleteRole(params string[] str)
+        {
+            if (Context.Message.MentionedRoles.Count > 0)
+            {
+                var economProvider = new EconomicProvider(Context.Guild);
+                var role = Context.Message.MentionedRoles.First();
+
+                var res = economProvider.DeleteRole(role.Id);
+                if (res == EconomicProvider.Result.NoRole)
+                    await ReplyAsync($"Роли {role.Mention} нет в списке на продажу.");
+            }
+            else
+                await ReplyAsync("Не могу найти роль в сообщении.");
+        }
+
+        [Command("КупитьРоль")]
+        [RolesCommand]
+        [Summary("покупает роль участнику. Ее нужно упомянуть.")]
+        public async Task BuyRole(params string[] str)
+        {
+            if (Context.Message.MentionedRoles.Count > 0)
+            {
+                var economProvider = new EconomicProvider(Context.Guild);
+                var role = Context.Message.MentionedRoles.First();
+                var res = economProvider.BuyRole(role, Context.User as SocketGuildUser);
+                if (res == EconomicProvider.Result.NoRole)
+                    await ReplyAsync($"Роли {role.Mention} нет в каталоге.");
+                else if (res == EconomicProvider.Result.NoBalance)
+                    await ReplyAsync($"У тебя не хватает средств на покупку роли {role.Mention}");
+                else if (res == EconomicProvider.Result.Error)
+                    await ReplyAsync($"Произошла ошибка при покупке роли. Можешь обратиться на [сервер поддержки](https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991)");
+            }
+            else
+                await ReplyAsync("Не могу найти роль в сообщении.");
+        }
+
+        [Command("ДобавитьБаланс")]
+        [RolesCommand]
+        [Summary("позволяет увеличить баланс участника(-м) сервера (его(их) нужно упомянуть).")]
+        public async Task AddBalance(int count, params string[] str)
+        {
+            var economProvider = new EconomicProvider(Context.Guild);
+
+            string usersList = null;
+
+            if (Context.Message.MentionedUsers.Count > 0)
+            {
+                foreach (var user in Context.Message.MentionedUsers)
+                {
+                    economProvider.AddBalance(user, count);
+                    var economUser = FilesProvider.GetEconomicGuildUser(user as SocketGuildUser);
+
+                    usersList += $"\n`{user.Mention}` Баланс: {economUser.Balance}";
+                }
+
+                await ReplyAsync(embed: new EmbedBuilder
+                {
+                    Title = "Новый баланс участников сервера",
+                    Description = usersList,
+                    ThumbnailUrl = Context.Guild.IconUrl,
+                    Color = Color.Blue
+                }.Build());
+            }
+            else
+                await ReplyAsync("Не могу найти участника(-ов) в сообщении.");
+        }
         #endregion
 
         #region --КАСТОМНЫЕ КОМАНДЫ--

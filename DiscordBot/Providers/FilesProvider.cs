@@ -26,9 +26,9 @@ using Discord.WebSocket;
 using System.Xml.Serialization;
 using DiscordBot.Modules.FileManaging;
 using System;
-using System.Drawing;
 using DiscordBot.Serializable;
 using System.Collections.Generic;
+using Discord;
 
 namespace DiscordBot.Providers
 {   
@@ -154,7 +154,7 @@ namespace DiscordBot.Providers
             serializer.Serialize(stream, connectors);
         }
 
-        public static SerializableEconomicGuild GetEconomicGuild(SocketGuild guild)
+        public static SerializableEconomicGuild GetEconomicGuild(IGuild guild)
         {
             string path = $"{GetBotDirectoryPath()}/EconomicGuilds/{guild.Id}.xml";
             if (File.Exists(path))
@@ -167,7 +167,7 @@ namespace DiscordBot.Providers
                 return null;
         }
 
-        public static SerializableEconomicGuildUser GetEconomicGuildUser(SocketGuildUser user)
+        public static SerializableEconomicGuildUser GetEconomicGuildUser(IGuildUser user)
         {
             var guild = GetEconomicGuild(user.Guild);
 
