@@ -41,21 +41,23 @@ namespace DiscordBot.Providers
 
         public void SetBalance(IUser user, int count)
         {
-            SerializableEconomicGuildUser economicGuildUser = GetEconomicGuildUser(user.Id);           
+            SerializableEconomicGuildUser economicGuildUser = GetEconomicGuildUser(user.Id).Item1;
+            int index = GetEconomicGuildUser(user.Id).Item2;
             var economGuild = EconomicGuild;
-            if (economGuild != null && economicGuildUser != null)
-            {
-                int indexOf = economGuild.SerializableEconomicUsers.IndexOf(economicGuildUser);
-
+            if (economGuild != null)
+            {                
                 if (economicGuildUser == null)
                     economGuild.SerializableEconomicUsers.Add(new SerializableEconomicGuildUser
                     {
-                        Id = user.Id
+                        Id = user.Id,
+                        Balance = count
                     });
-
-                economicGuildUser.Balance = count;
-                economGuild.SerializableEconomicUsers[indexOf] = economicGuildUser;
-
+                else
+                {                   
+                    economicGuildUser.Balance = count;
+                    economGuild.SerializableEconomicUsers[index] = economicGuildUser;
+                }
+                
                 FilesProvider.RefreshEconomicGuild(economGuild);
             }            
         }
@@ -73,12 +75,10 @@ namespace DiscordBot.Providers
         public void AddBalance(IUser user, int count)
         {
             var economicGuildUser = GetEconomicGuildUser(user.Id);
-            if (economicGuildUser != null)
-            {
-                int newBalance = economicGuildUser.Balance + count;
-
-                SetBalance(user, newBalance);
-            }            
+            int newBalance = count;
+            if (economicGuildUser.Item1 != null)            
+                newBalance = economicGuildUser.Item1.Balance + count;            
+            SetBalance(user, newBalance);                        
         }
 
         public void MinusBalance(IUser user, int count)
@@ -86,7 +86,7 @@ namespace DiscordBot.Providers
             var economicGuildUser = GetEconomicGuildUser(user.Id);
             if (economicGuildUser != null)
             {
-                int newBalance = economicGuildUser.Balance - count;
+                int newBalance = economicGuildUser.Item1.Balance - count;
 
                 SetBalance(user, newBalance);
             }            
@@ -113,15 +113,20 @@ namespace DiscordBot.Providers
 
                 if (roleId > 0)
                     try
-                    {
-                        var stEconomUser = FilesProvider.GetEconomicGuildUser(user);
+                    {                        
                         var economUser = FilesProvider.GetEconomicGuildUser(user);
+                                                
+                        int index = 0;
+
+                        foreach (var eUser in FilesProvider.GetEconomicGuild(user.Guild).SerializableEconomicUsers)                        
+                            if (economUser.Id != eUser.Id)
+                            { index++; break; }                        
 
                         if (economUser.Balance - cost > 0)
                         {
                             user.AddRoleAsync(role).GetAwaiter();
                             economUser.Balance -= cost;
-                            economGuild.SerializableEconomicUsers[economGuild.SerializableEconomicUsers.IndexOf(stEconomUser)] = economUser;
+                            economGuild.SerializableEconomicUsers[index] = economUser;
                             FilesProvider.RefreshEconomicGuild(economGuild);
                             return Result.Succesfull;
                         }
@@ -176,18 +181,24 @@ namespace DiscordBot.Providers
             {
                 int indexOf = rolesId.IndexOf(id);
                 economGuild.RolesAndCostList.RemoveAt(indexOf);
+                FilesProvider.RefreshEconomicGuild(economGuild);
                 return Result.Succesfull;
             }
             else
                 return Result.NoRole;
-        }        
+        }
 
-        public SerializableEconomicGuildUser GetEconomicGuildUser(ulong id)
+        public Tuple<SerializableEconomicGuildUser, int> GetEconomicGuildUser(ulong id)
         {
+            int indexOf = 0;
             foreach (var economUser in EconomicGuild.SerializableEconomicUsers)
-                if (economUser.Id == id)
-                    return economUser;
-            return null;
+            {
+                if (economUser.Id == id)                
+                    return new Tuple<SerializableEconomicGuildUser, int>(economUser, indexOf);                
+                indexOf++;
+            }
+                            
+            return new Tuple<SerializableEconomicGuildUser, int>(null, 0);
         }
     }
 }

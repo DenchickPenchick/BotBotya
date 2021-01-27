@@ -496,6 +496,8 @@ namespace TestBot
                 var res = economProvider.DeleteRole(role.Id);
                 if (res == EconomicProvider.Result.NoRole)
                     await ReplyAsync($"Роли {role.Mention} нет в списке на продажу.");
+                else if (res == EconomicProvider.Result.Succesfull)
+                    await ReplyAsync($"Роль {role.Mention} снята с продажи.");
             }
             else
                 await ReplyAsync("Не могу найти роль в сообщении.");
@@ -517,6 +519,8 @@ namespace TestBot
                     await ReplyAsync($"У тебя не хватает средств на покупку роли {role.Mention}");
                 else if (res == EconomicProvider.Result.Error)
                     await ReplyAsync($"Произошла ошибка при покупке роли. Можешь обратиться на [сервер поддержки](https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991)");
+                else if (res == EconomicProvider.Result.Succesfull)
+                    await ReplyAsync($"Роль {role.Mention} куплена");
             }
             else
                 await ReplyAsync("Не могу найти роль в сообщении.");
@@ -538,7 +542,7 @@ namespace TestBot
                     economProvider.AddBalance(user, count);
                     var economUser = FilesProvider.GetEconomicGuildUser(user as SocketGuildUser);
 
-                    usersList += $"\n`{user.Mention}` Баланс: {economUser.Balance + count}";
+                    usersList += $"\n{(user as SocketGuildUser).Mention} Баланс: {economUser.Balance}";
                 }
 
                 await ReplyAsync(embed: new EmbedBuilder
@@ -551,6 +555,54 @@ namespace TestBot
             }
             else
                 await ReplyAsync("Не могу найти участника(-ов) в сообщении.");
+        }
+
+        [Command("РолиНаПродажу")]
+        [RolesCommand]
+        [Summary("позволяет получить список ролей на продажу.")]
+        public async Task RolesOnSale()
+        {
+            var economProvider = new EconomicProvider(Context.Guild);
+
+            var roles = economProvider.EconomicGuild.RolesAndCostList;
+
+            List<string> pages =new List<string>
+            { 
+                null
+            };
+
+            int index = 0;
+
+            foreach (var role in roles)
+            {
+                if (pages.Count == 1 || $"{pages[index]}\n{Context.Guild.GetRole(role.Item1).Mention} Цена: {role.Item2}".Length < 2048)
+                    pages[0] += $"\n{Context.Guild.GetRole(role.Item1).Mention} Цена: {role.Item2}";
+                else if ($"{pages[index]}\n{Context.Guild.GetRole(role.Item1).Mention} Цена: {role.Item2}".Length >= 2048)
+                {
+                    pages.Add($"\n{Context.Guild.GetRole(role.Item1).Mention} Цена: {role.Item2}");
+                    index++;
+                }                
+            }
+            if (pages.Count == 1)
+                await ReplyAsync(embed: new EmbedBuilder
+                {
+                    Title = "Роли на продажу",
+                    Description = pages.First(),
+                    ThumbnailUrl = Context.Guild.IconUrl,
+                    Color = Color.Blue
+                }.Build());
+            else
+                await PagedReplyAsync(new PaginatedMessage
+                {
+                    Title = "Роли на продажу",
+                    Pages = pages,
+                    Options = new PaginatedAppearanceOptions
+                    {
+                        Jump = null,
+                        Info = null
+                    },
+                    Color = Color.Blue
+                });
         }
         #endregion
 

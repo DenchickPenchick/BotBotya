@@ -182,13 +182,17 @@ namespace DiscordBot.Providers
 
         public static void AddEconomicGuild(IGuild guild)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(SerializableEconomicGuild));
-            SerializableEconomicGuild serializableGuild = new SerializableEconomicGuild
+            string path = $"{GetBotDirectoryPath()}/EconomicGuilds/{guild.Id}.xml";
+            if (!File.Exists(path))
             {
-                Id = guild.Id
-            };
-            using FileStream stream = new FileStream($"{GetBotDirectoryPath()}/EconomicGuilds/{guild.Id}.xml", FileMode.Create);
-            serializer.Serialize(stream, serializableGuild);
+                XmlSerializer serializer = new XmlSerializer(typeof(SerializableEconomicGuild));
+                SerializableEconomicGuild serializableGuild = new SerializableEconomicGuild
+                {
+                    Id = guild.Id
+                };
+                using FileStream stream = new FileStream(path, FileMode.Create);
+                serializer.Serialize(stream, serializableGuild);
+            }            
         }
 
         public static void RefreshEconomicGuild(SerializableEconomicGuild guild)
