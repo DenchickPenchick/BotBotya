@@ -217,7 +217,7 @@ namespace DiscordBot
                             index = 0;
                             break;
                     }
-                    Thread.Sleep(TimeSpan.FromSeconds(60));
+                    Thread.Sleep(TimeSpan.FromSeconds(30));
                 }
             }).Start();            
         }

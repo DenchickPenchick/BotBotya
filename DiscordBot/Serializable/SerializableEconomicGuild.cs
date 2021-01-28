@@ -27,8 +27,7 @@ namespace DiscordBot.Serializable
     public class SerializableEconomicGuild
     {
         public ulong Id { get; set; } = 0;
-        public int RewardForMessage { get; set; } = 0;
-        public int RewardForAddBalanceCommand { get; set; } = 100;
+        public int RewardForMessage { get; set; } = 100;        
         public List<SerializableEconomicGuildUser> SerializableEconomicUsers { get; set; }  = new List<SerializableEconomicGuildUser>();
         public List<(ulong, int)> RolesAndCostList { get; set; } = new List<(ulong, int)>();
     }

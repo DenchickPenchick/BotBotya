@@ -57,14 +57,14 @@ namespace TestBot
         {
             LavaOperations = lavaOperations;
             Bot = bot;
-        }        
+        }
 
         #region --СТАНДАРТНЫЕ КОМАНДЫ--
         [Command("Хелп")]
         [StandartCommand]
         [Summary("позволяет узнать полный список команд")]
         public async Task Help()
-        {            
+        {
             int pos = 0;
             int posit = 1;
             int catpos = 0;
@@ -78,8 +78,8 @@ namespace TestBot
             CommandCategoryAttribute prevCategoryAttribute = new StandartCommandAttribute();
 
             foreach (var command in Bot.Commands.Commands)
-            { 
-                CommandCategoryAttribute categoryAttribute;                
+            {
+                CommandCategoryAttribute categoryAttribute;
 
                 if (command.Attributes.Contains(new StandartCommandAttribute()))
                     categoryAttribute = new StandartCommandAttribute();
@@ -92,14 +92,14 @@ namespace TestBot
                 else if (command.Attributes.Contains(new RolesCommandAttribute()))
                     categoryAttribute = new RolesCommandAttribute();
                 else
-                    categoryAttribute = new StandartCommandAttribute();                
+                    categoryAttribute = new StandartCommandAttribute();
 
                 if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}".Length >= 2048)
                 {
-                    if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName)                    
-                        posit = 1;                                            
-                    
-                    pages.Add($"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}");                    
+                    if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName)
+                        posit = 1;
+
+                    pages.Add($"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}");
                     pos++;
                 }
                 else if (catpos == 0)
@@ -111,22 +111,22 @@ namespace TestBot
                     pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}";
                 prevCategoryAttribute = categoryAttribute;
             }
-            
+
             await PagedReplyAsync(pager: new PaginatedMessage
             {
                 Title = "Справка по командам",
                 Pages = pages,
                 Color = Color.Blue,
                 Options = new PaginatedAppearanceOptions
-                { 
+                {
                     Jump = null,
-                    Info = null                    
+                    Info = null
                 }
             });
         }
 
         [Command("Очистить", RunMode = RunMode.Async)]
-        [StandartCommand]        
+        [StandartCommand]
         [Summary("позволяет очистить сообщений (до 100). Если сообщения отправлены более двух недель назад, то эти сообщения не удалятся.")]
         public async Task Clear(int count)
         {
@@ -218,11 +218,16 @@ namespace TestBot
             var contextRoles = (Context.User as SocketGuildUser).Roles;
             int contextMaxPos = 0;
 
-            foreach (var role in contextRoles)            
+            foreach (var role in contextRoles)
                 if (role.Position > contextMaxPos)
-                    contextMaxPos = role.Position;            
+                    contextMaxPos = role.Position;
+            
+            SocketGuildUser user;
 
-            SocketGuildUser user = GetSocketGuildUser(NameOfUser);
+            if (Context.Message.MentionedUsers.Count > 0)
+                user = Context.Message.MentionedUsers.First() as SocketGuildUser;
+            else
+                user = GetSocketGuildUser(NameOfUser);
 
             var toKickRoles = user.Roles;
             int toKickMaxPos = 0;
@@ -261,7 +266,12 @@ namespace TestBot
                 if (role.Position > contextMaxPos)
                     contextMaxPos = role.Position;
 
-            SocketGuildUser user = GetSocketGuildUser(NameOfUser);
+            SocketGuildUser user;
+
+            if (Context.Message.MentionedUsers.Count > 0)
+                user = Context.Message.MentionedUsers.First() as SocketGuildUser;
+            else
+                user = GetSocketGuildUser(NameOfUser);
 
             var toBanRoles = user.Roles;
             int toBanMaxPos = 0;
@@ -317,7 +327,7 @@ namespace TestBot
         {
             string message = null;
 
-            for (int i = 0; i < mess.Length; i++)            
+            for (int i = 0; i < mess.Length; i++)
                 message += i == 0 ? mess[i] : $" {mess[i]}";
 
             foreach (var user in Context.Guild.Users)
@@ -325,10 +335,10 @@ namespace TestBot
                 if (!user.IsBot)
                 {
                     var ch = await user.GetOrCreateDMChannelAsync();
-                    if(ch != null)
+                    if (ch != null)
                         await ch.SendMessageAsync(message);
                 }
-                
+
             }
             await ReplyAsync("Рассылка произведена успешно.");
         }
@@ -352,7 +362,7 @@ namespace TestBot
         [Summary("удаляет соединение с каналами других серверов.")]
         [StandartCommand]
         public async Task DeleteConnection()
-        {            
+        {
             var connectors = FilesProvider.GetConnectors(Context.Guild);
             SerializableConnector connector = null;
             if (connectors != null)
@@ -436,7 +446,7 @@ namespace TestBot
                 return;
             }
             await LavaOperations.SetVolumeAsync(Context.User as SocketGuildUser, vol, Context.Channel as SocketTextChannel);
-        }               
+        }
 
         [Command("Текст")]
         [MusicCommand]
@@ -455,7 +465,7 @@ namespace TestBot
                 return;
             }
 
-            await ReplyAsync(await player.Track.FetchLyricsFromGeniusAsync(), embed: new EmbedBuilder 
+            await ReplyAsync(await player.Track.FetchLyricsFromGeniusAsync(), embed: new EmbedBuilder
             {
                 Title = $"Текст песни {player.Track.Title}"
             }.Build());
@@ -464,6 +474,7 @@ namespace TestBot
 
         #region --РОЛЕВЫЕ КОМАНДЫ--
         [Command("ДобавитьРоль")]
+        [RequireUserPermission(GuildPermission.Administrator)]
         [RolesCommand]
         [Summary("добавляет роль на продажу. Ее нужно упомянуть")]
         public async Task AddEconomicRole(int price, params string[] str)
@@ -484,6 +495,7 @@ namespace TestBot
         }
 
         [Command("УбратьРоль")]
+        [RequireUserPermission(GuildPermission.Administrator)]
         [RolesCommand]
         [Summary("снимает роль с продажи. Ее нужно упомянуть.")]
         public async Task DeleteRole(params string[] str)
@@ -527,6 +539,7 @@ namespace TestBot
         }
 
         [Command("ДобавитьБаланс")]
+        [RequireUserPermission(GuildPermission.Administrator)]
         [RolesCommand]
         [Summary("позволяет увеличить баланс участника(-м) сервера (его(их) нужно упомянуть).")]
         public async Task AddBalance(int count, params string[] str)
@@ -540,6 +553,70 @@ namespace TestBot
                 foreach (var user in Context.Message.MentionedUsers)
                 {
                     economProvider.AddBalance(user, count);
+                    var economUser = FilesProvider.GetEconomicGuildUser(user as SocketGuildUser);
+
+                    usersList += $"\n{(user as SocketGuildUser).Mention} Баланс: {economUser.Balance}";
+                }
+
+                await ReplyAsync(embed: new EmbedBuilder
+                {
+                    Title = "Новый баланс участников сервера",
+                    Description = usersList,
+                    ThumbnailUrl = Context.Guild.IconUrl,
+                    Color = Color.Blue
+                }.Build());
+            }
+            else
+                await ReplyAsync("Не могу найти участника(-ов) в сообщении.");
+        }
+
+        [Command("УменьшитьБаланс")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [RolesCommand]
+        [Summary("позволяет уменьшить баланс участника(-м) сервера (его(их) нужно упомянуть).")]
+        public async Task MinusBalance(int count, params string[] str)
+        {
+            var economProvider = new EconomicProvider(Context.Guild);
+
+            string usersList = null;
+
+            if (Context.Message.MentionedUsers.Count > 0)
+            {
+                foreach (var user in Context.Message.MentionedUsers)
+                {
+                    economProvider.MinusBalance(user, count);
+                    var economUser = FilesProvider.GetEconomicGuildUser(user as SocketGuildUser);
+
+                    usersList += $"\n{(user as SocketGuildUser).Mention} Баланс: {economUser.Balance}";
+                }
+
+                await ReplyAsync(embed: new EmbedBuilder
+                {
+                    Title = "Новый баланс участников сервера",
+                    Description = usersList,
+                    ThumbnailUrl = Context.Guild.IconUrl,
+                    Color = Color.Blue
+                }.Build());
+            }
+            else
+                await ReplyAsync("Не могу найти участника(-ов) в сообщении.");
+        }
+
+        [Command("УстановитьБаланс")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [RolesCommand]
+        [Summary("позволяет установить баланс участника(-м) сервера (его(их) нужно упомянуть).")]
+        public async Task SetBalance(int count, params string[] str)
+        {
+            var economProvider = new EconomicProvider(Context.Guild);
+
+            string usersList = null;
+
+            if (Context.Message.MentionedUsers.Count > 0)
+            {
+                foreach (var user in Context.Message.MentionedUsers)
+                {
+                    economProvider.SetBalance(user, count);
                     var economUser = FilesProvider.GetEconomicGuildUser(user as SocketGuildUser);
 
                     usersList += $"\n{(user as SocketGuildUser).Mention} Баланс: {economUser.Balance}";
@@ -603,6 +680,41 @@ namespace TestBot
                     },
                     Color = Color.Blue
                 });
+        }
+
+        [Command("Баланс")]
+        [RolesCommand]
+        [Summary("показывает твой баланс.")]
+        public async Task GetBalance()
+        {
+            var economUser = FilesProvider.GetEconomicGuildUser(Context.User as SocketGuildUser);
+
+            if (economUser != null)
+            {
+                await ReplyAsync(embed: new EmbedBuilder
+                {
+                    Title = $"Баланс {Context.User.Username}: {economUser.Balance}",
+                    ThumbnailUrl = Context.User.GetAvatarUrl(),
+                    Color = Color.Blue
+                }.Build());
+            }
+            else
+                await ReplyAsync("У тебя нет собственного счета. Можно отправить **любое** сообщение, чтобы его создать.");
+        }
+
+        [Command("НаградаЗаСообщение")]
+        [RolesCommand]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("позволяет установить награду за каждое отправленное пользователем сообщение.")]
+        public async Task RewardForMessage(int count)
+        {
+            var economGuild = FilesProvider.GetEconomicGuild(Context.Guild);
+
+            economGuild.RewardForMessage = count;
+
+            FilesProvider.RefreshEconomicGuild(economGuild);
+
+            await ReplyAsync($"Теперь награда за сообщение равна {economGuild.RewardForMessage}");
         }
         #endregion
 
