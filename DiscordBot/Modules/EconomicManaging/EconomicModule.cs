@@ -34,12 +34,19 @@ namespace DiscordBot.Modules.EconomicManaging
         {
             Client = client;
             client.MessageReceived += Client_MessageReceived;
+            client.JoinedGuild += Client_JoinedGuild;
             client.Ready += Client_Ready;
-        }
+        }        
 
         public void RunModule()
         {
             
+        }
+
+        private Task Client_JoinedGuild(SocketGuild arg)
+        {
+            FilesProvider.AddEconomicGuild(arg);
+            return Task.CompletedTask;
         }
 
         private Task Client_Ready()

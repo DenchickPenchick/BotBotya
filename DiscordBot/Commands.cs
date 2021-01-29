@@ -1157,6 +1157,58 @@ namespace TestBot
 
             await ReplyAsync("Значок комнат изменен успешно");
         }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("КаналДляПриветствий")]
+        [CustomisationCommand]
+        [Summary("устанавливает канал для приветствий.")]
+        public async Task HelloChannel(params string[] str)
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            if (Context.Message.MentionedChannels.Count > 0)
+            {
+                serGuild.SystemChannels.NewUsersChannelId = Context.Message.MentionedChannels.First().Id;
+                FilesProvider.RefreshGuild(serGuild);
+            }
+            else
+                await ReplyAsync("Не могу найти канал.");
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("КаналДляПрощаний")]
+        [CustomisationCommand]
+        [Summary("устанавливает канал для прощаний.")]
+        public async Task GoodbyeChannel(params string[] str)
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            if (Context.Message.MentionedChannels.Count > 0)
+            {
+                serGuild.SystemChannels.LeaveUsersChannelId = Context.Message.MentionedChannels.First().Id;
+                FilesProvider.RefreshGuild(serGuild);
+            }
+            else
+                await ReplyAsync("Не могу найти канал.");
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("УведомлениеОНеправильнойКоманде")]
+        [CustomisationCommand]
+        [Summary("включает/выключает уведомление о неправильной команде.")]
+        public async Task CommandErrorMessage()
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            serGuild.UnknownCommandMessage = !serGuild.UnknownCommandMessage;
+            
+            if (serGuild.UnknownCommandMessage)
+                await ReplyAsync("Теперь я буду присылать уведомление о неправильной команде.");
+            else
+                await ReplyAsync("Теперь я не буду присылать уведомление о неправильной команде.");
+
+            FilesProvider.RefreshGuild(serGuild);
+        }
         #endregion        
 
         private SocketGuildUser GetSocketGuildUser(params string[] NameOfUser)

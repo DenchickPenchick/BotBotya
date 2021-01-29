@@ -30,6 +30,7 @@ namespace DiscordBot.Modules.FileManaging
         public ulong LinksChannelId { get; set; } = 0;
         public ulong VideosChannelId { get; set; } = 0;
         public ulong NewUsersChannelId { get; set; } = 0;
+        public ulong LeaveUsersChannelId { get; set; } = 0;
         public ulong CreateRoomChannelId { get; set; } = 0;                
     }
 }

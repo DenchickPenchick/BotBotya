@@ -32,6 +32,7 @@ namespace DiscordBot.Modules.FileManaging
         public ulong LoggerId { get; set; } = 0;        
         public bool HelloMessageEnable { get; set; } = false;        
         public bool CheckingContent { get; set; } = false;
+        public bool UnknownCommandMessage { get; set; } = false;
         public bool GuildNotifications { get; set; } = false;
         public string HelloMessage { get; set; } = null;        
         public string EmojiOfRoom { get; set; } = "🎤";

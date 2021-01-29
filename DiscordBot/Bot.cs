@@ -156,7 +156,8 @@ namespace DiscordBot
                         switch (result.Error)
                         {
                             case CommandError.UnknownCommand:
-                                await context.Channel.SendMessageAsync($"Неизвестная команда. Пропиши команду {serGuild.Prefix}Хелп.");
+                                if(serGuild.UnknownCommandMessage)
+                                    await context.Channel.SendMessageAsync($"Неизвестная команда. Пропиши команду {serGuild.Prefix}Хелп.");
                                 break;
                             case CommandError.ParseFailed:
                                 await context.Channel.SendMessageAsync("Навеверное ты неправильно ввел данные.");
