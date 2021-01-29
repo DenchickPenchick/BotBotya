@@ -158,6 +158,22 @@ namespace TestBot
 
         }
 
+        [Command("МойСервер")]
+        [StandartCommand]
+        [Summary("получает приглашение на мой сервер поддержки.")]
+        public async Task MyServer()
+        {
+            await ReplyAsync("https://discord.gg/p6R4yk7uqK");
+        }
+
+        [Command("ДобавитьБота")]
+        [StandartCommand]
+        [Summary("получает ссылку-приглашение меня на твоей сервер")]
+        public async Task InviteLink()
+        {
+            await ReplyAsync("*Перейди по ссылке и пригласи меня*\n https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991");
+        }
+
         [Command("Жалоба", RunMode = RunMode.Async)]
         [StandartCommand]
         [Summary("отпраляет жалобу на участника сервера.")]
@@ -530,7 +546,7 @@ namespace TestBot
                 else if (res == EconomicProvider.Result.NoBalance)
                     await ReplyAsync($"У тебя не хватает средств на покупку роли {role.Mention}");
                 else if (res == EconomicProvider.Result.Error)
-                    await ReplyAsync($"Произошла ошибка при покупке роли. Можешь обратиться на [сервер поддержки](https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991)");
+                    await ReplyAsync($"Произошла ошибка при покупке роли. Можешь обратиться на сервер поддержки.\n**Ссылка:** https://discord.gg/p6R4yk7uqK");
                 else if (res == EconomicProvider.Result.Succesfull)
                     await ReplyAsync($"Роль {role.Mention} куплена");
             }
