@@ -50,35 +50,37 @@ namespace DiscordBot.Providers
             var message = context.Message;
             var files = message.Attachments;
             var compiler = new Compiler(Compiler.CompilerTypeEnum.Command);
-
-            foreach (var file in files)
-            {
-                if (Path.GetExtension(file.Filename) == ".xml")
+            if (context.Message.Attachments.Count > 0)
+                foreach (var file in files)
                 {
-                    string url = file.Url;
-                    WebClient web = new WebClient();                    
-                    var serial = new CustomCommandsSerial(context.Guild);                    
-                    var command = (SerializableCommand)new XmlSerializer(typeof(SerializableCommand), new[] { typeof(SerializableBan), typeof(SerializableKick), typeof(SerializableMessage) }).Deserialize(web.OpenRead(url));
-                    command.GuildId = context.Guild.Id;
-                    var res = compiler.Result(context.Guild, context.Message);
-                    var ser = serial.GetCustomCommands();
+                    if (Path.GetExtension(file.Filename) == ".xml")
+                    {
+                        string url = file.Url;
+                        WebClient web = new WebClient();
+                        var serial = new CustomCommandsSerial(context.Guild);
+                        var command = (SerializableCommand)new XmlSerializer(typeof(SerializableCommand), new[] { typeof(SerializableBan), typeof(SerializableKick), typeof(SerializableMessage) }).Deserialize(web.OpenRead(url));
+                        command.GuildId = context.Guild.Id;
+                        var res = compiler.Result(context.Guild, context.Message);
+                        var ser = serial.GetCustomCommands();
 
-                    List<string> CommandsNames = new List<string>();
-                    if(ser != null)
-                        foreach (var _command in ser.Commands)
-                        {
-                            CommandsNames.Add(_command.Name);
-                        }
+                        List<string> CommandsNames = new List<string>();
+                        if (ser != null)
+                            foreach (var _command in ser.Commands)
+                            {
+                                CommandsNames.Add(_command.Name);
+                            }
 
-                    if (CommandsNames.Contains(command.Name))
-                        await context.Channel.SendMessageAsync($"Команда с именем {command.Name} уже существует.");
+                        if (CommandsNames.Contains(command.Name))
+                            await context.Channel.SendMessageAsync($"Команда с именем {command.Name} уже существует.");
 
-                    await context.Channel.SendMessageAsync(embed: res);                    
+                        await context.Channel.SendMessageAsync(embed: res);
 
-                    if(res.Color != Color.Red)
-                        serial.SerializeCommand(command);                                           
+                        if (res.Color != Color.Red)
+                            serial.SerializeCommand(command);
+                    }
                 }
-            }            
+            else
+                await context.Channel.SendMessageAsync("Не могу найти файл в твоем сообщении.");
         }
 
         public enum Result { Success, Error }

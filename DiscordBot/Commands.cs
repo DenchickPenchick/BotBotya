@@ -60,10 +60,10 @@ namespace TestBot
         }
 
         #region --СТАНДАРТНЫЕ КОМАНДЫ--
-        [Command("Хелп")]
+        [Command("Хелп")]        
         [StandartCommand]
         [Summary("позволяет узнать полный список команд")]
-        public async Task Help()
+        public async Task Help(int page = 0)
         {
             int pos = 0;
             int posit = 1;
@@ -94,7 +94,7 @@ namespace TestBot
                 else
                     categoryAttribute = new StandartCommandAttribute();
 
-                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}".Length >= 2048)
+                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}".Length >= 250)
                 {
                     if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName)
                         posit = 1;
@@ -111,22 +111,41 @@ namespace TestBot
                     pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}";
                 prevCategoryAttribute = categoryAttribute;
             }
-
-            await PagedReplyAsync(pager: new PaginatedMessage
+            if (page > 0)
             {
-                Title = "Справка по командам",
-                Pages = pages,
-                Color = Color.Blue,
-                Options = new PaginatedAppearanceOptions
+                if(page > pages.Count)
+                    await ReplyAsync(embed: new EmbedBuilder
+                    {
+                        Title = "Справка по командам",
+                        Description = pages.Last(),
+                        Color = Color.Blue
+                    }.Build());
+                else
+                    await ReplyAsync(embed: new EmbedBuilder
+                    {
+                        Title = "Справка по командам",
+                        Description = pages[page - 1],
+                        Color = Color.Blue
+                    }.Build());
+            }
+            else
+                await PagedReplyAsync(pager: new PaginatedMessage
                 {
-                    Jump = null,
-                    Info = null
-                }
-            });
+                    Title = "Справка по командам",
+                    Pages = pages,
+                    Color = Color.Blue,
+                    Options = new PaginatedAppearanceOptions
+                    {
+                        Jump = null,
+                        Info = null,
+                        Stop = null
+                    }
+                });
         }
 
         [Command("Очистить", RunMode = RunMode.Async)]
         [StandartCommand]
+        [RequireUserPermission(ChannelPermission.ManageMessages)]
         [Summary("позволяет очистить сообщений (до 100). Если сообщения отправлены более двух недель назад, то эти сообщения не удалятся.")]
         public async Task Clear(int count)
         {
@@ -158,7 +177,7 @@ namespace TestBot
 
         }
 
-        [Command("МойСервер")]
+        [Command("СерверПоддержки")]
         [StandartCommand]
         [Summary("получает приглашение на мой сервер поддержки.")]
         public async Task MyServer()
@@ -732,6 +751,34 @@ namespace TestBot
 
             await ReplyAsync($"Теперь награда за сообщение равна {economGuild.RewardForMessage}");
         }
+
+        [Command("Монетка")]
+        [RolesCommand]
+        [Summary("играй на удачу и получай валюту!")]
+        public async Task Monet(int count)
+        {
+            var economProvider = new EconomicProvider(Context.Guild);
+            Random random = new Random();
+            int value = random.Next(0, 100);
+            var economUser = economProvider.GetEconomicGuildUser(Context.User.Id);
+
+            if (economUser.Item1.Balance >= count)
+            {
+                if (value <= 30)
+                {
+                    economProvider.AddBalance(Context.User, count);
+                    await ReplyAsync("Ты выиграл!");
+                }
+                else
+                {
+                    economProvider.MinusBalance(Context.User, count);
+                    await ReplyAsync("Ты проиграл!");
+                }
+            }
+            else
+                await ReplyAsync("Ты не можешь поставить ставку, т.к. у тебя недостаточно средств.");            
+        }
+
         #endregion
 
         #region --КАСТОМНЫЕ КОМАНДЫ--
@@ -900,41 +947,47 @@ namespace TestBot
         public async Task ConfigureGuild()
         {
             Compiler compiler = new Compiler(Compiler.CompilerTypeEnum.Guild);
-            WebClient webClient = new WebClient();
-            var attachedFile = Context.Message.Attachments.ToArray()[0];
-            if (Path.GetExtension(attachedFile.Filename) == ".xml")
+            WebClient webClient = new WebClient();            
+            if (Context.Message.Attachments.Count > 0)
             {
-                XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
-                bool deserializable = serializer.CanDeserialize(new XmlTextReader(webClient.OpenRead(attachedFile.Url)));
-                if (deserializable)
+                var attachedFile = Context.Message.Attachments.ToArray()[0];
+                if (Path.GetExtension(attachedFile.Filename) == ".xml")
                 {
-                    try
+                    XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
+                    bool deserializable = serializer.CanDeserialize(new XmlTextReader(webClient.OpenRead(attachedFile.Url)));
+                    if (deserializable)
                     {
-                        var serGuild = (SerializableGuild)serializer.Deserialize(webClient.OpenRead(attachedFile.Url));
-                        var res = compiler.Result(Context.Guild, Context.Message);
-                        await ReplyAsync(embed: res);
-                        if (res.Color != Color.Red)
+                        try
                         {
-                            serGuild.GuildId = Context.Guild.Id;
-                            FilesProvider.RefreshGuild(serGuild);
-                            await ReplyAsync("Сервер успешно сконфигурирован");
+                            var serGuild = (SerializableGuild)serializer.Deserialize(webClient.OpenRead(attachedFile.Url));
+                            var res = compiler.Result(Context.Guild, Context.Message);
+                            await ReplyAsync(embed: res);
+                            if (res.Color != Color.Red)
+                            {
+                                serGuild.GuildId = Context.Guild.Id;
+                                FilesProvider.RefreshGuild(serGuild);
+                                await ReplyAsync("Сервер успешно сконфигурирован");
+                            }
+                        }
+                        catch
+                        {
+                            await ReplyAsync(embed: new CompilerEmbed
+                            {
+                                Errors = new List<ErrorField>
+                            {
+                            new ErrorField("Нарушена типовая структура сервера. Возможный вариант решения проблемы: проверьте написание команд, тегов и т.д.")
+                            }
+                            }.Build());
                         }
                     }
-                    catch
-                    {
-                        await ReplyAsync(embed: new CompilerEmbed
-                        { 
-                        Errors = new List<ErrorField>
-                        { 
-                        new ErrorField("Нарушена типовая структура сервера. Возможный вариант решения проблемы: проверьте написание команд, тегов и т.д.")
-                        }}.Build());
-                    }
+                    else
+                        await ReplyAsync("Неправильно сформирован файл");
                 }
                 else
-                    await ReplyAsync("Неправильно сформирован файл");
-            }
+                    await ReplyAsync("Неверный формат файла");
+            }             
             else
-                await ReplyAsync("Неверный формат файла");
+                await ReplyAsync("Не могу найти файл в твоем сообщении.");
         }
 
         [Command("ФайлКонфигурации")]
@@ -1186,6 +1239,7 @@ namespace TestBot
             {
                 serGuild.SystemChannels.NewUsersChannelId = Context.Message.MentionedChannels.First().Id;
                 FilesProvider.RefreshGuild(serGuild);
+                await ReplyAsync("Канал для приветствий установлен");
             }
             else
                 await ReplyAsync("Не могу найти канал.");
@@ -1203,6 +1257,7 @@ namespace TestBot
             {
                 serGuild.SystemChannels.LeaveUsersChannelId = Context.Message.MentionedChannels.First().Id;
                 FilesProvider.RefreshGuild(serGuild);
+                await ReplyAsync("Канал для прощаний установлен");
             }
             else
                 await ReplyAsync("Не могу найти канал.");
