@@ -124,7 +124,7 @@ namespace DiscordBot.MusicOperations
                 var track = search.Tracks.FirstOrDefault();
                 await player.PlayAsync(track);
 
-                await SendPlayer(player);                
+                await SendPlayer(player, contextChannel);                
             }
             catch (Exception ex)
             {
@@ -188,7 +188,7 @@ namespace DiscordBot.MusicOperations
                 }
 
                 await player.PauseAsync();
-                await SendPlayer(player);                
+                await SendPlayer(player, contextChannel);                
             }
             catch (Exception ex)
             {
@@ -221,7 +221,7 @@ namespace DiscordBot.MusicOperations
                 }                   
 
                 await player.ResumeAsync();
-                await SendPlayer(player);                
+                await SendPlayer(player, contextChannel);                
             }
             catch (Exception ex)
             {
@@ -285,7 +285,7 @@ namespace DiscordBot.MusicOperations
             };
         }
 
-        private async Task SendPlayer(LavaPlayer player)
+        private async Task SendPlayer(LavaPlayer player, SocketTextChannel textChannel)
         {
             try
             {
@@ -294,7 +294,7 @@ namespace DiscordBot.MusicOperations
                 int m = player.Track.Position.Minutes;
                 int s = player.Track.Position.Seconds;
                 int part = s / player.Track.Duration.Seconds * 100;
-                var mess = await (player.TextChannel ?? (guild as SocketGuild).DefaultChannel).SendMessageAsync(embed: new EmbedBuilder
+                var mess = await textChannel.SendMessageAsync(embed: new EmbedBuilder
                 {
                     Title = $"Плеер сервера {guild.Name}",
                     Description = player.Track.Title,                    

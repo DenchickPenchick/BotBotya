@@ -920,6 +920,7 @@ namespace TestBot
         }
 
         [Command("ПоменятьНикнеймБота")]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
         [CustomisationCommand]
         [Summary("меняет никнейм бота")]
         public async Task ChangeBotNickname(params string[] NewNick)
