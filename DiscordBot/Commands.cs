@@ -1084,7 +1084,7 @@ namespace TestBot
             FilesProvider.RefreshGuild(serializableGuild);
 
             if (serializableGuild.HelloMessageEnable)
-                await ReplyAsync("Теперь приветственные сообщения будут присылаться каждому пользователю при входе на сервер. Изменить текст можно командой !EditHelloMessage");
+                await ReplyAsync($"Теперь приветственные сообщения будут присылаться каждому пользователю при входе на сервер. Изменить текст можно командой {serializableGuild.Prefix}РедактироватьПриветственноеСообщение");
             else
                 await ReplyAsync("Теперь приветственные сообщения не будут присылаться каждому пользователю при входе на сервер.");
         }
