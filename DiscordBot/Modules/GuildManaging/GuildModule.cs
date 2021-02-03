@@ -43,6 +43,7 @@ namespace DiscordBot.GuildManaging
             Client.JoinedGuild += Client_JoinedGuild;            
             Client.UserJoined += Client_UserJoined;
             Client.UserLeft += Client_UserLeft;
+            Client.ReactionAdded += Client_ReactionAdded;
         }
 
         private async Task Client_UserLeft(SocketGuildUser arg)
@@ -83,5 +84,10 @@ namespace DiscordBot.GuildManaging
             Console.WriteLine($"Bot joined new guild({arg.Id}).", Color.Blue);
             await new GuildProvider(arg).SendHelloMessageToGuild(Client);                        
         }        
+
+        private async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        {
+            
+        }
     }
 }

@@ -336,17 +336,18 @@ namespace DiscordBot.MusicOperations
                 int s = player.Track.Position.Seconds;
                 double st = player.Track.Position.TotalSeconds;
                 double part = st / player.Track.Duration.TotalSeconds;
-                await message.ModifyAsync(x => x.Embed = new Optional<Embed>(new EmbedBuilder
-                {
-                    Title = $"Плеер сервера {guild.Name}",
-                    Description = player.Track.Title,
-                    Color = Color.Blue,
-                    Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url },
-                    Footer = new EmbedFooterBuilder
+                if(message != null)
+                    await message.ModifyAsync(x => x.Embed = new Optional<Embed>(new EmbedBuilder
                     {
-                        Text = $"{(h < 10 ? $"0{h}" : h.ToString())}:{(m < 10 ? $"0{m}" : m.ToString())}:{(s < 10 ? $"0{s}" : s.ToString())} {(part >= 0 && part < 0.2 ? "◯" : "─")}{(part >= 0.2 && part < 0.3 ? "◯" : "─")}{(part >= 0.3 && part < 0.4 ? "◯" : "─")}{(part >= 0.4 && part < 0.5 ? "◯" : "─")}{(part >= 0.5 && part < 0.6 ? "◯" : "─")}{(part >= 0.6 && part < 0.7 ? "◯" : "─")}{(part >= 0.7 && part < 0.8 ? "◯" : "─")}{(part >= 0.8 && part < 0.9 ? "◯" : "─")}{(part >= 0.9 && part < 0.95 ? "◯" : "─")}{(part >= 0.95 ? "◯" : "─")}"
-                    }
-                }.Build()));
+                        Title = $"Плеер сервера {guild.Name}",
+                        Description = player.Track.Title,
+                        Color = Color.Blue,
+                        Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url },
+                        Footer = new EmbedFooterBuilder
+                        {
+                            Text = $"{(h < 10 ? $"0{h}" : h.ToString())}:{(m < 10 ? $"0{m}" : m.ToString())}:{(s < 10 ? $"0{s}" : s.ToString())} {(part >= 0 && part < 0.2 ? "◯" : "─")}{(part >= 0.2 && part < 0.3 ? "◯" : "─")}{(part >= 0.3 && part < 0.4 ? "◯" : "─")}{(part >= 0.4 && part < 0.5 ? "◯" : "─")}{(part >= 0.5 && part < 0.6 ? "◯" : "─")}{(part >= 0.6 && part < 0.7 ? "◯" : "─")}{(part >= 0.7 && part < 0.8 ? "◯" : "─")}{(part >= 0.8 && part < 0.9 ? "◯" : "─")}{(part >= 0.9 && part < 0.95 ? "◯" : "─")}{(part >= 0.95 ? "◯" : "─")}"
+                        }
+                    }.Build()));
             }
             catch (Exception ex)
             {

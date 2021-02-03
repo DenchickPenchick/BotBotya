@@ -284,7 +284,11 @@ namespace TestBot
             }
 
             if (user != null)
+            {
                 await user.KickAsync();
+                await ReplyAsync($"Я кикнул {user.Username}.");
+            }
+            
             else
                 await ReplyAsync($"Пользователь не найден.");
         }
@@ -328,7 +332,10 @@ namespace TestBot
             }
 
             if (user != null)
+            {
                 await user.BanAsync();
+                await ReplyAsync($"Я забанил {user.Username}.");
+            }            
             else
                 await ReplyAsync($"Пользователь не найден. Проверь данные.");
         }
@@ -344,9 +351,9 @@ namespace TestBot
                 var channel = Context.Channel as SocketTextChannel;
                 await channel.ModifyAsync(x => x.SlowModeInterval = time);
                 if (channel.SlowModeInterval == 0)
-                    await ReplyAsync($"На канале {Context.Channel.Name} отключен медленный режим");
+                    await ReplyAsync($"В канале {Context.Channel.Name} отключен медленный режим");
                 else
-                    await ReplyAsync($"На канале {Context.Channel.Name} включен медленный режим. Интервал: {time} секунд");
+                    await ReplyAsync($"В канале {Context.Channel.Name} включен медленный режим. Интервал: {time} секунд");
             }
             else if (time < 0)
                 await ReplyAsync("Интервал не может быть отрицательным");
@@ -361,6 +368,7 @@ namespace TestBot
         public async Task SendMessages(params string[] mess)
         {
             string message = null;
+            string noMessageToUsers = null;
 
             for (int i = 0; i < mess.Length; i++)
                 message += i == 0 ? mess[i] : $" {mess[i]}";
@@ -369,13 +377,28 @@ namespace TestBot
             {
                 if (!user.IsBot)
                 {
-                    var ch = await user.GetOrCreateDMChannelAsync();
-                    if (ch != null)
-                        await ch.SendMessageAsync(message);
+                    
+                    try
+                    {
+                        var ch = await user.GetOrCreateDMChannelAsync();
+                        if (ch != null)
+                            await ch.SendMessageAsync(message);
+                    }
+                    catch (Exception)
+                    {
+                        noMessageToUsers += $"\n{user.Username}";                        
+                    }
                 }
 
             }
             await ReplyAsync("Рассылка произведена успешно.");
+            if (noMessageToUsers != null)
+                await ReplyAsync(embed: new EmbedBuilder
+                {
+                    Title = "Список кому не дошло сообщение",
+                    Description = noMessageToUsers,
+                    Color = Color.Blue
+                }.Build());
         }
         #endregion
 

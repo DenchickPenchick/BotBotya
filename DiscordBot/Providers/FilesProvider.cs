@@ -31,23 +31,23 @@ using System.Collections.Generic;
 using Discord;
 
 namespace DiscordBot.Providers
-{   
+{
     public static class FilesProvider
-    {        
+    {
         public static string GetHelloText(SocketGuild guild) => GetGuild(guild).HelloMessage;
 
         public static string GetBotDirectoryPath()
         {
             using StreamReader reader = new StreamReader("config.json");
             return JsonSerializer.Deserialize<SerializableConfig>(reader.ReadToEnd()).Path;
-        }        
-                                
+        }
+
         public static SerializableGuild GetGuild(SocketGuild guild)
-        {            
+        {
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
             using FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/BotGuilds/{guild.Id}.xml", FileMode.Open);
             return (SerializableGuild)serializer.Deserialize(stream);
-        }        
+        }
 
         public static void DeleteGuild(ulong id)
         {
@@ -60,7 +60,7 @@ namespace DiscordBot.Providers
             SerializableGuild serializableGuild = new SerializableGuild
             {
                 GuildId = guild.Id
-            };            
+            };
             using (FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/BotGuilds/{guild.Id}.xml", FileMode.Create))
                 serializer.Serialize(stream, serializableGuild);
             Console.WriteLine($"Guild({guild.Id}) serialized.", Color.Green);
@@ -96,7 +96,7 @@ namespace DiscordBot.Providers
         }
 
         public static SerializableConnectors GetConnectors(SocketGuild guild)
-        {            
+        {
             string path = $"{GetBotDirectoryPath()}/ServerConnectorsHandlers/{guild.Id}.xml";
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableConnectors));
 
@@ -109,7 +109,7 @@ namespace DiscordBot.Providers
         }
 
         public static void AddConnector(SocketGuild guild, SerializableConnector connector)
-        {            
+        {
             var conn = GetConnectors(guild);
 
             if (conn == null)
@@ -131,7 +131,7 @@ namespace DiscordBot.Providers
             {
                 List<ulong> hostsId = new List<ulong>();
 
-                foreach (var connect in conn.SerializableConnectorsChannels)                
+                foreach (var connect in conn.SerializableConnectorsChannels)
                     hostsId.Add(connect.HostId);
 
                 if (hostsId.Contains(connector.HostId))
@@ -142,8 +142,8 @@ namespace DiscordBot.Providers
 
                 conn.SerializableConnectorsChannels.Add(connector);
                 RefreshConnectors(conn);
-            }            
-        }        
+            }
+        }
 
         public static void RefreshConnectors(SerializableConnectors connectors)
         {
@@ -171,7 +171,7 @@ namespace DiscordBot.Providers
         {
             var guild = GetEconomicGuild(user.Guild);
 
-            foreach (var economUser in guild.SerializableEconomicUsers)            
+            foreach (var economUser in guild.SerializableEconomicUsers)
                 if (economUser.Id == user.Id)
                     return economUser;
             return new SerializableEconomicGuildUser
@@ -192,7 +192,7 @@ namespace DiscordBot.Providers
                 };
                 using FileStream stream = new FileStream(path, FileMode.Create);
                 serializer.Serialize(stream, serializableGuild);
-            }            
+            }
         }
 
         public static void RefreshEconomicGuild(SerializableEconomicGuild guild)
@@ -202,6 +202,43 @@ namespace DiscordBot.Providers
             File.WriteAllText($"{GetBotDirectoryPath()}/EconomicGuilds/{guild.Id}.xml", string.Empty);
             using FileStream stream = new FileStream($"{GetBotDirectoryPath()}/EconomicGuilds/{guild.Id}.xml", FileMode.Open, FileAccess.ReadWrite);
             serializer.Serialize(stream, guild);
+        }
+
+        public static SerializableReactRoleMessages GetReactRoleMessages()
+        {
+            string path = $"{GetBotDirectoryPath()}/ReactRoleMessages.xml";
+
+            using FileStream stream = new FileStream(path, FileMode.Open);
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializableReactRoleMessages));
+            return (SerializableReactRoleMessages)serializer.Deserialize(stream);
+        }
+
+        public static void RefreshReactRoleMessages(SerializableReactRoleMessages messages)
+        {
+            string path = $"{GetBotDirectoryPath()}/ReactRoleMessages.xml";
+
+            File.WriteAllText(path, string.Empty);
+            using FileStream stream = new FileStream(path, FileMode.Open);
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializableReactRoleMessages));
+            serializer.Serialize(stream, messages);
+        }
+
+        public static void AddReactRoleMessage(SerializableReactRoleMessage message)
+        {            
+            var messages = GetReactRoleMessages();
+
+            messages.ReactRoleMessages.Add(message);
+            RefreshReactRoleMessages(messages);
+        }
+
+        public static SerializableReactRoleMessage GetReactRoleMessage(ulong id)
+        { 
+        
+        }
+
+        public static void AddReactRoleToReactRoleMessage(ulong reactName)
+        { 
+        
         }
     }
 }

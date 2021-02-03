@@ -56,7 +56,7 @@ namespace DiscordBot.Providers
                 $"🤖 *GitHub:* https://github.com/DenchickPenchick/BotBotya 🤖",
                 Color = Color.Blue
             }.Build());
-        }                
+        }                        
 
         public bool ExistChannelByName(SocketGuildChannel channel)
         {
