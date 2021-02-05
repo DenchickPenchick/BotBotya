@@ -20,13 +20,28 @@ _________________________________________________________________________
 _________________________________________________________________________
 */
 
-using System.Collections.Generic;
+using Discord;
+using Discord.Commands;
+using System;
+using System.Threading.Tasks;
 
-namespace DiscordBot.Serializable
+namespace DiscordBot.TypeReaders
 {
-    public class SerializableReactRoleMessage
+    public class EmojiTypeReader : TypeReader
     {
-        public ulong Id { get; set; } = 0;
-        public List<(string, ulong)> EmojiesRoleId { get; set; } = new List<(string, ulong)>();
+        public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
+        {
+            try
+            {                
+                if (new Emoji(input) != null)
+                    return Task.FromResult(TypeReaderResult.FromSuccess(new Emoji(input)));
+
+                return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Can't parse this emote"));
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(TypeReaderResult.FromError(ex));
+            }
+        }
     }
 }

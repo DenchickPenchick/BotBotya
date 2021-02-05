@@ -26,6 +26,6 @@ namespace DiscordBot.Serializable
 {
     public class SerializableReactRoleMessages
     {
-        public List<SerializableReactRoleMessage> ReactRoleMessages = new List<SerializableReactRoleMessage>();
+        public List<SerializableReactRoleMessage> ReactRoleMessages { get; set; } = new List<SerializableReactRoleMessage>();
     }
 }

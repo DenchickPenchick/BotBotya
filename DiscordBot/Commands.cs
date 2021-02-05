@@ -60,7 +60,8 @@ namespace TestBot
         }
 
         #region --СТАНДАРТНЫЕ КОМАНДЫ--
-        [Command("Хелп")]        
+        [Command("Хелп")]
+        [Alias("Хэлп", "Помощь")]
         [StandartCommand]
         [Summary("позволяет узнать полный список команд")]
         public async Task Help(int page = 0)
@@ -81,6 +82,11 @@ namespace TestBot
             {
                 CommandCategoryAttribute categoryAttribute;
 
+                string aliases = "\nПсевдонимы:";
+
+                foreach (string alias in command.Aliases)
+                    aliases += $" `{alias}`";
+
                 if (command.Attributes.Contains(new StandartCommandAttribute()))
                     categoryAttribute = new StandartCommandAttribute();
                 else if (command.Attributes.Contains(new CustomisationCommandAttribute()))
@@ -94,26 +100,26 @@ namespace TestBot
                 else
                     categoryAttribute = new StandartCommandAttribute();
 
-                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}".Length >= 250)
+                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Aliases.Count > 0 ? aliases : null)}".Length >= 250)
                 {
                     if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName)
                         posit = 1;
 
-                    pages.Add($"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}");
+                    pages.Add($"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Aliases.Count > 0 ? aliases : null)}");
                     pos++;
                 }
                 else if (catpos == 0)
                 {
-                    pages[0] += $"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}";
+                    pages[0] += $"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Aliases.Count > 0 ? aliases : null)}";
                     catpos++;
                 }
                 else
-                    pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}";
+                    pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Aliases.Count > 0 ? aliases : null)}";
                 prevCategoryAttribute = categoryAttribute;
             }
             if (page > 0)
             {
-                if(page > pages.Count)
+                if (page > pages.Count)
                     await ReplyAsync(embed: new EmbedBuilder
                     {
                         Title = "Справка по командам",
@@ -141,6 +147,28 @@ namespace TestBot
                         Stop = null
                     }
                 });
+        }
+
+        [Command("Статистика")]
+        [StandartCommand]
+        [Alias("Инфо")]
+        [Summary("позволяет узнать мои статистику")]
+        public async Task Info()
+        {
+            var client = Bot.Client;
+
+            int members = 0;
+
+            foreach (var guild in client.Guilds)
+                members += guild.Users.Count;
+
+            await ReplyAsync(embed: new EmbedBuilder
+            {
+                Title = "Статистика бота",
+                Description = $"Я сейчас нахожусь на {client.Guilds.Count} серверах.\nМною пользуются {members} человек.",
+                Color = Color.Blue,
+                ThumbnailUrl = client.CurrentUser.GetAvatarUrl()
+            }.Build());
         }
 
         [Command("Очистить", RunMode = RunMode.Async)]
@@ -178,6 +206,7 @@ namespace TestBot
         }
 
         [Command("СерверПоддержки")]
+        [Alias("Поддержка")]
         [StandartCommand]
         [Summary("получает приглашение на мой сервер поддержки.")]
         public async Task MyServer()
@@ -187,6 +216,7 @@ namespace TestBot
 
         [Command("ДобавитьБота")]
         [StandartCommand]
+        [Alias("Добавить")]
         [Summary("получает ссылку-приглашение меня на твоей сервер")]
         public async Task InviteLink()
         {
@@ -247,7 +277,8 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.KickMembers)]
         [Command("Кик")]
         [StandartCommand]
-        [Summary("позволяет кикнуть пользователя с сервера (У тебя должно быть право на эту команду).")]
+        [Alias("К")]
+        [Summary("позволяет кикнуть пользователя с сервера.")]
         public async Task Kick(params string[] NameOfUser)
         {
             var contextRoles = (Context.User as SocketGuildUser).Roles;
@@ -256,7 +287,7 @@ namespace TestBot
             foreach (var role in contextRoles)
                 if (role.Position > contextMaxPos)
                     contextMaxPos = role.Position;
-            
+
             SocketGuildUser user;
 
             if (Context.Message.MentionedUsers.Count > 0)
@@ -288,14 +319,15 @@ namespace TestBot
                 await user.KickAsync();
                 await ReplyAsync($"Я кикнул {user.Username}.");
             }
-            
+
             else
                 await ReplyAsync($"Пользователь не найден.");
         }
 
         [RequireUserPermission(GuildPermission.BanMembers)]
         [Command("Бан")]
-        [Summary("позволяет забанить пользователя на сервере (У тебя должно быть право на эту команду).")]
+        [Alias("Б")]
+        [Summary("позволяет забанить пользователя на сервере.")]
         public async Task Ban(params string[] NameOfUser)
         {
             var contextRoles = (Context.User as SocketGuildUser).Roles;
@@ -335,7 +367,7 @@ namespace TestBot
             {
                 await user.BanAsync();
                 await ReplyAsync($"Я забанил {user.Username}.");
-            }            
+            }
             else
                 await ReplyAsync($"Пользователь не найден. Проверь данные.");
         }
@@ -343,7 +375,7 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.ManageChannels)]
         [Command("МедленныйРежим")]
         [StandartCommand]
-        [Summary("позволяет включить медленный режим в канале (У тебя должно быть право на эту команду).")]
+        [Summary("позволяет включить медленный режим в канале.")]
         public async Task ChangePosOfSlowMode(int time = 0)
         {
             if (time >= 0 && time <= 21600)
@@ -377,7 +409,7 @@ namespace TestBot
             {
                 if (!user.IsBot)
                 {
-                    
+
                     try
                     {
                         var ch = await user.GetOrCreateDMChannelAsync();
@@ -386,7 +418,7 @@ namespace TestBot
                     }
                     catch (Exception)
                     {
-                        noMessageToUsers += $"\n{user.Username}";                        
+                        noMessageToUsers += $"\n{user.Username}";
                     }
                 }
 
@@ -439,6 +471,72 @@ namespace TestBot
         }
         #endregion
 
+        #region --РОЛЬ РЕАКЦИЯ--
+        [Command("ДобавитьРеакциюЗаРоль")]
+        [Summary("добавляет реакцию к сообщению. После нажатия на реакцию будет выдана соответствующая роль.")]
+        [StandartCommand]
+        public async Task AddReaction(ulong id, Emoji emoji, params string[] str)
+        {
+            var reactRoleMessages = FilesProvider.GetReactRoleMessages();
+            List<ulong> reactRoleMessagesId = new List<ulong>();
+
+            if (Context.Message.MentionedChannels.First() is not SocketTextChannel textChannel)
+            {
+                await ReplyAsync($"Не могу найти канал где находится сообщение.");
+                return;
+            }
+
+            if (textChannel.GetMessageAsync(id) == null)
+            {
+                await ReplyAsync($"Не могу найти сообщение в {textChannel.Mention}.");
+                return;
+            }
+
+            foreach (var reactRoleMessage in reactRoleMessages.ReactRoleMessages)
+                reactRoleMessagesId.Add(reactRoleMessage.Id);
+
+            if (reactRoleMessagesId.Contains(id))
+            {
+                FilesProvider.AddReactRoleToReactRoleMessage(id, emoji.Name, Context.Message.MentionedRoles.First().Id);
+            }
+            else
+                FilesProvider.AddReactRoleMessage(new SerializableReactRoleMessage
+                {
+                    Id = id,
+                    EmojiesRoleId = new List<(string, ulong)>
+                    {
+                        (emoji.Name, Context.Message.MentionedRoles.First().Id)
+                    }
+                });
+
+            await textChannel.GetMessageAsync(id).Result.AddReactionAsync(emoji);
+
+            await ReplyAsync("Добавлено");
+        }
+
+        [Command("УдалитьРеакциюЗаРоль")]
+        [Summary("добавляет реакцию к сообщению. После нажатия на реакцию будет выдана соответствующая роль.")]
+        [StandartCommand]
+        public async Task DeleteReaction(ulong id, Emoji emoji)
+        {
+            var reactRoleMessages = FilesProvider.GetReactRoleMessages();
+            List<ulong> reactRoleMessagesId = new List<ulong>();
+
+            foreach (var reactRoleMessage in reactRoleMessages.ReactRoleMessages)
+                reactRoleMessagesId.Add(reactRoleMessage.Id);
+
+            if (!reactRoleMessagesId.Contains(id))
+            {
+                await ReplyAsync("Не существует сообщения с данным `id`");
+                return;
+            }
+
+            FilesProvider.RemoveReactRoleFromReactRoleMessage(id, emoji.Name);
+
+            await ReplyAsync("Удалено");
+        }
+        #endregion
+
         #region --МУЗЫКАЛЬНЫЕ КОМАНДЫ--
         [Command("Подключиться")]
         [MusicCommand]
@@ -479,6 +577,7 @@ namespace TestBot
 
         [Command("Пауза")]
         [MusicCommand]
+        [Alias("Стоп")]
         [Summary("ставит на паузу трек")]
         public async Task PauseTrackAsync()
         {
@@ -487,6 +586,7 @@ namespace TestBot
 
         [Command("Воспроизведение")]
         [MusicCommand]
+        [Alias("Плей", "Плэй")]
         [Summary("продолжает трек, который стоит на паузе")]
         public async Task ResumeTrackAsync()
         {
@@ -528,7 +628,7 @@ namespace TestBot
                 Title = $"Текст песни {player.Track.Title}"
             }.Build());
         }
-        #endregion
+        #endregion        
 
         #region --РОЛЕВЫЕ КОМАНДЫ--
         [Command("ДобавитьРоль")]
@@ -694,6 +794,7 @@ namespace TestBot
 
         [Command("РолиНаПродажу")]
         [RolesCommand]
+        [Alias("Витрина")]
         [Summary("позволяет получить список ролей на продажу.")]
         public async Task RolesOnSale()
         {
@@ -701,8 +802,8 @@ namespace TestBot
 
             var roles = economProvider.EconomicGuild.RolesAndCostList;
 
-            List<string> pages =new List<string>
-            { 
+            List<string> pages = new List<string>
+            {
                 null
             };
 
@@ -716,7 +817,7 @@ namespace TestBot
                 {
                     pages.Add($"\n{Context.Guild.GetRole(role.Item1).Mention} Цена: {role.Item2}");
                     index++;
-                }                
+                }
             }
             if (pages.Count == 1)
                 await ReplyAsync(embed: new EmbedBuilder
@@ -762,6 +863,7 @@ namespace TestBot
 
         [Command("НаградаЗаСообщение")]
         [RolesCommand]
+        [Alias("Награда")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [Summary("позволяет установить награду за каждое отправленное пользователем сообщение.")]
         public async Task RewardForMessage(int count)
@@ -799,7 +901,7 @@ namespace TestBot
                 }
             }
             else
-                await ReplyAsync("Ты не можешь поставить ставку, т.к. у тебя недостаточно средств.");            
+                await ReplyAsync("Ты не можешь поставить ставку, т.к. у тебя недостаточно средств.");
         }
 
         #endregion
@@ -821,7 +923,7 @@ namespace TestBot
                 allComm += $"\n{arg++}. {command.Name}. Алгоритм:";
                 var actions = command.Actions;
                 int argPos = 1;
-                foreach (var action in actions)                
+                foreach (var action in actions)
                     switch (action.Item1)
                     {
                         case SerializableCommand.CommandActionType.Message:
@@ -836,7 +938,7 @@ namespace TestBot
                         case SerializableCommand.CommandActionType.Interactive:
                             allComm += $"\n{arg - 1}.{argPos++}) Ожидает нового сообщения.";
                             break;
-                    }                
+                    }
             }
 
 
@@ -883,7 +985,7 @@ namespace TestBot
                 if (File.Exists(name))
                     File.Delete(name);
             }
-        }        
+        }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("ДобавитьКоманду")]
@@ -893,7 +995,7 @@ namespace TestBot
         {
             var provider = new CustomCommandsProvider(Context.Guild);
 
-            await provider.AddCommand(Context);            
+            await provider.AddCommand(Context);
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
@@ -904,7 +1006,7 @@ namespace TestBot
         {
             CustomCommandsCore core = new CustomCommandsCore(Context);
 
-            await core.ExecuteCommand(name);            
+            await core.ExecuteCommand(name);
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
@@ -928,7 +1030,7 @@ namespace TestBot
             var serGuild = FilesProvider.GetGuild(Context.Guild);
             var links = Context.Guild.GetTextChannel(serGuild.SystemChannels.LinksChannelId);
             var videos = Context.Guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId);
-            var rooms = Context.Guild.GetVoiceChannel(serGuild.SystemCategories.VoiceRoomsCategoryId);            
+            var rooms = Context.Guild.GetVoiceChannel(serGuild.SystemCategories.VoiceRoomsCategoryId);
 
             await ReplyAsync(embed: new EmbedBuilder
             {
@@ -936,7 +1038,7 @@ namespace TestBot
                 Description = $"Приветственные сообщения: {(serGuild.HelloMessageEnable == true ? "Включены" : "Выключены")}\n" +
                 $"{(serGuild.HelloMessage != null && serGuild.HelloMessageEnable == true ? $"Текст приветственного сообщения: {serGuild.HelloMessage}\n" : null)}" +
                 $"{(links == null && videos == null ? null : $"Каналы контента: {links?.Mention} {videos?.Mention}")}\n" +
-                $"{(rooms == null ? null : $"Категория с комнатами: {rooms.Name}")}",                
+                $"{(rooms == null ? null : $"Категория с комнатами: {rooms.Name}")}",
                 Color = Color.Blue,
                 ImageUrl = Context.Guild.IconUrl
             }.Build());
@@ -971,7 +1073,7 @@ namespace TestBot
         public async Task ConfigureGuild()
         {
             Compiler compiler = new Compiler(Compiler.CompilerTypeEnum.Guild);
-            WebClient webClient = new WebClient();            
+            WebClient webClient = new WebClient();
             if (Context.Message.Attachments.Count > 0)
             {
                 var attachedFile = Context.Message.Attachments.ToArray()[0];
@@ -1009,7 +1111,7 @@ namespace TestBot
                 }
                 else
                     await ReplyAsync("Неверный формат файла");
-            }             
+            }
             else
                 await ReplyAsync("Не могу найти файл в твоем сообщении.");
         }
@@ -1025,7 +1127,8 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.ManageRoles)]
         [CustomisationCommand]
         [Command("ДобавитьРольПоумолчанию", RunMode = RunMode.Async)]
-        [Summary("устанавливает роль по-умолчанию, которая будет выдаваться каждому пользователю (У тебя должно быть право на выполнение этой команды).\nДля того чтобы установить роль нужно ее отметить. Если отметить несколько ролей, то установлена будет только первая.")]
+        [Alias("АвтоРоль")]
+        [Summary("устанавливает роль по-умолчанию, которая будет выдаваться каждому пользователю.\nДля того чтобы установить роль нужно ее отметить. Если отметить несколько ролей, то установлена будет только первая.")]
         public async Task AddDefaultRole(params string[] str)
         {
             if (Context.Message.MentionedRoles.Count > 0)
@@ -1098,7 +1201,8 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("ВключитьПриветствие")]
-        [Summary("выключает или включает приветственные сообщения. Отредактировать сообщение можно с помощью команды РедактироватьПриветственноеСообщение (У тебя должно быть право на выполнение этой команды).")]
+        [Alias("Приветствие")]
+        [Summary("выключает или включает приветственные сообщения. Отредактировать сообщение можно с помощью команды `РедактироватьПриветственноеСообщение`.")]
         [CustomisationCommand]
         public async Task EnableHelloMessage()
         {
@@ -1113,8 +1217,9 @@ namespace TestBot
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Alias("ПоменятьПриветствие")]
         [Command("РедактироватьПриветственноеСообщение", RunMode = RunMode.Async)]
-        [Summary("редактирует приветственное сообщение (У тебя должно быть право на выполнение этой команды).")]
+        [Summary("редактирует приветственное сообщение.")]
         [CustomisationCommand]
         public async Task EditHelloMessage()
         {
@@ -1135,6 +1240,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("ПоменятьПрефикс")]
+        [Alias("Префикс")]
         [Summary("редактирует префикс (У тебя должно быть право на выполнение этой команды).")]
         [CustomisationCommand]
         public async Task EditPrefix(string newPrefix)
@@ -1150,7 +1256,8 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageChannels)]
         [Command("РежимКомнат")]
-        [Summary("создает канал с возможностью создания комнат. Возможно удаление комнат. У тебя должно быть право на выполнение этой команды.")]
+        [Alias("Комнаты")]
+        [Summary("создает канал с возможностью создания комнат. Возможно удаление комнат.")]
         [CustomisationCommand]
         public async Task EnableRooms()
         {
@@ -1167,7 +1274,8 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageChannels)]
         [Command("КаналыКонтента")]
-        [Summary("создает каналы контента. Возможно удаление каналов. У тебя должно быть право на выполнение этой команды.")]
+        [Alias("Контент")]
+        [Summary("создает каналы контента. Возможно удаление каналов.")]
         [CustomisationCommand]
         public async Task EnableContent()
         {
@@ -1185,7 +1293,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("ПроверкаКонтента")]
-        [Summary("включает/выключает проверку контента (сортировку видео, ссылок по нужным каналам). Работает только при включенных каналах контента. У тебя должно быть право на выполнение этой команды.")]
+        [Summary("включает/выключает проверку контента (сортировку видео, ссылок по нужным каналам). Работает только при включенных каналах контента.")]
         [CustomisationCommand]
         public async Task EnableCheckingContent()
         {
@@ -1202,6 +1310,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.Administrator)]
         [Command("Уведомления", RunMode = RunMode.Async)]
+        [Alias("Логирование", "Лог")]
         [Summary("включает/выключает уведомления сервера. При бане, кике, добавлении на сервер пользователя бот тебя уведомит")]
         [CustomisationCommand]
         public async Task EnableGuildNotifications()
@@ -1252,7 +1361,7 @@ namespace TestBot
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
-        [Command("КаналДляПриветствий")]
+        [Command("КаналДляПриветствий")]        
         [CustomisationCommand]
         [Summary("устанавливает канал для приветствий.")]
         public async Task HelloChannel(params string[] str)
@@ -1290,6 +1399,7 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("УведомлениеОНеправильнойКоманде")]
         [CustomisationCommand]
+        [Alias("НеправильнаяКоманда", "Ошибки")]
         [Summary("включает/выключает уведомление о неправильной команде.")]
         public async Task CommandErrorMessage()
         {
@@ -1327,14 +1437,21 @@ namespace TestBot
         }
 
         private async void ClearMessages(object count)
-        {            
-            var messages = await Context.Channel.GetMessagesAsync((int)count + 2).FlattenAsync();            
-            await (Context.Channel as SocketTextChannel).DeleteMessagesAsync(messages);
-            var delMess = await ReplyAsync("Удаление сообщений произведено успешно");
-            Console.WriteLine("Cleared", Color.Green);
-            Thread.Sleep(1000);
-            await delMess.DeleteAsync();
-            Thread.Sleep(0);            
+        {
+            try
+            {
+                var messages = await Context.Channel.GetMessagesAsync((int)count + 2).FlattenAsync();
+                await (Context.Channel as SocketTextChannel).DeleteMessagesAsync(messages);
+                var delMess = await ReplyAsync("Удаление сообщений произведено успешно");
+                Console.WriteLine("Cleared", Color.Green);
+                Thread.Sleep(1000);
+                await delMess.DeleteAsync();
+                Thread.Sleep(0);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ex: {ex}");
+            }
         }
     }
 }

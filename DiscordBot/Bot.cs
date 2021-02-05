@@ -43,6 +43,7 @@ using DiscordBot.Modules.ServersConnectingManaging;
 using DiscordBot.Providers.FileManaging;
 using System.Threading;
 using DiscordBot.Modules.EconomicManaging;
+using DiscordBot.TypeReaders;
 
 namespace DiscordBot
 {
@@ -195,7 +196,8 @@ namespace DiscordBot
         }
 
         private async Task RegisterCommandsAsync()
-        {           
+        {
+            Commands.AddTypeReader<Emoji>(new EmojiTypeReader());
             await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), Services);                                   
             Client.MessageReceived += HandleCommandAsync;
         }

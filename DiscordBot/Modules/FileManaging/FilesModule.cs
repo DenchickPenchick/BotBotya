@@ -147,7 +147,24 @@ namespace DiscordBot.Providers.FileManaging
                 Console.WriteLine("EconomicGuilds created", Color.Green);
             }
             else
-                Console.WriteLine("EconomicGuilds found", Color.Green);                
+                Console.WriteLine("EconomicGuilds found", Color.Green);
+
+            Console.WriteLine("Checking files...");
+
+            if (!File.Exists($"{Bot.PathToBotDirectory}/ReactRoleMessages.xml"))
+            {
+                Console.WriteLine("ReactRoleMessages.xml not found", Color.Red);
+                using (FileStream stream = new FileStream($"{Bot.PathToBotDirectory}/ReactRoleMessages.xml", FileMode.Create))
+                {
+                    var serializer = new XmlSerializer(typeof(SerializableReactRoleMessages));
+
+                    serializer.Serialize(stream, new SerializableReactRoleMessages
+                    {
+                        ReactRoleMessages = new List<SerializableReactRoleMessage>()
+                    });
+                }
+                Console.WriteLine("ReactRoleMessages.xml created", Color.Green);
+            }
         }
 
         private async void SetupBotGuildData()

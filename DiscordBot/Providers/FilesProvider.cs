@@ -223,22 +223,69 @@ namespace DiscordBot.Providers
             serializer.Serialize(stream, messages);
         }
 
-        public static void AddReactRoleMessage(SerializableReactRoleMessage message)
-        {            
+        public static void RefreshReactRoleMessage(SerializableReactRoleMessage message)
+        {
             var messages = GetReactRoleMessages();
+            int indexOf = 0;
 
-            messages.ReactRoleMessages.Add(message);
+            foreach (var mess in messages.ReactRoleMessages)
+                if (mess.Id != message.Id)
+                    indexOf++;
+                else
+                    break;
+
+            messages.ReactRoleMessages[indexOf] = message;
+
             RefreshReactRoleMessages(messages);
         }
 
-        public static SerializableReactRoleMessage GetReactRoleMessage(ulong id)
-        { 
-        
+        public static void AddReactRoleMessage(SerializableReactRoleMessage message)
+        {            
+            var messages = GetReactRoleMessages();
+            if (messages.ReactRoleMessages.Contains(message))
+            {
+                messages.ReactRoleMessages.Add(message);
+                RefreshReactRoleMessages(messages);
+            }            
         }
 
-        public static void AddReactRoleToReactRoleMessage(ulong reactName)
-        { 
-        
+        public static SerializableReactRoleMessage GetReactRoleMessage(ulong id)
+        {
+            var messages = GetReactRoleMessages();
+            foreach (var mess in messages.ReactRoleMessages)
+                if (mess.Id == id)
+                    return mess;
+            return null;
+        }
+
+        public static void AddReactRoleToReactRoleMessage(ulong messId, string reactName, ulong roleId)
+        {
+            var message = GetReactRoleMessage(messId);
+
+            message.EmojiesRoleId.Add((reactName, roleId));
+
+            RefreshReactRoleMessage(message);
+        }
+
+        public static void RemoveReactRoleFromReactRoleMessage(ulong messId, string reactName)
+        {
+            var message = GetReactRoleMessage(messId);
+            int indexOf = 0;
+            bool changed = false;
+
+            foreach (var eR in message.EmojiesRoleId)
+                if (eR.Item1 != reactName)
+                {
+                    indexOf++;
+                    changed = true;
+                }                
+                else
+                    break;
+            if (changed)
+            {
+                message.EmojiesRoleId.Remove(message.EmojiesRoleId[indexOf]);
+                RefreshReactRoleMessage(message);
+            }            
         }
     }
 }

@@ -35,15 +35,15 @@ namespace DiscordBot.GuildManaging
 
         public GuildModule(DiscordSocketClient client)
         {
-            Client = client;                    
+            Client = client;
+            Client.ReactionAdded += Client_ReactionAdded;
         }        
 
         public void RunModule()
         {
             Client.JoinedGuild += Client_JoinedGuild;            
             Client.UserJoined += Client_UserJoined;
-            Client.UserLeft += Client_UserLeft;
-            Client.ReactionAdded += Client_ReactionAdded;
+            Client.UserLeft += Client_UserLeft;            
         }
 
         private async Task Client_UserLeft(SocketGuildUser arg)
@@ -87,7 +87,27 @@ namespace DiscordBot.GuildManaging
 
         private async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
-            
+            var userMessage = await arg1.DownloadAsync();
+            var message = FilesProvider.GetReactRoleMessage(userMessage.Id);
+
+            if (message != null)
+            {                
+                if (userMessage.Author is SocketGuildUser user)
+                {
+                    var reactRoleMess = message.EmojiesRoleId;
+                    int indexOf = 0;
+
+                    foreach (var mess in reactRoleMess)
+                        if (mess.Item1 != arg3.Emote.Name)
+                            indexOf++;
+                        else
+                            break;
+                    
+                    await user.AddRoleAsync(user.Guild.GetRole(reactRoleMess[indexOf].Item2));
+                    
+                }
+            }
+            await userMessage.RemoveReactionAsync(arg3.Emote, userMessage.Author);
         }
     }
 }
