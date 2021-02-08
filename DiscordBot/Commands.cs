@@ -60,7 +60,7 @@ namespace TestBot
         }
 
         #region --СТАНДАРТНЫЕ КОМАНДЫ--
-        [Command("Хелп")]
+        [Command("Хелп", RunMode = RunMode.Async)]
         [Alias("Хэлп", "Помощь")]
         [StandartCommand]
         [Summary("позволяет узнать полный список команд")]
@@ -85,7 +85,8 @@ namespace TestBot
                 string aliases = "\nПсевдонимы:";
 
                 foreach (string alias in command.Aliases)
-                    aliases += $" `{alias}`";
+                    if(alias != command.Name)
+                        aliases += $" `{alias}`";
 
                 if (command.Attributes.Contains(new StandartCommandAttribute()))
                     categoryAttribute = new StandartCommandAttribute();
@@ -472,7 +473,7 @@ namespace TestBot
         #endregion
 
         #region --РОЛЬ РЕАКЦИЯ--
-        [Command("ДобавитьРеакциюЗаРоль")]
+        [Command("ДобавитьРольЗаРеакцию")]
         [Summary("добавляет реакцию к сообщению. После нажатия на реакцию будет выдана соответствующая роль.")]
         [StandartCommand]
         public async Task AddReaction(ulong id, Emoji emoji, params string[] str)
@@ -514,8 +515,8 @@ namespace TestBot
             await ReplyAsync("Добавлено");
         }
 
-        [Command("УдалитьРеакциюЗаРоль")]
-        [Summary("добавляет реакцию к сообщению. После нажатия на реакцию будет выдана соответствующая роль.")]
+        [Command("УдалитьРольЗаРеакцию")]
+        [Summary("удаляет \"Роль за реакцию\" у сообщения")]
         [StandartCommand]
         public async Task DeleteReaction(ulong id, Emoji emoji)
         {

@@ -242,7 +242,7 @@ namespace DiscordBot.Providers
         public static void AddReactRoleMessage(SerializableReactRoleMessage message)
         {            
             var messages = GetReactRoleMessages();
-            if (messages.ReactRoleMessages.Contains(message))
+            if (!messages.ReactRoleMessages.Contains(message))
             {
                 messages.ReactRoleMessages.Add(message);
                 RefreshReactRoleMessages(messages);
