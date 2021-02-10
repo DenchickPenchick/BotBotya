@@ -227,52 +227,41 @@ namespace TestBot
         [Command("Жалоба", RunMode = RunMode.Async)]
         [StandartCommand]
         [Summary("отпраляет жалобу на участника сервера.")]
-        public async Task ReportUser()
+        public async Task ReportUser(SocketGuildUser user, params string[] reasonArray)
         {
-            await ReplyAsync("Упомяни пользователя, на которого ты хочешь подать жалобу.");
-            var replyUser = await NextMessageAsync();
-            if (replyUser.MentionedUsers.Count == 0)
+            if (Context.User.Id != user.Id)
             {
-                await ReplyAsync("Не найдено ни одного пользователя в сообщении");
-                return;
-            }
+                string reason = null;
 
-            if (replyUser != null)
-            {
-                await ReplyAsync("Введи причину жалобы.");
-                var reasonReply = await NextMessageAsync();
-                if (reasonReply != null)
+                for (int i = 0; i < reasonArray.Length; i++)
                 {
-                    var userReport = replyUser.MentionedUsers.ToArray()[0];
-                    if (userReport != null)
-                    {
-                        await ReplyAsync("Жалоба на участника отпралена на рассмотрение владельцу сервера.");
-                        var embedToAdmin = new EmbedBuilder
-                        {
-                            Title = $"Поступила жалоба на участника {userReport.Username}",
-                            Description = $"Причина:\n{reasonReply.Content}",
-                            ImageUrl = userReport.GetAvatarUrl(),
-                            Color = Color.Blue
-                        }.Build();
-
-                        var embedToReportedUser = new EmbedBuilder
-                        {
-                            Title = $"На тебя поступила жалоба от {Context.User.Username}",
-                            Description = $"Причина:\n{reasonReply.Content}",
-                            Color = Color.Blue
-                        }.Build();
-
-                        await Context.Guild.Owner.GetOrCreateDMChannelAsync().Result.SendMessageAsync(embed: embedToAdmin);
-                        await userReport.GetOrCreateDMChannelAsync().Result.SendMessageAsync(embed: embedToReportedUser);
-                    }
-                    else
-                        await ReplyAsync("Пользователь не найден.");
+                    if (i > 0)
+                        reason += $" {reasonArray[i]}";
+                    else if (i == 0)
+                        reason += reasonArray[i];
                 }
-                else
-                    await ReplyAsync("Ответ не получен в течение 5 минут. Команда аннулированна");
+
+                var embedToAdmin = new EmbedBuilder
+                {
+                    Title = $"Поступила жалоба на участника {user.Username}",
+                    Description = $"**Причина:**\n`{reason}`",
+                    ThumbnailUrl = user.GetAvatarUrl(),
+                    Color = Color.Blue
+                }.Build();
+
+                var embedToReportedUser = new EmbedBuilder
+                {
+                    Title = $"На тебя поступила жалоба от {Context.User.Username}",
+                    Description = $"**Причина:**\n`{reason}`",
+                    ThumbnailUrl = Context.User.GetAvatarUrl(),
+                    Color = Color.Blue
+                }.Build();
+
+                await Context.Guild.Owner.GetOrCreateDMChannelAsync().Result.SendMessageAsync(embed: embedToAdmin);
+                await user.GetOrCreateDMChannelAsync().Result.SendMessageAsync(embed: embedToReportedUser);
             }
             else
-                await ReplyAsync("Ответ не получен в течение 5 минут. Команда аннулированна");
+                await ReplyAsync("Ты не можешь отправить сам себе жалобу");
         }
 
         [RequireUserPermission(GuildPermission.KickMembers)]
@@ -280,7 +269,7 @@ namespace TestBot
         [StandartCommand]
         [Alias("К")]
         [Summary("позволяет кикнуть пользователя с сервера.")]
-        public async Task Kick(params string[] NameOfUser)
+        public async Task Kick(SocketGuildUser user)
         {
             var contextRoles = (Context.User as SocketGuildUser).Roles;
             int contextMaxPos = 0;
@@ -288,13 +277,6 @@ namespace TestBot
             foreach (var role in contextRoles)
                 if (role.Position > contextMaxPos)
                     contextMaxPos = role.Position;
-
-            SocketGuildUser user;
-
-            if (Context.Message.MentionedUsers.Count > 0)
-                user = Context.Message.MentionedUsers.First() as SocketGuildUser;
-            else
-                user = GetSocketGuildUser(NameOfUser);
 
             var toKickRoles = user.Roles;
             int toKickMaxPos = 0;
@@ -329,21 +311,14 @@ namespace TestBot
         [Command("Бан")]
         [Alias("Б")]
         [Summary("позволяет забанить пользователя на сервере.")]
-        public async Task Ban(params string[] NameOfUser)
+        public async Task Ban(SocketGuildUser user)
         {
             var contextRoles = (Context.User as SocketGuildUser).Roles;
             int contextMaxPos = 0;
 
             foreach (var role in contextRoles)
                 if (role.Position > contextMaxPos)
-                    contextMaxPos = role.Position;
-
-            SocketGuildUser user;
-
-            if (Context.Message.MentionedUsers.Count > 0)
-                user = Context.Message.MentionedUsers.First() as SocketGuildUser;
-            else
-                user = GetSocketGuildUser(NameOfUser);
+                    contextMaxPos = role.Position;                        
 
             var toBanRoles = user.Roles;
             int toBanMaxPos = 0;
@@ -476,20 +451,14 @@ namespace TestBot
         [Command("ДобавитьРольЗаРеакцию")]
         [Summary("добавляет реакцию к сообщению. После нажатия на реакцию будет выдана соответствующая роль.")]
         [StandartCommand]
-        public async Task AddReaction(ulong id, Emoji emoji, params string[] str)
+        public async Task AddReaction(ulong id, SocketTextChannel channel, Emoji emoji, IRole role)
         {
             var reactRoleMessages = FilesProvider.GetReactRoleMessages();
             List<ulong> reactRoleMessagesId = new List<ulong>();
 
-            if (Context.Message.MentionedChannels.First() is not SocketTextChannel textChannel)
+            if (channel.GetMessageAsync(id) == null)
             {
-                await ReplyAsync($"Не могу найти канал где находится сообщение.");
-                return;
-            }
-
-            if (textChannel.GetMessageAsync(id) == null)
-            {
-                await ReplyAsync($"Не могу найти сообщение в {textChannel.Mention}.");
+                await ReplyAsync($"Не могу найти сообщение в {channel.Mention}.");
                 return;
             }
 
@@ -498,7 +467,7 @@ namespace TestBot
 
             if (reactRoleMessagesId.Contains(id))
             {
-                FilesProvider.AddReactRoleToReactRoleMessage(id, emoji.Name, Context.Message.MentionedRoles.First().Id);
+                FilesProvider.AddReactRoleToReactRoleMessage(id, emoji.Name, role.Id);
             }
             else
                 FilesProvider.AddReactRoleMessage(new SerializableReactRoleMessage
@@ -506,11 +475,11 @@ namespace TestBot
                     Id = id,
                     EmojiesRoleId = new List<(string, ulong)>
                     {
-                        (emoji.Name, Context.Message.MentionedRoles.First().Id)
+                        (emoji.Name, role.Id)
                     }
                 });
 
-            await textChannel.GetMessageAsync(id).Result.AddReactionAsync(emoji);
+            await channel.GetMessageAsync(id).Result.AddReactionAsync(emoji);
 
             await ReplyAsync("Добавлено");
         }
@@ -636,12 +605,11 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.Administrator)]
         [RolesCommand]
         [Summary("добавляет роль на продажу. Ее нужно упомянуть")]
-        public async Task AddEconomicRole(int price, params string[] str)
+        public async Task AddEconomicRole(int price, IRole role)
         {
             if (Context.Message.MentionedRoles.Count > 0)
             {
-                var economProvider = new EconomicProvider(Context.Guild);
-                var role = Context.Message.MentionedRoles.First();
+                var economProvider = new EconomicProvider(Context.Guild);                
 
                 var res = economProvider.AddRole(role, price);
                 if (res != EconomicProvider.Result.RoleAlreadyAdded)
@@ -657,12 +625,11 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.Administrator)]
         [RolesCommand]
         [Summary("снимает роль с продажи. Ее нужно упомянуть.")]
-        public async Task DeleteRole(params string[] str)
+        public async Task DeleteRole(IRole role)
         {
             if (Context.Message.MentionedRoles.Count > 0)
             {
-                var economProvider = new EconomicProvider(Context.Guild);
-                var role = Context.Message.MentionedRoles.First();
+                var economProvider = new EconomicProvider(Context.Guild);                
 
                 var res = economProvider.DeleteRole(role.Id);
                 if (res == EconomicProvider.Result.NoRole)
@@ -677,12 +644,11 @@ namespace TestBot
         [Command("КупитьРоль")]
         [RolesCommand]
         [Summary("покупает роль участнику. Ее нужно упомянуть.")]
-        public async Task BuyRole(params string[] str)
+        public async Task BuyRole(IRole role)
         {
             if (Context.Message.MentionedRoles.Count > 0)
             {
-                var economProvider = new EconomicProvider(Context.Guild);
-                var role = Context.Message.MentionedRoles.First();
+                var economProvider = new EconomicProvider(Context.Guild);                
                 var res = economProvider.BuyRole(role, Context.User as SocketGuildUser);
                 if (res == EconomicProvider.Result.NoRole)
                     await ReplyAsync($"Роли {role.Mention} нет в каталоге.");
@@ -701,7 +667,7 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.Administrator)]
         [RolesCommand]
         [Summary("позволяет увеличить баланс участника(-м) сервера (его(их) нужно упомянуть).")]
-        public async Task AddBalance(int count, params string[] str)
+        public async Task AddBalance(int count, params SocketGuildUser[] users)
         {
             var economProvider = new EconomicProvider(Context.Guild);
 
@@ -709,12 +675,12 @@ namespace TestBot
 
             if (Context.Message.MentionedUsers.Count > 0)
             {
-                foreach (var user in Context.Message.MentionedUsers)
+                foreach (var user in users)
                 {
                     economProvider.AddBalance(user, count);
-                    var economUser = FilesProvider.GetEconomicGuildUser(user as SocketGuildUser);
+                    var economUser = FilesProvider.GetEconomicGuildUser(user);
 
-                    usersList += $"\n{(user as SocketGuildUser).Mention} Баланс: {economUser.Balance}";
+                    usersList += $"\n{user.Mention} Баланс: {economUser.Balance}";
                 }
 
                 await ReplyAsync(embed: new EmbedBuilder
@@ -733,7 +699,7 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.Administrator)]
         [RolesCommand]
         [Summary("позволяет уменьшить баланс участника(-м) сервера (его(их) нужно упомянуть).")]
-        public async Task MinusBalance(int count, params string[] str)
+        public async Task MinusBalance(int count, params SocketGuildUser[] users)
         {
             var economProvider = new EconomicProvider(Context.Guild);
 
@@ -741,12 +707,12 @@ namespace TestBot
 
             if (Context.Message.MentionedUsers.Count > 0)
             {
-                foreach (var user in Context.Message.MentionedUsers)
+                foreach (var user in users)
                 {
                     economProvider.MinusBalance(user, count);
-                    var economUser = FilesProvider.GetEconomicGuildUser(user as SocketGuildUser);
+                    var economUser = FilesProvider.GetEconomicGuildUser(user);
 
-                    usersList += $"\n{(user as SocketGuildUser).Mention} Баланс: {economUser.Balance}";
+                    usersList += $"\n{user.Mention} Баланс: {economUser.Balance}";
                 }
 
                 await ReplyAsync(embed: new EmbedBuilder
@@ -765,7 +731,7 @@ namespace TestBot
         [RequireUserPermission(GuildPermission.Administrator)]
         [RolesCommand]
         [Summary("позволяет установить баланс участника(-м) сервера (его(их) нужно упомянуть).")]
-        public async Task SetBalance(int count, params string[] str)
+        public async Task SetBalance(int count, params SocketGuildUser[] users)
         {
             var economProvider = new EconomicProvider(Context.Guild);
 
@@ -773,12 +739,11 @@ namespace TestBot
 
             if (Context.Message.MentionedUsers.Count > 0)
             {
-                foreach (var user in Context.Message.MentionedUsers)
+                foreach (var user in users)
                 {
                     economProvider.SetBalance(user, count);
-                    var economUser = FilesProvider.GetEconomicGuildUser(user as SocketGuildUser);
-
-                    usersList += $"\n{(user as SocketGuildUser).Mention} Баланс: {economUser.Balance}";
+                    var economUser = FilesProvider.GetEconomicGuildUser(user);
+                    usersList += $"\n{user.Mention} Баланс: {economUser.Balance}";
                 }
 
                 await ReplyAsync(embed: new EmbedBuilder
@@ -1129,75 +1094,19 @@ namespace TestBot
         [CustomisationCommand]
         [Command("ДобавитьРольПоумолчанию", RunMode = RunMode.Async)]
         [Alias("АвтоРоль")]
-        [Summary("устанавливает роль по-умолчанию, которая будет выдаваться каждому пользователю.\nДля того чтобы установить роль нужно ее отметить. Если отметить несколько ролей, то установлена будет только первая.")]
-        public async Task AddDefaultRole(params string[] str)
-        {
-            if (Context.Message.MentionedRoles.Count > 0)
-            {
-                var role = Context.Message.MentionedRoles.ToArray()[0];
-                SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
+        [Summary("устанавливает роль по-умолчанию, которая будет выдаваться каждому пользователю.\nДля того чтобы установить роль нужно ее отметить.")]
+        public async Task AddDefaultRole(IRole role)
+        {            
+            SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
 
-                serializableGuild.DefaultRoleId = role.Id;
+            serializableGuild.DefaultRoleId = role.Id;
 
-                FilesProvider.RefreshGuild(serializableGuild);
+            FilesProvider.RefreshGuild(serializableGuild);
 
-                await ReplyAsync("Роль успешно задана. Она будет выдаваться всем пользователям по-умолчанию. Цвет и другие параметры ты можешь натроить сам.");
+            await ReplyAsync("Роль успешно задана. Она будет выдаваться всем пользователям по-умолчанию.");
 
-                foreach (var user in Context.Guild.Users)
-                    await user.AddRoleAsync(role);
-            }
-            else
-            {
-                await ReplyAsync("Роль не найдена в сообщении. Ты хочешь ее создать? Пиши +(да) или -(нет).");
-                var createRoleMessage = await NextMessageAsync();
-                if (createRoleMessage != null)
-                    switch (createRoleMessage.Content)
-                    {
-                        case "+":
-                            await ReplyAsync("Введи название роли(обязательно)");
-                            var roleMessage = await NextMessageAsync();
-                            if (roleMessage != null)
-                            {
-                                var role = await Context.Guild.CreateRoleAsync(roleMessage.Content,
-                                    new GuildPermissions().Modify(
-                                        createInstantInvite: true,
-                                        readMessageHistory: true,
-                                        connect: true,
-                                        sendMessages: true,
-                                        sendTTSMessages: true,
-                                        embedLinks: true,
-                                        attachFiles: true,
-                                        mentionEveryone: true,
-                                        useExternalEmojis: true,
-                                        speak: true,
-                                        useVoiceActivation: true),
-                                    Color.Default, false, null);
-
-                                SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
-
-                                serializableGuild.DefaultRoleId = role.Id;
-
-                                FilesProvider.RefreshGuild(serializableGuild);
-
-                                await ReplyAsync("Роль успешно задана. Она будет выдаваться всем пользователям по-умолчанию. Цвет и другие параметры ты можешь натроить сам.");
-
-                                foreach (var user in Context.Guild.Users)
-                                    await user.AddRoleAsync(role);
-                            }
-                            else
-                                await ReplyAsync("Ответ не получен в течении 5 минут. Команда аннулированна.");
-                            break;
-                        case "-":
-                            await ReplyAsync("Невозможно установить роль по-умолчанию. Команда аннулированна.");
-                            return;
-                    }
-                else
-                {
-                    await ReplyAsync("Ответ не получен в течении 5 минут. Команда аннулированна.");
-                    return;
-                }
-
-            }
+            foreach (var user in Context.Guild.Users)
+                await user.AddRoleAsync(role);            
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
@@ -1365,13 +1274,13 @@ namespace TestBot
         [Command("КаналДляПриветствий")]        
         [CustomisationCommand]
         [Summary("устанавливает канал для приветствий.")]
-        public async Task HelloChannel(params string[] str)
+        public async Task HelloChannel(SocketTextChannel channel)
         {
             var serGuild = FilesProvider.GetGuild(Context.Guild);
 
             if (Context.Message.MentionedChannels.Count > 0)
             {
-                serGuild.SystemChannels.NewUsersChannelId = Context.Message.MentionedChannels.First().Id;
+                serGuild.SystemChannels.NewUsersChannelId = channel.Id;
                 FilesProvider.RefreshGuild(serGuild);
                 await ReplyAsync("Канал для приветствий установлен");
             }
@@ -1383,13 +1292,13 @@ namespace TestBot
         [Command("КаналДляПрощаний")]
         [CustomisationCommand]
         [Summary("устанавливает канал для прощаний.")]
-        public async Task GoodbyeChannel(params string[] str)
+        public async Task GoodbyeChannel(SocketTextChannel channel)
         {
             var serGuild = FilesProvider.GetGuild(Context.Guild);
 
             if (Context.Message.MentionedChannels.Count > 0)
             {
-                serGuild.SystemChannels.LeaveUsersChannelId = Context.Message.MentionedChannels.First().Id;
+                serGuild.SystemChannels.LeaveUsersChannelId = channel.Id;
                 FilesProvider.RefreshGuild(serGuild);
                 await ReplyAsync("Канал для прощаний установлен");
             }
@@ -1416,27 +1325,7 @@ namespace TestBot
             FilesProvider.RefreshGuild(serGuild);
         }
         #endregion        
-
-        private SocketGuildUser GetSocketGuildUser(params string[] NameOfUser)
-        {
-            string name = null;
-            int argPos = 0;
-            var guild = Context.Guild;
-            SocketGuildUser User = null;
-
-            foreach (string partOfName in NameOfUser)
-            {
-                name += argPos == 0 ? partOfName : $" {partOfName}";
-                argPos++;
-            }
-
-            foreach (var user in guild.Users)
-                if ((user.Username == name || user.Nickname == name) && name != null)
-                    User = user;
-
-            return User;
-        }
-
+        
         private async void ClearMessages(object count)
         {
             try

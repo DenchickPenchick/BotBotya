@@ -57,92 +57,83 @@ namespace DiscordBot.Modules.ContentManaging
             if (!((arg as SocketUserMessage).Author as SocketGuildUser).IsBot)
                 if (serGuild.CheckingContent && guild.GetTextChannel(serGuild.SystemChannels.LinksChannelId) != null && guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId) != null)
                 {
-                    List<Uri> uris = GetUrisFromMessage(arg);
-                    var messUser = arg.Author as SocketGuildUser;
-                    GuildProvider provider = new GuildProvider(messUser.Guild);
-                    var VideosAndPicturesChannel = provider.VideosTextChannel();
-                    var LinksChannel = provider.LinksTextChannel();
-                    var message = arg;
-                    bool Video = false;                    
-                    bool DiscordMedia = false;
-                    bool Invite = false;
-                    bool InVideoChannel = false;
-                    bool InLinksChannel = false;
+                    var provider = new GuildProvider(guild);
+                    var linksChannel = provider.LinksTextChannel();
+                    var videosChannel = provider.VideosTextChannel();                    
 
-                    if (uris.Count == 1)
-                        foreach (Uri uri in uris)
+                    var uris = GetUrisFromMessage(arg);
+
+                    List<string> VideoHostnames = new List<string>
+                    { 
+                        "www.youtube.com",
+                        "youtube.com",
+                        "www.youtu.be",
+                        "youtu.be"
+                    };
+
+                    List<string> ContentLinks = new List<string>
+                    { 
+                        "discord.com",
+                        "tenor.com"
+                    };
+
+                    List<string> links = new List<string>();
+
+                    foreach (var uri in uris)
+                    {
+                        bool sorted = false;
+
+                        if (uri.Host == "discord.gg" && uri.AbsolutePath.Length == 11) //Если приглашение, тогда прекращаем операцию
                         {
-                            string host = uri.Host;
-
-                            if (host == "www.youtube.com" || host == "www.youtu.be")
-                                Video = true;
-                            else if (host.ToLower().Contains("discord") || host.ToLower().Contains("tenor"))
-                                DiscordMedia = true;
+                            await arg.DeleteAsync();
+                            return;
                         }
-                    else
-                        await arg.DeleteAsync();
 
-                    if (message.Channel == VideosAndPicturesChannel)
-                        InVideoChannel = true;
-                    else if (message.Channel == LinksChannel)
-                        InLinksChannel = true;
+                        if (VideoHostnames.Contains(uri.Host))
+                        {
+                            if (videosChannel != null && !links.Contains(uri.ToString()))
+                            {
+                                links.Add(uri.ToString());
+                                if (arg.Channel.Id != videosChannel.Id)
+                                {
+                                    await videosChannel.SendMessageAsync(uri.ToString());
+                                    await arg.DeleteAsync();
+                                }
+                                
+                                sorted = true;
+                            }
+                        }
 
-                    if (Video && !DiscordMedia)
-                        await VideosAndPicturesChannel.SendMessageAsync(arg.Content);
-                    else if (Video && !DiscordMedia)
-                        await LinksChannel.SendMessageAsync(arg.Content);
-                    if (Invite)
-                        await arg.DeleteAsync();
-                    //var messUser = arg.Author as SocketGuildUser;
-                    //GuildProvider provider = new GuildProvider(messUser.Guild);
-                    //var VideosAndPicturesChannel = provider.VideosTextChannel();
-                    //var LinksChannel = provider.LinksTextChannel();
-                    //var message = arg;
+                        if (ContentLinks.Contains(uri.Host))
+                        {
+                            if (!links.Contains(uri.ToString()))
+                            {
+                                links.Add(uri.ToString());                                                                
+                                sorted = true;
+                            }
+                        }
 
-                    //if (Uri.IsWellFormedUriString(message.Content, UriKind.RelativeOrAbsolute))
-                    //{
-                    //    Uri uri = new Uri(message.Content);
-                    //    string host = uri.Host;
-                    //    bool Video = false;
-                    //    bool DiscordMedia = false;
-                    //    bool InVideoChannel = false;
-                    //    bool InLinksChannel = false;
+                        if (sorted)
+                        {
+                            continue;
+                        }
 
-                    //    if (message.Channel == VideosAndPicturesChannel)
-                    //        InVideoChannel = true;
-                    //    else if (message.Channel == LinksChannel)
-                    //        InLinksChannel = true;
-
-                    //    if (host == "www.youtube.com" || host == "www.youtu.be")
-                    //        Video = true;
-                    //    else if (host.ToLower().Contains("discord") || host.ToLower().Contains("tenor"))
-                    //        DiscordMedia = true;
-
-                    //    if (!DiscordMedia)
-                    //    {
-                    //        if (!((InVideoChannel && Video) || (InLinksChannel && !Video)))
-                    //        {
-                    //            if ((!Video && guild.GetTextChannel(serGuild.SystemChannels.LinksChannelId) != null) || (Video && guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId) != null))
-                    //                await message.DeleteAsync();
-                    //            string link = message.Content;
-                    //            switch (Video)
-                    //            {
-                    //                case true:
-                    //                    if (guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId) != null)
-                    //                        await VideosAndPicturesChannel.SendMessageAsync(link);
-                    //                    break;
-                    //                case false:
-                    //                    if (guild.GetTextChannel(serGuild.SystemChannels.LinksChannelId) != null)
-                    //                        await LinksChannel.SendMessageAsync(link);
-                    //                    break;
-                    //            }
-                    //        }
-                    //    }
-                    //}
+                        if (linksChannel == null || links.Contains(uri.ToString()))
+                        {
+                            continue;
+                        }
+                        if (arg.Channel.Id != linksChannel.Id)
+                        {
+                            await arg.DeleteAsync();
+                            await linksChannel.SendMessageAsync(uri.ToString());
+                        }
+                        
+                            links.Add(uri.ToString());
+                    }                                            
                 }
         }
-
-        private static List<Uri> GetUrisFromMessage(SocketMessage message)
+        #region --АЛГОРИТМ ПО ИЗВЛЕЧЕНИБ ССЫЛОК ИЗ СООБЩЕНИЯ
+        private List<Uri> GetUrisFromMessage(SocketMessage message)
         {
             List<Uri> uris = new List<Uri>();
             string content = message.Content;
@@ -159,26 +150,26 @@ namespace DiscordBot.Modules.ContentManaging
                     if (httpChars || httpsChars)
                     {
                         string url = null;
-                        if (httpChars)
+                        if (httpChars && chars.Length - (i + 6) >= 0)
                         {
                             url += "http";
                             string doubleSlash = chars[i + 4].ToString() + chars[i + 5].ToString() + chars[i + 6].ToString();
                             if (doubleSlash == "://")
                             {
                                 url += "://";
-                                url += Path(chars, i + 7);
+                                url += Path(chars, i + 7, ProtocolType.HTTP);
                                 if (Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute))
                                     uris.Add(new Uri(url));
                             }
                         }
-                        else
+                        else if(httpsChars && chars.Length - (i + 7) >= 0)
                         {
                             url += "https";
                             string doubleSlash = chars[i + 5].ToString() + chars[i + 6].ToString() + chars[i + 7].ToString();
                             if (doubleSlash == "://")
                             {
                                 url += "://";
-                                url += Path(chars, i + 8);
+                                url += Path(chars, i + 8, ProtocolType.HTTPS);
                                 if (Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute))
                                     uris.Add(new Uri(url));
                             }
@@ -189,12 +180,31 @@ namespace DiscordBot.Modules.ContentManaging
             return uris;
         }
 
-        private static string Path(char[] chars, int index)
+        private string Path(char[] chars, int index, ProtocolType protocolType)
         {
             string pathRes = null;
+
             for (int i = index; i < chars.Length; i++)
             {
-                if (chars[i] != ' ')
+                bool nextIsNewLink = false;
+
+                switch (protocolType)
+                {
+                    case ProtocolType.HTTP:
+                        if (chars.Length - (i + 7) >= 0)
+                        {
+                            nextIsNewLink = chars[i].ToString() + chars[i + 1].ToString() + chars[i + 2].ToString() + chars[i + 3].ToString() + chars[i + 4].ToString() + chars[i + 5].ToString() + chars[i + 6].ToString() == "http://";
+                        }
+                        break;
+                    case ProtocolType.HTTPS:
+                        if (chars.Length - (i + 8) >= 0)
+                        {
+                            nextIsNewLink = chars[i].ToString() + chars[i + 1].ToString() + chars[i + 2].ToString() + chars[i + 3].ToString() + chars[i + 4].ToString() + chars[i + 5].ToString() + chars[i + 6].ToString() + chars[i + 7].ToString() == "https://";
+                        }
+                        break;
+                }
+
+                if (chars[i] != ' ' && !nextIsNewLink)
                 {
                     pathRes += chars[i].ToString();
                 }
@@ -204,5 +214,41 @@ namespace DiscordBot.Modules.ContentManaging
 
             return pathRes;
         }
+        #endregion
+
+        #region--РАССТОЯНИЕ ЛЕВЕНШТЕЙНА--
+        private int Minimum(int a, int b, int c) => (a = a < b ? a : b) < c ? a : c;
+
+        private int Distance(string firstWord, string secondWord)
+        {
+            const int deleteCost = 1, insertCost = 1;
+            int n = firstWord.Length + 1;
+            int m = secondWord.Length + 1;
+            int[,] matrix = new int[n, m];
+
+            for (int i = 0; i < n; i++)
+                matrix[i, 0] = i;
+
+            for (int i = 0; i < m; i++)
+                matrix[0, i] = i;
+
+
+            for (int i = 1; i < n; i++)
+            {
+                for (int j = 1; j < m; j++)
+                {
+                    int substitutionCost = firstWord[i - 1] == secondWord[j - 1] ? 0 : 1;
+                    matrix[i, j] = Minimum(
+                        matrix[i - 1, j] + deleteCost,
+                        matrix[i, j - 1] + insertCost,
+                        matrix[i - 1, j - 1] + substitutionCost);
+                }
+            }
+
+            return matrix[n - 1, m - 1];
+        }
+        #endregion
+
+        private enum ProtocolType { HTTP, HTTPS };
     }
 }

@@ -44,7 +44,6 @@ using DiscordBot.Providers.FileManaging;
 using System.Threading;
 using DiscordBot.Modules.EconomicManaging;
 using DiscordBot.TypeReaders;
-using DiscordBot.DiscordBotListsServices;
 
 namespace DiscordBot
 {
@@ -115,8 +114,7 @@ namespace DiscordBot
         }
 
         private async Task Client_Ready()
-        {
-            await new DiscordBotListsService(Client).RunDiscordBotsListService("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc0OTk5MTM5MTYzOTEwOTY3MyIsInBlcm1zIjowLCJpYXQiOjE2MTIxMDkwMDR9.fEZtwhUgyx8KrSbdsPhDnHvKFufPAEP_mDVK-6A4ZZY");
+        {            
             var instanceOfLavaNode = Services.GetRequiredService<LavaNode>();            
             if (!instanceOfLavaNode.IsConnected)
             {

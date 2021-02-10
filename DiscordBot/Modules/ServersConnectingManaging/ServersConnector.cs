@@ -48,19 +48,24 @@ namespace DiscordBot.Modules.ServersConnectingManaging
 
         private Task Client_ChannelDestroyed(SocketChannel arg)
         {
-            var connectors = FilesProvider.GetConnectors((arg as SocketTextChannel).Guild);
-            SerializableConnector connector = null;
-            if (connectors != null)
-                foreach (var conn in connectors.SerializableConnectorsChannels)
-                    if ((arg as SocketTextChannel).Id == conn.HostId)
-                        connector = conn;
+            var guild = (arg as SocketTextChannel).Guild;
 
-            if (connector != null)
+            if (guild != null)
             {
-                connectors.SerializableConnectorsChannels.Remove(connector);
-                FilesProvider.RefreshConnectors(connectors);                
-            }
+                var connectors = FilesProvider.GetConnectors(guild);
+                SerializableConnector connector = null;
+                if (connectors != null)
+                    foreach (var conn in connectors.SerializableConnectorsChannels)
+                        if ((arg as SocketTextChannel).Id == conn.HostId)
+                            connector = conn;
 
+                if (connector != null)
+                {
+                    connectors.SerializableConnectorsChannels.Remove(connector);
+                    FilesProvider.RefreshConnectors(connectors);
+                }
+            }
+            
             return Task.CompletedTask;
         }
 
