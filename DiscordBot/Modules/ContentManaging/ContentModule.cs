@@ -26,16 +26,20 @@ using System;
 using System.Threading.Tasks;
 using DiscordBot.Providers;
 using System.Collections.Generic;
+using DiscordBot.TextReaders;
+using Discord.Commands;
 
 namespace DiscordBot.Modules.ContentManaging
 {
     public class ContentModule : IModule
     {
         private DiscordSocketClient Client { get; set; }
+        private CommandService CommandService { get; set; }
 
-        public ContentModule(DiscordSocketClient client)
+        public ContentModule(DiscordSocketClient client, CommandService commandService)
         {
             Client = client;
+            CommandService = commandService;
         }
 
         public void RunModule()
@@ -51,20 +55,97 @@ namespace DiscordBot.Modules.ContentManaging
 
         private async Task CheckContent(SocketMessage arg)
         {
+            var mess = arg as SocketUserMessage;
             var guild = ((arg as SocketUserMessage).Author as SocketGuildUser).Guild;
             var serGuild = FilesProvider.GetGuild(guild);
 
+            int argPos = 0;
+
             if (!((arg as SocketUserMessage).Author as SocketGuildUser).IsBot)
-                if (serGuild.CheckingContent && guild.GetTextChannel(serGuild.SystemChannels.LinksChannelId) != null && guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId) != null)
+            {
+                if (serGuild.CheckingBadWords)
                 {
+                    bool prefix = mess.HasStringPrefix(serGuild.Prefix, ref argPos);
+                    string str = mess.Content.Remove(0, serGuild.Prefix.Length).Split(' ')[0];
+                    List<string> commandsNames = new List<string>();
+                    foreach (var command in CommandService.Commands)
+                    {
+                        commandsNames.Add(command.Name.ToLower());
+                        for (int i = 1; i < command.Aliases.Count; i++)
+                            commandsNames.Add(command.Aliases[i].ToLower());
+                    }                    
+
+                    if ((prefix && !commandsNames.Contains(str.ToLower())) 
+                        || !prefix)
+                    {
+                        Filter filter = new Filter(arg.Content, serGuild);
+
+                        var res = filter.Filt();
+                        if (arg.Author is SocketGuildUser user)
+                        {
+                            List<ulong> badUsersIds = new List<ulong>();
+
+                            foreach (var badUser in serGuild.BadUsers)
+                                badUsersIds.Add(badUser.Item1);
+
+                            if (res == Filter.Result.Words)
+                            {
+                                if (serGuild.WarnsForBadWords)
+                                { 
+                                    int warns;
+                                    if (!badUsersIds.Contains(user.Id))
+                                    {
+                                        serGuild.BadUsers.Add((user.Id, 1));
+                                        warns = 1;
+                                    }
+                                    else
+                                    {
+                                        serGuild.BadUsers[badUsersIds.IndexOf(user.Id)] = (user.Id, serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2 + 1);
+                                        warns = serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2;
+                                    }
+                                    await arg.Channel.SendMessageAsync($"{user.Mention}, на этом сервере запрещен мат." +
+                                        $"{(serGuild.WarnsForBadWords == true ? $"\nКоличество предупреждений: ${warns}" : null)}");
+                                    if (warns > serGuild.MaxWarns)
+                                    {
+                                        if (serGuild.KickForWarns || serGuild.BanForWarns) 
+                                        {
+                                            var channel = await user.GetOrCreateDMChannelAsync();                                        
+                                            await channel.SendMessageAsync(embed: new EmbedBuilder
+                                            {
+                                                Title = serGuild.KickForWarns == true ? $"Ты кикнут с сервера {user.Guild.Name}" : $"Ты забанен на сервере {user.Guild.Name}",
+                                                Description = $"Ты  {(serGuild.KickForWarns == true ? "кикнут" : "забанен")} из-за нарушений правил сервера, а именно за употребление запрещенных на сервере слов. " +
+                                                $"Ты превысил лимит предупреждений ({serGuild.MaxWarns}).\n" +
+                                                $"Сообщение из-за которого тебя выгнали:\n" +
+                                                $"`{arg.Content}`",
+                                                Color = Color.Blue,
+                                                ThumbnailUrl = user.Guild.IconUrl
+                                            }.Build());
+                                        }
+
+                                        await user.KickAsync();
+                                    }
+                                }                                
+                                await arg.DeleteAsync();
+
+
+                                FilesProvider.RefreshGuild(serGuild);
+                            }
+
+                        }
+                    }
+                }
+                if (serGuild.CheckingContent
+                    && guild.GetTextChannel(serGuild.SystemChannels.LinksChannelId) != null
+                    && guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId) != null)
+                {                
                     var provider = new GuildProvider(guild);
                     var linksChannel = provider.LinksTextChannel();
-                    var videosChannel = provider.VideosTextChannel();                    
+                    var videosChannel = provider.VideosTextChannel();
 
                     var uris = GetUrisFromMessage(arg);
 
                     List<string> VideoHostnames = new List<string>
-                    { 
+                    {
                         "www.youtube.com",
                         "youtube.com",
                         "www.youtu.be",
@@ -72,7 +153,7 @@ namespace DiscordBot.Modules.ContentManaging
                     };
 
                     List<string> ContentLinks = new List<string>
-                    { 
+                    {
                         "discord.com",
                         "tenor.com"
                     };
@@ -99,7 +180,7 @@ namespace DiscordBot.Modules.ContentManaging
                                     await videosChannel.SendMessageAsync(uri.ToString());
                                     await arg.DeleteAsync();
                                 }
-                                
+
                                 sorted = true;
                             }
                         }
@@ -108,7 +189,7 @@ namespace DiscordBot.Modules.ContentManaging
                         {
                             if (!links.Contains(uri.ToString()))
                             {
-                                links.Add(uri.ToString());                                                                
+                                links.Add(uri.ToString());
                                 sorted = true;
                             }
                         }
@@ -127,10 +208,13 @@ namespace DiscordBot.Modules.ContentManaging
                             await arg.DeleteAsync();
                             await linksChannel.SendMessageAsync(uri.ToString());
                         }
-                        
-                            links.Add(uri.ToString());
-                    }                                            
+
+                        links.Add(uri.ToString());
+                    }
+
                 }
+            }
+            
         }
         #region --АЛГОРИТМ ПО ИЗВЛЕЧЕНИБ ССЫЛОК ИЗ СООБЩЕНИЯ
         private List<Uri> GetUrisFromMessage(SocketMessage message)
@@ -214,40 +298,7 @@ namespace DiscordBot.Modules.ContentManaging
 
             return pathRes;
         }
-        #endregion
-
-        #region--РАССТОЯНИЕ ЛЕВЕНШТЕЙНА--
-        private int Minimum(int a, int b, int c) => (a = a < b ? a : b) < c ? a : c;
-
-        private int Distance(string firstWord, string secondWord)
-        {
-            const int deleteCost = 1, insertCost = 1;
-            int n = firstWord.Length + 1;
-            int m = secondWord.Length + 1;
-            int[,] matrix = new int[n, m];
-
-            for (int i = 0; i < n; i++)
-                matrix[i, 0] = i;
-
-            for (int i = 0; i < m; i++)
-                matrix[0, i] = i;
-
-
-            for (int i = 1; i < n; i++)
-            {
-                for (int j = 1; j < m; j++)
-                {
-                    int substitutionCost = firstWord[i - 1] == secondWord[j - 1] ? 0 : 1;
-                    matrix[i, j] = Minimum(
-                        matrix[i - 1, j] + deleteCost,
-                        matrix[i, j - 1] + insertCost,
-                        matrix[i - 1, j - 1] + substitutionCost);
-                }
-            }
-
-            return matrix[n - 1, m - 1];
-        }
-        #endregion
+        #endregion        
 
         private enum ProtocolType { HTTP, HTTPS };
     }

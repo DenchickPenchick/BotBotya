@@ -113,11 +113,6 @@ C:\Users\Денис\Source\Repos\DenchickPenchick\BotBotya\DiscordBot\bin\Debug\
 C:\Users\Денис\Source\Repos\DenchickPenchick\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csproj.CopyComplete
 C:\Users\Денис\Source\Repos\DenchickPenchick\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.genruntimeconfig.cache
 C:\Users\Денис\source\repos\DenchickPenchick\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csprojAssemblyReference.cache
-C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.AssemblyInfoInputs.cache
-C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.AssemblyInfo.cs
-C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csproj.CoreCompileInputs.cache
-C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.dll
-C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.pdb
 C:\Users\Денис\source\repos\BotBotya\DiscordBot\bin\Debug\netcoreapp3.1\DiscordBot.exe
 C:\Users\Денис\source\repos\BotBotya\DiscordBot\bin\Debug\netcoreapp3.1\DiscordBot.deps.json
 C:\Users\Денис\source\repos\BotBotya\DiscordBot\bin\Debug\netcoreapp3.1\DiscordBot.runtimeconfig.json
@@ -139,6 +134,11 @@ C:\Users\Денис\source\repos\BotBotya\DiscordBot\bin\Debug\netcoreapp3.1\New
 C:\Users\Денис\source\repos\BotBotya\DiscordBot\bin\Debug\netcoreapp3.1\System.Interactive.Async.dll
 C:\Users\Денис\source\repos\BotBotya\DiscordBot\bin\Debug\netcoreapp3.1\System.Linq.Async.dll
 C:\Users\Денис\source\repos\BotBotya\DiscordBot\bin\Debug\netcoreapp3.1\Victoria.dll
-C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csproj.CopyComplete
-C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.genruntimeconfig.cache
 C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csprojAssemblyReference.cache
+C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.AssemblyInfoInputs.cache
+C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.AssemblyInfo.cs
+C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csproj.CoreCompileInputs.cache
+C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.csproj.CopyComplete
+C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.dll
+C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.pdb
+C:\Users\Денис\source\repos\BotBotya\DiscordBot\obj\Debug\netcoreapp3.1\DiscordBot.genruntimeconfig.cache

@@ -37,7 +37,6 @@ using System.IO;
 using System.Xml.Serialization;
 using Victoria;
 using DiscordBot.Compiling;
-using DiscordBot.Modules.FileManaging;
 using System.Net;
 using System.Xml;
 using DiscordBot;
@@ -85,7 +84,7 @@ namespace TestBot
                 string aliases = "\nПсевдонимы:";
 
                 foreach (string alias in command.Aliases)
-                    if(alias != command.Name)
+                    if (alias != command.Name)
                         aliases += $" `{alias}`";
 
                 if (command.Attributes.Contains(new StandartCommandAttribute()))
@@ -318,7 +317,7 @@ namespace TestBot
 
             foreach (var role in contextRoles)
                 if (role.Position > contextMaxPos)
-                    contextMaxPos = role.Position;                        
+                    contextMaxPos = role.Position;
 
             var toBanRoles = user.Roles;
             int toBanMaxPos = 0;
@@ -609,7 +608,7 @@ namespace TestBot
         {
             if (Context.Message.MentionedRoles.Count > 0)
             {
-                var economProvider = new EconomicProvider(Context.Guild);                
+                var economProvider = new EconomicProvider(Context.Guild);
 
                 var res = economProvider.AddRole(role, price);
                 if (res != EconomicProvider.Result.RoleAlreadyAdded)
@@ -629,7 +628,7 @@ namespace TestBot
         {
             if (Context.Message.MentionedRoles.Count > 0)
             {
-                var economProvider = new EconomicProvider(Context.Guild);                
+                var economProvider = new EconomicProvider(Context.Guild);
 
                 var res = economProvider.DeleteRole(role.Id);
                 if (res == EconomicProvider.Result.NoRole)
@@ -648,7 +647,7 @@ namespace TestBot
         {
             if (Context.Message.MentionedRoles.Count > 0)
             {
-                var economProvider = new EconomicProvider(Context.Guild);                
+                var economProvider = new EconomicProvider(Context.Guild);
                 var res = economProvider.BuyRole(role, Context.User as SocketGuildUser);
                 if (res == EconomicProvider.Result.NoRole)
                     await ReplyAsync($"Роли {role.Mention} нет в каталоге.");
@@ -1096,7 +1095,7 @@ namespace TestBot
         [Alias("АвтоРоль")]
         [Summary("устанавливает роль по-умолчанию, которая будет выдаваться каждому пользователю.\nДля того чтобы установить роль нужно ее отметить.")]
         public async Task AddDefaultRole(IRole role)
-        {            
+        {
             SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
 
             serializableGuild.DefaultRoleId = role.Id;
@@ -1106,7 +1105,7 @@ namespace TestBot
             await ReplyAsync("Роль успешно задана. Она будет выдаваться всем пользователям по-умолчанию.");
 
             foreach (var user in Context.Guild.Users)
-                await user.AddRoleAsync(role);            
+                await user.AddRoleAsync(role);
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
@@ -1216,6 +1215,80 @@ namespace TestBot
                 await ReplyAsync("Проверка контента включена.");
             else
                 await ReplyAsync("Проверка контента отключена.");
+        }
+
+        [Command("ДобавитьНежелательныеСлова")]
+        [CustomisationCommand]
+        [Summary("добавляет список нежелательных слов")]
+        public async Task AddBadWords(params string[] wordsInMess)
+        {
+            if (wordsInMess.Length == 0)
+            {
+                if (Context.Message.Attachments.Count > 0)
+                {
+                    var attachment = Context.Message.Attachments.First();
+                    if (Path.GetExtension(attachment.Filename) == ".txt")
+                    {
+                        WebClient client = new WebClient();
+                        Stream stream = client.OpenRead(attachment.Url);
+                        SerializableGuild guild = FilesProvider.GetGuild(Context.Guild);
+
+                        using StreamReader reader = new StreamReader(stream);
+                        string text = await reader.ReadToEndAsync();
+
+                        string[] words = text.Split(' ');
+                        List<string> filteredWords = new List<string>();
+
+                        foreach (string word in words)
+                            if (!filteredWords.Contains(word.ToLower()) && !guild.BadWords.Contains(word.ToLower()))
+                                filteredWords.Add(word.ToLower());
+
+                        guild.BadWords.AddRange(filteredWords);
+
+                        FilesProvider.RefreshGuild(guild);
+
+                        await ReplyAsync($"Добавлено {filteredWords.Count} слов. На данный момент в словаре есть {guild.BadWords.Count} слов.");
+                    }
+                    else
+                        await ReplyAsync("Некорректное расширение файла. Файл должен быть текстовый (`.txt`)");
+                }
+                else
+                    await ReplyAsync("Я не могу найти файл в сообщении.");
+            }
+            else
+            {
+                SerializableGuild guild = FilesProvider.GetGuild(Context.Guild);
+                List<string> filteredWords = new List<string>();
+
+                foreach (string word in wordsInMess)                
+                    if (!filteredWords.Contains(word) && !guild.BadWords.Contains(word))
+                        filteredWords.Add(word);
+
+                guild.BadWords.AddRange(filteredWords);
+                FilesProvider.RefreshGuild(guild);
+
+                await ReplyAsync($"Добавлено {filteredWords.Count} слов. На данный момент в словаре есть {guild.BadWords.Count} слов.");
+            }
+        }
+
+        [Command("УдалитьНежелательноеСлово")]
+        [CustomisationCommand]
+        [Summary("удаляет нежелательные слова из списка.")]
+        public async Task DeleteWord(params string[] words)
+        {
+            if (words.Length > 0)
+            {
+                SerializableGuild guild = FilesProvider.GetGuild(Context.Guild);
+
+                foreach (string word in words)                
+                    if (guild.BadWords.Contains(word))                    
+                        guild.BadWords.Remove(word);    
+
+                FilesProvider.RefreshGuild(guild);
+                await ReplyAsync("Удаление слов произведено успешно.");
+            }
+            else
+                await ReplyAsync("Не могу найти слова в сообщении.");
         }
 
         [RequireUserPermission(GuildPermission.Administrator)]

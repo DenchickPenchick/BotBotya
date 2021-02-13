@@ -20,23 +20,30 @@ _________________________________________________________________________
 _________________________________________________________________________
 */
 
-using System;
+using System.Collections.Generic;
 
-namespace DiscordBot.Modules.FileManaging
-{
-    [Serializable]
+namespace DiscordBot.Serializable
+{    
     public class SerializableGuild
     {
         public ulong GuildId { get; set; } = 0;
         public ulong DefaultRoleId { get; set; } = 0;
-        public ulong LoggerId { get; set; } = 0;        
+        public ulong LoggerId { get; set; } = 0;
+        public int MaxWarns { get; set; } = 5;
+        public bool KickForWarns { get; set; } = false;
+        public bool BanForWarns { get; set; } = false;
+        public bool WarnsForBadWords { get; set; } = false;
+        public bool WarnsForInviteLink { get; set; } = false;
         public bool HelloMessageEnable { get; set; } = false;        
         public bool CheckingContent { get; set; } = false;
         public bool UnknownCommandMessage { get; set; } = false;
         public bool GuildNotifications { get; set; } = false;
+        public bool CheckingBadWords { get; set; } = false;
         public string HelloMessage { get; set; } = null;        
         public string EmojiOfRoom { get; set; } = "🎤";
         public string Prefix { get; set; } = "!";
+        public List<string> BadWords { get; set; } = new List<string>();
+        public List<(ulong, int)> BadUsers { get; set; } = new List<(ulong, int)>();
         public SerializableCategories SystemCategories { get; set; } = new SerializableCategories();
         public SerializableChannels SystemChannels { get; set; } = new SerializableChannels();
     }

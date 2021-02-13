@@ -23,7 +23,8 @@ _________________________________________________________________________
 using Discord;
 using Discord.WebSocket;
 using System.Threading.Tasks;
-using DiscordBot.Modules.FileManaging;
+using System;
+using DiscordBot.Serializable;
 
 namespace DiscordBot.Providers
 {
@@ -48,14 +49,21 @@ namespace DiscordBot.Providers
 
         public async Task SendHelloMessageToGuild(DiscordSocketClient client)
         {
-            await Guild.DefaultChannel.SendMessageAsync(embed: new EmbedBuilder
+            try
             {
-                Title = $"👋 Спасибо, что пригласили меня на сервер {Guild.Name} 👋",
-                Description = $"Меня зовут {client.CurrentUser.Username}. Я много что умею! Пропиши `!Хелп`, чтобы узнать мой функционал.\n" +
-                $"🤖 *Мой сайт:* https://botbotya.ru 🤖\n" +
-                $"🤖 *GitHub:* https://github.com/DenchickPenchick/BotBotya 🤖",
-                Color = Color.Blue
-            }.Build());
+                await Guild.DefaultChannel.SendMessageAsync(embed: new EmbedBuilder
+                {
+                    Title = $"👋 Спасибо, что пригласили меня на сервер {Guild.Name} 👋",
+                    Description = $"Меня зовут {client.CurrentUser.Username}. Я много что умею! Пропиши `!Хелп`, чтобы узнать мой функционал.\n" +
+                    $"🤖 *Мой сайт:* https://botbotya.ru 🤖\n" +
+                    $"🤖 *GitHub:* https://github.com/DenchickPenchick/BotBotya 🤖",
+                    Color = Color.Blue
+                }.Build());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ex: {ex}");
+            }
         }                        
 
         public bool ExistChannelByName(SocketGuildChannel channel)

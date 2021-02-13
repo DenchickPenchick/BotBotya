@@ -22,7 +22,6 @@ _________________________________________________________________________
 
 using Discord;
 using Discord.WebSocket;
-using DiscordBot.Modules.FileManaging;
 using DiscordBot.Serializable;
 using DiscordBot.Serializable.SerializableActions;
 using System;

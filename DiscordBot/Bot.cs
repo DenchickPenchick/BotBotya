@@ -91,7 +91,7 @@ namespace DiscordBot
             {
                 DiscordSocketClient = Client,
                 RoomModule = new RoomModule(Client),
-                ContentModule = new ContentModule(Client),
+                ContentModule = new ContentModule(Client, Commands),
                 FileModule = new FilesModule(this),
                 GuildModule = new GuildModule(Client),
                 NotificationsModule = new LogModule(Client),
@@ -161,7 +161,7 @@ namespace DiscordBot
                                     await context.Channel.SendMessageAsync($"Неизвестная команда. Пропиши команду {serGuild.Prefix}Хелп.");
                                 break;
                             case CommandError.ParseFailed:
-                                await context.Channel.SendMessageAsync("Навеверное ты неправильно ввел данные.");
+                                await context.Channel.SendMessageAsync("Наверное ты неправильно ввел данные.");
                                 break;
                             case CommandError.BadArgCount:
                                 await context.Channel.SendMessageAsync("Ты указал либо больше, либо меньше параметров чем нужно.");

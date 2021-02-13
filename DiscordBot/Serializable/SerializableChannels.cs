@@ -22,7 +22,7 @@ _________________________________________________________________________
 
 using System;
 
-namespace DiscordBot.Modules.FileManaging
+namespace DiscordBot.Serializable
 {
     [Serializable]
     public class SerializableChannels

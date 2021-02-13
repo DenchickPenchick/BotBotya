@@ -21,6 +21,7 @@ _________________________________________________________________________
 */
 
 using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
@@ -336,7 +337,7 @@ namespace DiscordBot.MusicOperations
                 int s = player.Track.Position.Seconds;
                 double st = player.Track.Position.TotalSeconds;
                 double part = st / player.Track.Duration.TotalSeconds;
-                if(message != null)
+                if (message != null)
                     await message.ModifyAsync(x => x.Embed = new Optional<Embed>(new EmbedBuilder
                     {
                         Title = $"Плеер сервера {guild.Name}",
@@ -365,7 +366,38 @@ namespace DiscordBot.MusicOperations
                 {
                     if (player.Track == null)
                         break;
-                    await UpdatePlayer.Invoke(Guild);
+                    try
+                    {
+                        var message = PlayersMessagesCollection[Guild];                        
+                        int h = player.Track.Position.Hours;
+                        int m = player.Track.Position.Minutes;
+                        int s = player.Track.Position.Seconds;
+                        double st = player.Track.Position.TotalSeconds;
+                        double part = st / player.Track.Duration.TotalSeconds;
+                        if (message != null)
+                            await message.ModifyAsync(x => x.Embed = new Optional<Embed>(new EmbedBuilder
+                            {
+                                Title = $"Плеер сервера {Guild.Name}",
+                                Description = player.Track.Title,
+                                Color = Color.Blue,
+                                Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url },
+                                Footer = new EmbedFooterBuilder
+                                {
+                                    Text = $"{(h < 10 ? $"0{h}" : h.ToString())}:{(m < 10 ? $"0{m}" : m.ToString())}:{(s < 10 ? $"0{s}" : s.ToString())} {(part >= 0 && part < 0.2 ? "◯" : "─")}{(part >= 0.2 && part < 0.3 ? "◯" : "─")}{(part >= 0.3 && part < 0.4 ? "◯" : "─")}{(part >= 0.4 && part < 0.5 ? "◯" : "─")}{(part >= 0.5 && part < 0.6 ? "◯" : "─")}{(part >= 0.6 && part < 0.7 ? "◯" : "─")}{(part >= 0.7 && part < 0.8 ? "◯" : "─")}{(part >= 0.8 && part < 0.9 ? "◯" : "─")}{(part >= 0.9 && part < 0.95 ? "◯" : "─")}{(part >= 0.95 ? "◯" : "─")}"
+                                }
+                            }.Build()));
+                    }
+                    catch (HttpException ex)
+                    {
+                        if (ex.DiscordCode == 50001)
+                        {
+                            Thread.Sleep(-1);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Ex: {ex}");
+                    }
                     Thread.Sleep(TimeSpan.FromSeconds(5));
                 }
             }
