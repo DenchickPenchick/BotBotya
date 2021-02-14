@@ -73,9 +73,9 @@ namespace DiscordBot.Modules.ContentManaging
                         commandsNames.Add(command.Name.ToLower());
                         for (int i = 1; i < command.Aliases.Count; i++)
                             commandsNames.Add(command.Aliases[i].ToLower());
-                    }                    
+                    }
 
-                    if ((prefix && !commandsNames.Contains(str.ToLower())) 
+                    if ((prefix && !commandsNames.Contains(str.ToLower()))
                         || !prefix)
                     {
                         Filter filter = new Filter(arg.Content, serGuild);
@@ -91,7 +91,7 @@ namespace DiscordBot.Modules.ContentManaging
                             if (res == Filter.Result.Words)
                             {
                                 if (serGuild.WarnsForBadWords)
-                                { 
+                                {
                                     int warns;
                                     if (!badUsersIds.Contains(user.Id))
                                     {
@@ -100,44 +100,52 @@ namespace DiscordBot.Modules.ContentManaging
                                     }
                                     else
                                     {
-                                        serGuild.BadUsers[badUsersIds.IndexOf(user.Id)] = (user.Id, serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2 + 1);
+                                        serGuild.BadUsers[badUsersIds.IndexOf(user.Id)] = (user.Id,
+                                            serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2 + 1);
                                         warns = serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2;
                                     }
-                                    await arg.Channel.SendMessageAsync($"{user.Mention}, на этом сервере запрещен мат." +
+                                    await arg.Channel.SendMessageAsync($"{user.Mention}, на этом сервере запрещены такие слова." +
                                         $"{(serGuild.WarnsForBadWords == true ? $"\nКоличество предупреждений: ${warns}" : null)}");
                                     if (warns > serGuild.MaxWarns)
                                     {
-                                        if (serGuild.KickForWarns || serGuild.BanForWarns) 
-                                        {
-                                            var channel = await user.GetOrCreateDMChannelAsync();                                        
+                                        if (serGuild.KickForWarns || serGuild.BanForWarns)
+                                        { 
+                                            var channel = await user.GetOrCreateDMChannelAsync();
                                             await channel.SendMessageAsync(embed: new EmbedBuilder
                                             {
                                                 Title = serGuild.KickForWarns == true ? $"Ты кикнут с сервера {user.Guild.Name}" : $"Ты забанен на сервере {user.Guild.Name}",
                                                 Description = $"Ты  {(serGuild.KickForWarns == true ? "кикнут" : "забанен")} из-за нарушений правил сервера, а именно за употребление запрещенных на сервере слов. " +
-                                                $"Ты превысил лимит предупреждений ({serGuild.MaxWarns}).\n" +
-                                                $"Сообщение из-за которого тебя выгнали:\n" +
-                                                $"`{arg.Content}`",
+                                                              $"Ты превысил лимит предупреждений ({serGuild.MaxWarns}).\n" +
+                                                              $"Сообщение из-за которого тебя выгнали:\n" +
+                                                              $"`{arg.Content}`",
                                                 Color = Color.Blue,
                                                 ThumbnailUrl = user.Guild.IconUrl
                                             }.Build());
-                                        }
 
-                                        await user.KickAsync();
+                                            if (serGuild.KickForWarns)
+                                            {
+                                                await arg.Channel.SendMessageAsync("KICK");
+                                                // await user.KickAsync();                                        
+                                            }
+                                            else if(serGuild.BanForWarns)
+                                            {
+                                                await arg.Channel.SendMessageAsync("BAN");
+                                                // await user.BanAsync();                                        
+                                            }
+                                        }
                                     }
                                 }                                
                                 await arg.DeleteAsync();
 
-
                                 FilesProvider.RefreshGuild(serGuild);
                             }
-
                         }
                     }
                 }
                 if (serGuild.CheckingContent
                     && guild.GetTextChannel(serGuild.SystemChannels.LinksChannelId) != null
                     && guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId) != null)
-                {                
+                {
                     var provider = new GuildProvider(guild);
                     var linksChannel = provider.LinksTextChannel();
                     var videosChannel = provider.VideosTextChannel();
@@ -214,9 +222,9 @@ namespace DiscordBot.Modules.ContentManaging
 
                 }
             }
-            
+
         }
-        #region --АЛГОРИТМ ПО ИЗВЛЕЧЕНИБ ССЫЛОК ИЗ СООБЩЕНИЯ
+        #region --АЛГОРИТМ ПО ИЗВЛЕЧЕНИЮ ССЫЛОК ИЗ СООБЩЕНИЯ
         private List<Uri> GetUrisFromMessage(SocketMessage message)
         {
             List<Uri> uris = new List<Uri>();

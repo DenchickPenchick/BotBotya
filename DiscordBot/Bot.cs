@@ -198,6 +198,7 @@ namespace DiscordBot
         private async Task RegisterCommandsAsync()
         {
             Commands.AddTypeReader<Emoji>(new EmojiTypeReader());
+            Commands.AddTypeReader<Color>(new ColorTypeReader());
             await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), Services);                                   
             Client.MessageReceived += HandleCommandAsync;
         }
@@ -209,18 +210,25 @@ namespace DiscordBot
                 int index = 0;
                 while (true)
                 {
-                    switch (index)
+                    try
                     {
-                        case 0:
-                            await Client.SetGameAsync("https://botbotya.ru", "https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991", ActivityType.CustomStatus);
-                            index++;
-                            break;
-                        case 1:
-                            await Client.SetGameAsync($"{Client.Guilds.Count} серверах", "https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991", ActivityType.CustomStatus);
-                            index = 0;
-                            break;
+                        switch (index)
+                        {
+                            case 0:
+                                await Client.SetGameAsync("https://botbotya.ru", "https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991", ActivityType.CustomStatus);
+                                index++;
+                                break;
+                            case 1:
+                                await Client.SetGameAsync($"{Client.Guilds.Count} серверах", "https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991", ActivityType.CustomStatus);
+                                index = 0;
+                                break;
+                        }
+                        Thread.Sleep(TimeSpan.FromSeconds(30));
                     }
-                    Thread.Sleep(TimeSpan.FromSeconds(30));
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Ex: {ex}");
+                    }
                 }
             }).Start();            
         }

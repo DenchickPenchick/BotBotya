@@ -217,7 +217,7 @@ namespace TestBot
         [Command("ДобавитьБота")]
         [StandartCommand]
         [Alias("Добавить")]
-        [Summary("получает ссылку-приглашение меня на твоей сервер")]
+        [Summary("получает ссылку-приглашение меня на твой сервер")]
         public async Task InviteLink()
         {
             await ReplyAsync("*Перейди по ссылке и пригласи меня*\n https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991");
@@ -1031,64 +1031,6 @@ namespace TestBot
             await ReplyAsync($"Никнейм бота изменен с {prevName} на {name}");
         }
 
-        [Command("СконфигурироватьСервер")]
-        [RequireUserPermission(GuildPermission.ManageGuild)]
-        [CustomisationCommand]
-        [Summary("конфигурирует сервер с соответствующим XML файлом")]
-        public async Task ConfigureGuild()
-        {
-            Compiler compiler = new Compiler(Compiler.CompilerTypeEnum.Guild);
-            WebClient webClient = new WebClient();
-            if (Context.Message.Attachments.Count > 0)
-            {
-                var attachedFile = Context.Message.Attachments.ToArray()[0];
-                if (Path.GetExtension(attachedFile.Filename) == ".xml")
-                {
-                    XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
-                    bool deserializable = serializer.CanDeserialize(new XmlTextReader(webClient.OpenRead(attachedFile.Url)));
-                    if (deserializable)
-                    {
-                        try
-                        {
-                            var serGuild = (SerializableGuild)serializer.Deserialize(webClient.OpenRead(attachedFile.Url));
-                            var res = compiler.Result(Context.Guild, Context.Message);
-                            await ReplyAsync(embed: res);
-                            if (res.Color != Color.Red)
-                            {
-                                serGuild.GuildId = Context.Guild.Id;
-                                FilesProvider.RefreshGuild(serGuild);
-                                await ReplyAsync("Сервер успешно сконфигурирован");
-                            }
-                        }
-                        catch
-                        {
-                            await ReplyAsync(embed: new CompilerEmbed
-                            {
-                                Errors = new List<ErrorField>
-                            {
-                            new ErrorField("Нарушена типовая структура сервера. Возможный вариант решения проблемы: проверьте написание команд, тегов и т.д.")
-                            }
-                            }.Build());
-                        }
-                    }
-                    else
-                        await ReplyAsync("Неправильно сформирован файл");
-                }
-                else
-                    await ReplyAsync("Неверный формат файла");
-            }
-            else
-                await ReplyAsync("Не могу найти файл в твоем сообщении.");
-        }
-
-        [Command("ФайлКонфигурации")]
-        [CustomisationCommand]
-        [Summary("возвращает XML файл конфигурации сервера")]
-        public async Task GetConfigFile()
-        {
-            await Context.Channel.SendFileAsync($"{FilesProvider.GetBotDirectoryPath()}/BotGuilds/{Context.Guild.Id}.xml", $"Файл конфигурации сервера {Context.Guild.Name}");
-        }
-
         [RequireUserPermission(GuildPermission.ManageRoles)]
         [CustomisationCommand]
         [Command("ДобавитьРольПоумолчанию", RunMode = RunMode.Async)]
@@ -1291,6 +1233,37 @@ namespace TestBot
                 await ReplyAsync("Не могу найти слова в сообщении.");
         }
 
+        [Command("НаказаниеЗаНарушения")]
+        [CustomisationCommand]
+        [Summary("устанавливает наказание за превышение количества предупреждений.")]
+        public async Task AddPunishmentForBadWords(string punishment)
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            switch (punishment.ToLower())
+            {
+                case "кик":
+                    serGuild.KickForWarns = true;
+                    serGuild.BanForWarns = false;
+                    break;
+                case "бан":
+                    serGuild.KickForWarns = false;
+                    serGuild.BanForWarns = true;
+                    break;
+                case "нет":
+                    serGuild.KickForWarns = false;
+                    serGuild.BanForWarns = false;
+                    break;
+                default:
+                    await ReplyAsync("Ты неверно указал наказание. Вот тебе 2 типа наказаний:\n1.`Кик`\n2.`Бан`\nЕсли ты хочешь отменить наказания, тогда напиши `Нет` в качестве аргумента.");
+                    return;                    
+            }
+
+            FilesProvider.RefreshGuild(serGuild);
+
+            await ReplyAsync("Наказание успешно установлено.");   
+        }
+
         [RequireUserPermission(GuildPermission.Administrator)]
         [Command("Уведомления", RunMode = RunMode.Async)]
         [Alias("Логирование", "Лог")]
@@ -1396,6 +1369,15 @@ namespace TestBot
                 await ReplyAsync("Теперь я не буду присылать уведомление о неправильной команде.");
 
             FilesProvider.RefreshGuild(serGuild);
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("ЦветЕмбеда")]
+        [CustomisationCommand]
+        [Summary("устанавливает цвет эмбеда")]
+        public async Task ChangeEmbedColor(Color color)
+        { 
+        
         }
         #endregion        
         
