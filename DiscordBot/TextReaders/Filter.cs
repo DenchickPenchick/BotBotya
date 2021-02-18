@@ -71,37 +71,42 @@ namespace DiscordBot.TextReaders
             }
         }
 
-        public int Distance(string firstWord, string secondWord)
+        public static int Distance(string firstWord, string secondWord)
         {
             firstWord = firstWord.ToLower();
             secondWord = secondWord.ToLower();
-            const int deleteCost = 2, insertCost = 1;
-            int n = firstWord.Length + 1;
-            int m = secondWord.Length + 1;
-            int[,] matrix = new int[n, m];
+            var n = firstWord.Length + 1;
+            var m = secondWord.Length + 1;
+            var matrixD = new int[n, m];
 
-            for (int i = 0; i < n; i++)
-                matrix[i, 0] = i;
+            const int deletionCost = 1;
+            const int insertionCost = 1;
 
-            for (int i = 0; i < m; i++)
-                matrix[0, i] = i;
-
-
-            for (int i = 1; i < n; i++)
+            for (var i = 0; i < n; i++)
             {
-                for (int j = 1; j < m; j++)
+                matrixD[i, 0] = i;
+            }
+
+            for (var j = 0; j < m; j++)
+            {
+                matrixD[0, j] = j;
+            }
+
+            for (var i = 1; i < n; i++)
+            {
+                for (var j = 1; j < m; j++)
                 {
-                    int substitutionCost = firstWord[i - 1] == secondWord[j - 1] ? 0 : 1;
-                    matrix[i, j] = Minimum(
-                        matrix[i - 1, j] + deleteCost,
-                        matrix[i, j - 1] + insertCost,
-                        matrix[i - 1, j - 1] + substitutionCost);
+                    var substitutionCost = firstWord[i - 1] == secondWord[j - 1] ? 0 : 1;
+
+                    matrixD[i, j] = Minimum(matrixD[i - 1, j] + deletionCost,          
+                                            matrixD[i, j - 1] + insertionCost,         
+                                            matrixD[i - 1, j - 1] + substitutionCost); 
                 }
             }
 
-            return matrix[n - 1, m - 1];
+            return matrixD[n - 1, m - 1];
         }
 
-        private int Minimum(int a, int b, int c) => (a = a < b ? a : b) < c ? a : c;
+        private static int Minimum(int a, int b, int c) => (a = a < b ? a : b) < c ? a : c;
     }
 }

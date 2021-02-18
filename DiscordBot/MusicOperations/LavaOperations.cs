@@ -23,6 +23,7 @@ _________________________________________________________________________
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
+using DiscordBot.Providers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,6 +54,7 @@ namespace DiscordBot.MusicOperations
         {
             var voiceState = user.VoiceState;            
             var channel = voiceState.Value.VoiceChannel;
+            var serGuild = FilesProvider.GetGuild(user.Guild);
 
             if (channel == null)
                 await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NotConnected));
@@ -63,7 +65,7 @@ namespace DiscordBot.MusicOperations
                 await contextChannel.SendMessageAsync(embed: new EmbedBuilder
                 {
                     Title = $"Подключен к каналу {channel.Name}",
-                    Color = Color.Blue
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                 }.Build());
             }
             catch (Exception ex)
@@ -78,11 +80,12 @@ namespace DiscordBot.MusicOperations
             {
                 if (user.Guild.CurrentUser.VoiceChannel != null)
                 {
+                    var serGuild = FilesProvider.GetGuild(user.Guild);
                     await LavaNode.LeaveAsync(user.Guild.CurrentUser.VoiceChannel);
                     await contextChannel.SendMessageAsync(embed: new EmbedBuilder
                     {
                         Title = $"Покинул канал {user.Guild.CurrentUser.VoiceChannel.Name}",
-                        Color = Color.Blue
+                        Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                     }.Build());
                 }
                 else
@@ -234,6 +237,7 @@ namespace DiscordBot.MusicOperations
         {
             try
             {
+                var serGuild = FilesProvider.GetGuild(user.Guild);
                 ushort conv = (ushort)(vol * ushort.MaxValue / 100);
 
                 var hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
@@ -243,7 +247,7 @@ namespace DiscordBot.MusicOperations
                 await contextChannel.SendMessageAsync(embed: new EmbedBuilder
                 {
                     Description = $"Текущая громкость: {vol}%",
-                    Color = Color.Blue
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                 }.Build());
                 await UpdatePlayer.Invoke(user.Guild);
             }
@@ -291,6 +295,7 @@ namespace DiscordBot.MusicOperations
             try
             {
                 var guild = player.VoiceChannel.Guild;
+                var serGuild = FilesProvider.GetGuild(guild);
                 int h = player.Track.Position.Hours;
                 int m = player.Track.Position.Minutes;
                 int s = player.Track.Position.Seconds;
@@ -299,7 +304,7 @@ namespace DiscordBot.MusicOperations
                 {
                     Title = $"Плеер сервера {guild.Name}",
                     Description = player.Track.Title,                    
-                    Color = Color.Blue,
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild),
                     Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url },
                     Footer = new EmbedFooterBuilder
                     {
@@ -330,6 +335,7 @@ namespace DiscordBot.MusicOperations
         {
             try
             {
+                var serGuild = FilesProvider.GetGuild(guild);
                 var message = PlayersMessagesCollection[guild];
                 var player = LavaNode.GetPlayer(guild);
                 int h = player.Track.Position.Hours;
@@ -342,7 +348,7 @@ namespace DiscordBot.MusicOperations
                     {
                         Title = $"Плеер сервера {guild.Name}",
                         Description = player.Track.Title,
-                        Color = Color.Blue,
+                        Color = ColorProvider.GetColorForCurrentGuild(serGuild),
                         Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url },
                         Footer = new EmbedFooterBuilder
                         {
@@ -368,6 +374,7 @@ namespace DiscordBot.MusicOperations
                         break;
                     try
                     {
+                        var serGuild = FilesProvider.GetGuild(Guild);
                         var message = PlayersMessagesCollection[Guild];                        
                         int h = player.Track.Position.Hours;
                         int m = player.Track.Position.Minutes;
@@ -379,7 +386,7 @@ namespace DiscordBot.MusicOperations
                             {
                                 Title = $"Плеер сервера {Guild.Name}",
                                 Description = player.Track.Title,
-                                Color = Color.Blue,
+                                Color = ColorProvider.GetColorForCurrentGuild(serGuild),
                                 Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url },
                                 Footer = new EmbedFooterBuilder
                                 {

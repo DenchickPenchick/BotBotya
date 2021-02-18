@@ -33,7 +33,7 @@ namespace DiscordBot.Providers
 {
     public static class FilesProvider
     {
-        public static string GetHelloText(SocketGuild guild) => GetGuild(guild).HelloMessage;
+        public static string GetHelloText(IGuild guild) => GetGuild(guild).HelloMessage;
 
         public static string GetBotDirectoryPath()
         {
@@ -41,7 +41,7 @@ namespace DiscordBot.Providers
             return JsonSerializer.Deserialize<SerializableConfig>(reader.ReadToEnd()).Path;
         }
 
-        public static SerializableGuild GetGuild(SocketGuild guild)
+        public static SerializableGuild GetGuild(IGuild guild)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
             using FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/BotGuilds/{guild.Id}.xml", FileMode.Open);

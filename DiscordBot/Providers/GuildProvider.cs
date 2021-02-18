@@ -25,13 +25,14 @@ using Discord.WebSocket;
 using System.Threading.Tasks;
 using System;
 using DiscordBot.Serializable;
+using System.Collections.Generic;
 
 namespace DiscordBot.Providers
 {
     public class GuildProvider
     {
         public SocketGuild Guild { get; }
-        private SerializableGuild SerializableGuild { get => FilesProvider.GetGuild(Guild);}
+        public SerializableGuild SerializableGuild { get => FilesProvider.GetGuild(Guild);}
 
         public GuildProvider(SocketGuild guild)
         {            
@@ -45,8 +46,7 @@ namespace DiscordBot.Providers
         public SocketCategoryChannel ContentCategoryChannel() => Guild.GetCategoryChannel(SerializableGuild.SystemCategories.ContentCategoryId);                
 
         public enum GetCategoryIdEnum { MainVoiceChannelsCategory, RoomVoiceChannelsCategory, MainTextChannelsCategory, ContentChannelsCategory, BotChannelsCategory }
-        
-
+                
         public async Task SendHelloMessageToGuild(DiscordSocketClient client)
         {
             try
@@ -64,7 +64,69 @@ namespace DiscordBot.Providers
             {
                 Console.WriteLine($"Ex: {ex}");
             }
-        }                        
+        }
+
+        public void SetWarns(IUser user, int warns)
+        {
+            var serGuild = SerializableGuild;
+            List<ulong> ids = new List<ulong>();            
+            foreach (var bad in serGuild.BadUsers)
+                ids.Add(bad.Item1);
+            int index = ids.IndexOf(user.Id);
+
+            if (index >= 0 && warns > 0)
+                serGuild.BadUsers[index] = (user.Id, warns);            
+            else
+                serGuild.BadUsers.Add((user.Id, warns));
+
+            FilesProvider.RefreshGuild(serGuild);
+        }
+
+        public void PlusWarns(IUser user, int count)
+        {
+            var serGuild = SerializableGuild;
+            List<ulong> ids = new List<ulong>();
+            foreach (var bad in serGuild.BadUsers)
+                ids.Add(bad.Item1);
+            int index = ids.IndexOf(user.Id);
+
+            if (index >= 0)
+                serGuild.BadUsers[index] = (user.Id, serGuild.BadUsers[index].Item2 + count);
+            else
+                serGuild.BadUsers.Add((user.Id, count));
+
+            FilesProvider.RefreshGuild(serGuild);
+        }
+
+        public void MinusWarns(IUser user, int count)
+        {
+            var serGuild = SerializableGuild;
+            List<ulong> ids = new List<ulong>();
+            foreach (var bad in serGuild.BadUsers)
+                ids.Add(bad.Item1);
+            int index = ids.IndexOf(user.Id);
+
+            if (index >= 0)
+                if(serGuild.BadUsers[index].Item2 - count >= 0)
+                    serGuild.BadUsers[index] = (user.Id, serGuild.BadUsers[index].Item2 - count);
+            else
+                serGuild.BadUsers.Add((user.Id, count));
+
+            FilesProvider.RefreshGuild(serGuild);
+        }
+
+        public (ulong, int) GetBadUser(IUser user)
+        {
+            var serGuild = SerializableGuild;
+            List<ulong> ids = new List<ulong>();
+            foreach (var bad in serGuild.BadUsers)
+                ids.Add(bad.Item1);
+            int index = ids.IndexOf(user.Id);
+            if (index >= 0)
+                return (serGuild.BadUsers[index].Item1, serGuild.BadUsers[index].Item2);
+            else
+                return (0, 0);
+        }
 
         public bool ExistChannelByName(SocketGuildChannel channel)
         {

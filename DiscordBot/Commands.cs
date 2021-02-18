@@ -82,10 +82,14 @@ namespace TestBot
                 CommandCategoryAttribute categoryAttribute;
 
                 string aliases = "\nПсевдонимы:";
+                string parameters = "\nПараметры";
 
                 foreach (string alias in command.Aliases)
                     if (alias != command.Name)
                         aliases += $" `{alias}`";
+
+                foreach (var param in command.Parameters)
+                    parameters += $" `{param.Name}`";
 
                 if (command.Attributes.Contains(new StandartCommandAttribute()))
                     categoryAttribute = new StandartCommandAttribute();
@@ -100,21 +104,21 @@ namespace TestBot
                 else
                     categoryAttribute = new StandartCommandAttribute();
 
-                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Aliases.Count > 0 ? aliases : null)}".Length >= 250)
+                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 0 ? aliases : null)}".Length >= 250)
                 {
                     if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName)
                         posit = 1;
 
-                    pages.Add($"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Aliases.Count > 0 ? aliases : null)}");
+                    pages.Add($"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 0 ? aliases : null)}");
                     pos++;
                 }
                 else if (catpos == 0)
                 {
-                    pages[0] += $"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Aliases.Count > 0 ? aliases : null)}";
+                    pages[0] += $"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 0 ? aliases : null)}";
                     catpos++;
                 }
                 else
-                    pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Aliases.Count > 0 ? aliases : null)}";
+                    pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 0 ? aliases : null)}";
                 prevCategoryAttribute = categoryAttribute;
             }
             if (page > 0)
@@ -124,14 +128,14 @@ namespace TestBot
                     {
                         Title = "Справка по командам",
                         Description = pages.Last(),
-                        Color = Color.Blue
+                        Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                     }.Build());
                 else
                     await ReplyAsync(embed: new EmbedBuilder
                     {
                         Title = "Справка по командам",
                         Description = pages[page - 1],
-                        Color = Color.Blue
+                        Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                     }.Build());
             }
             else
@@ -139,7 +143,7 @@ namespace TestBot
                 {
                     Title = "Справка по командам",
                     Pages = pages,
-                    Color = Color.Blue,
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild),
                     Options = new PaginatedAppearanceOptions
                     {
                         Jump = null,
@@ -155,6 +159,7 @@ namespace TestBot
         [Summary("позволяет узнать мои статистику")]
         public async Task Info()
         {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
             var client = Bot.Client;
 
             int members = 0;
@@ -166,7 +171,7 @@ namespace TestBot
             {
                 Title = "Статистика бота",
                 Description = $"Я сейчас нахожусь на {client.Guilds.Count} серверах.\nМною пользуются {members} человек.",
-                Color = Color.Blue,
+                Color = ColorProvider.GetColorForCurrentGuild(serGuild),
                 ThumbnailUrl = client.CurrentUser.GetAvatarUrl()
             }.Build());
         }
@@ -226,34 +231,35 @@ namespace TestBot
         [Command("Жалоба", RunMode = RunMode.Async)]
         [StandartCommand]
         [Summary("отпраляет жалобу на участника сервера.")]
-        public async Task ReportUser(SocketGuildUser user, params string[] reasonArray)
+        public async Task ReportUser(SocketGuildUser user, params string[] reason)
         {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
             if (Context.User.Id != user.Id)
             {
-                string reason = null;
+                string reasonForm = null;
 
-                for (int i = 0; i < reasonArray.Length; i++)
+                for (int i = 0; i < reason.Length; i++)
                 {
                     if (i > 0)
-                        reason += $" {reasonArray[i]}";
+                        reasonForm += $" {reason[i]}";
                     else if (i == 0)
-                        reason += reasonArray[i];
+                        reasonForm += reason[i];
                 }
 
                 var embedToAdmin = new EmbedBuilder
                 {
                     Title = $"Поступила жалоба на участника {user.Username}",
-                    Description = $"**Причина:**\n`{reason}`",
+                    Description = $"**Причина:**\n`{reasonForm}`",
                     ThumbnailUrl = user.GetAvatarUrl(),
-                    Color = Color.Blue
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                 }.Build();
 
                 var embedToReportedUser = new EmbedBuilder
                 {
                     Title = $"На тебя поступила жалоба от {Context.User.Username}",
-                    Description = $"**Причина:**\n`{reason}`",
+                    Description = $"**Причина:**\n`{reasonForm}`",
                     ThumbnailUrl = Context.User.GetAvatarUrl(),
-                    Color = Color.Blue
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                 }.Build();
 
                 await Context.Guild.Owner.GetOrCreateDMChannelAsync().Result.SendMessageAsync(embed: embedToAdmin);
@@ -265,8 +271,7 @@ namespace TestBot
 
         [RequireUserPermission(GuildPermission.KickMembers)]
         [Command("Кик")]
-        [StandartCommand]
-        [Alias("К")]
+        [StandartCommand]        
         [Summary("позволяет кикнуть пользователя с сервера.")]
         public async Task Kick(SocketGuildUser user)
         {
@@ -374,6 +379,7 @@ namespace TestBot
         [Summary("делает рассылку сообщений всем участникам сервера")]
         public async Task SendMessages(params string[] mess)
         {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
             string message = null;
             string noMessageToUsers = null;
 
@@ -404,8 +410,83 @@ namespace TestBot
                 {
                     Title = "Список кому не дошло сообщение",
                     Description = noMessageToUsers,
-                    Color = Color.Blue
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                 }.Build());
+        }
+
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Command("СнятьПредупреждения")]
+        [Alias("Амнистия")]
+        [Summary("снимает предупреждения с участника сервера")]
+        public async Task NoWarns(SocketGuildUser user)
+        {
+            var provider = new GuildProvider(Context.Guild);
+
+            provider.SetWarns(user, 0);
+
+            await ReplyAsync($"Предупреждения с {user.Mention} сняты.");
+        }
+
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Command("УстановитьПредупреждения")]        
+        [Summary("установливает предупреждения у участника сервера")]
+        public async Task SetWarns(SocketGuildUser user, int warns)
+        {
+            var provider = new GuildProvider(Context.Guild);                        
+
+            provider.SetWarns(user, warns);
+
+            await ReplyAsync($"Установлено.");
+        }
+
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Command("ДобавитьПредупреждения")]
+        [Summary("добавляет предупреждения участнику сервера.")]
+        public async Task PlusWarns(SocketGuildUser user, int count)
+        {   
+            var provider = new GuildProvider(Context.Guild);
+
+            provider.PlusWarns(user, count);
+
+            await ReplyAsync($"Добавлено.");
+        }
+
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Command("УбратьПредупреждения")]
+        [Summary("добавляет предупреждения участнику сервера.")]
+        public async Task MinusWarns(SocketGuildUser user, int count)
+        {
+            var provider = new GuildProvider(Context.Guild);
+
+            provider.MinusWarns(user, count);
+
+            await ReplyAsync($"Добавлено.");
+        }
+
+        [Command("МоиПредупреждения")]
+        [Summary("показывает количество твоих предупреждений.")]
+        public async Task MyWarns()
+        {
+            if (Context.User is SocketGuildUser user)
+            {
+                var provider = new GuildProvider(Context.Guild);
+                var bad = provider.GetBadUser(user);
+
+                if (bad.Item1 > 0)
+                    await ReplyAsync(embed: new EmbedBuilder
+                    {
+                        Title = "Предупреждения:",
+                        Description = bad.Item2.ToString(),
+                        Color = ColorProvider.GetColorForCurrentGuild(Context.Guild)
+                    }.Build());
+                else
+                    await ReplyAsync(embed: new EmbedBuilder
+                    {
+                        Title = "Предупреждения:",
+                        Description = 0.ToString(),
+                        Color = ColorProvider.GetColorForCurrentGuild(Context.Guild)
+                    }.Build());
+            }
         }
         #endregion
 
@@ -448,6 +529,7 @@ namespace TestBot
 
         #region --РОЛЬ РЕАКЦИЯ--
         [Command("ДобавитьРольЗаРеакцию")]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
         [Summary("добавляет реакцию к сообщению. После нажатия на реакцию будет выдана соответствующая роль.")]
         [StandartCommand]
         public async Task AddReaction(ulong id, SocketTextChannel channel, Emoji emoji, IRole role)
@@ -484,6 +566,7 @@ namespace TestBot
         }
 
         [Command("УдалитьРольЗаРеакцию")]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
         [Summary("удаляет \"Роль за реакцию\" у сообщения")]
         [StandartCommand]
         public async Task DeleteReaction(ulong id, Emoji emoji)
@@ -639,7 +722,7 @@ namespace TestBot
             else
                 await ReplyAsync("Не могу найти роль в сообщении.");
         }
-
+         
         [Command("КупитьРоль")]
         [RolesCommand]
         [Summary("покупает роль участнику. Ее нужно упомянуть.")]
@@ -668,6 +751,7 @@ namespace TestBot
         [Summary("позволяет увеличить баланс участника(-м) сервера (его(их) нужно упомянуть).")]
         public async Task AddBalance(int count, params SocketGuildUser[] users)
         {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
             var economProvider = new EconomicProvider(Context.Guild);
 
             string usersList = null;
@@ -687,7 +771,7 @@ namespace TestBot
                     Title = "Новый баланс участников сервера",
                     Description = usersList,
                     ThumbnailUrl = Context.Guild.IconUrl,
-                    Color = Color.Blue
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                 }.Build());
             }
             else
@@ -700,6 +784,7 @@ namespace TestBot
         [Summary("позволяет уменьшить баланс участника(-м) сервера (его(их) нужно упомянуть).")]
         public async Task MinusBalance(int count, params SocketGuildUser[] users)
         {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
             var economProvider = new EconomicProvider(Context.Guild);
 
             string usersList = null;
@@ -719,7 +804,7 @@ namespace TestBot
                     Title = "Новый баланс участников сервера",
                     Description = usersList,
                     ThumbnailUrl = Context.Guild.IconUrl,
-                    Color = Color.Blue
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                 }.Build());
             }
             else
@@ -732,6 +817,7 @@ namespace TestBot
         [Summary("позволяет установить баланс участника(-м) сервера (его(их) нужно упомянуть).")]
         public async Task SetBalance(int count, params SocketGuildUser[] users)
         {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
             var economProvider = new EconomicProvider(Context.Guild);
 
             string usersList = null;
@@ -750,7 +836,7 @@ namespace TestBot
                     Title = "Новый баланс участников сервера",
                     Description = usersList,
                     ThumbnailUrl = Context.Guild.IconUrl,
-                    Color = Color.Blue
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                 }.Build());
             }
             else
@@ -763,6 +849,7 @@ namespace TestBot
         [Summary("позволяет получить список ролей на продажу.")]
         public async Task RolesOnSale()
         {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
             var economProvider = new EconomicProvider(Context.Guild);
 
             var roles = economProvider.EconomicGuild.RolesAndCostList;
@@ -790,7 +877,7 @@ namespace TestBot
                     Title = "Роли на продажу",
                     Description = pages.First(),
                     ThumbnailUrl = Context.Guild.IconUrl,
-                    Color = Color.Blue
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                 }.Build());
             else
                 await PagedReplyAsync(new PaginatedMessage
@@ -802,7 +889,7 @@ namespace TestBot
                         Jump = null,
                         Info = null
                     },
-                    Color = Color.Blue
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                 });
         }
 
@@ -811,6 +898,7 @@ namespace TestBot
         [Summary("показывает твой баланс.")]
         public async Task GetBalance()
         {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
             var economUser = FilesProvider.GetEconomicGuildUser(Context.User as SocketGuildUser);
 
             if (economUser != null)
@@ -819,7 +907,7 @@ namespace TestBot
                 {
                     Title = $"Баланс {Context.User.Username}: {economUser.Balance}",
                     ThumbnailUrl = Context.User.GetAvatarUrl(),
-                    Color = Color.Blue
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild)
                 }.Build());
             }
             else
@@ -868,7 +956,6 @@ namespace TestBot
             else
                 await ReplyAsync("Ты не можешь поставить ставку, т.к. у тебя недостаточно средств.");
         }
-
         #endregion
 
         #region --КАСТОМНЫЕ КОМАНДЫ--
@@ -877,6 +964,7 @@ namespace TestBot
         [Summary("выводит все кастомные команды.")]
         public async Task GetAllCustomCommands()
         {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
             var guild = Context.Guild;
             var serial = new CustomCommandsSerial(guild);
             var commands = serial.GetCustomCommands();
@@ -911,7 +999,7 @@ namespace TestBot
             {
                 Title = $"Кастомные команды сервера {Context.Guild.Name}",
                 Description = allComm,
-                Color = Color.Blue
+                Color = ColorProvider.GetColorForCurrentGuild(serGuild)
             }.Build());
         }
 
@@ -987,28 +1075,6 @@ namespace TestBot
         #endregion
 
         #region --КАСТОМИЗАЦИЯ--
-        [Command("Конфигурация")]
-        [CustomisationCommand]
-        [Summary("получает конфигурацию сервера.")]
-        public async Task GetGuildConfig()
-        {
-            var serGuild = FilesProvider.GetGuild(Context.Guild);
-            var links = Context.Guild.GetTextChannel(serGuild.SystemChannels.LinksChannelId);
-            var videos = Context.Guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId);
-            var rooms = Context.Guild.GetVoiceChannel(serGuild.SystemCategories.VoiceRoomsCategoryId);
-
-            await ReplyAsync(embed: new EmbedBuilder
-            {
-                Title = $"Конфигурация сервера {Context.Guild.Name}",
-                Description = $"Приветственные сообщения: {(serGuild.HelloMessageEnable == true ? "Включены" : "Выключены")}\n" +
-                $"{(serGuild.HelloMessage != null && serGuild.HelloMessageEnable == true ? $"Текст приветственного сообщения: {serGuild.HelloMessage}\n" : null)}" +
-                $"{(links == null && videos == null ? null : $"Каналы контента: {links?.Mention} {videos?.Mention}")}\n" +
-                $"{(rooms == null ? null : $"Категория с комнатами: {rooms.Name}")}",
-                Color = Color.Blue,
-                ImageUrl = Context.Guild.IconUrl
-            }.Build());
-        }
-
         [Command("ПоменятьНикнеймБота")]
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [CustomisationCommand]
@@ -1245,24 +1311,32 @@ namespace TestBot
                 case "кик":
                     serGuild.KickForWarns = true;
                     serGuild.BanForWarns = false;
+                    serGuild.MuteForWarns = false;
                     break;
                 case "бан":
                     serGuild.KickForWarns = false;
                     serGuild.BanForWarns = true;
+                    serGuild.MuteForWarns = false;
+                    break;
+                case "мут":
+                    serGuild.KickForWarns = false;
+                    serGuild.BanForWarns = false;
+                    serGuild.MuteForWarns = true;
                     break;
                 case "нет":
                     serGuild.KickForWarns = false;
                     serGuild.BanForWarns = false;
+                    serGuild.MuteForWarns = false;
                     break;
                 default:
-                    await ReplyAsync("Ты неверно указал наказание. Вот тебе 2 типа наказаний:\n1.`Кик`\n2.`Бан`\nЕсли ты хочешь отменить наказания, тогда напиши `Нет` в качестве аргумента.");
+                    await ReplyAsync("Ты неверно указал наказание. Вот тебе 3 типа наказаний:\n1. `Кик`\n2. `Бан`\n3. `Мут`\nЕсли ты хочешь отменить наказания, тогда напиши `Нет` в качестве аргумента.");
                     return;                    
             }
 
             FilesProvider.RefreshGuild(serGuild);
 
             await ReplyAsync("Наказание успешно установлено.");   
-        }
+        }        
 
         [RequireUserPermission(GuildPermission.Administrator)]
         [Command("Уведомления", RunMode = RunMode.Async)]
@@ -1372,15 +1446,95 @@ namespace TestBot
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
-        [Command("ЦветЕмбеда")]
+        [Command("ЦветЭмбеда")]
         [CustomisationCommand]
         [Summary("устанавливает цвет эмбеда")]
-        public async Task ChangeEmbedColor(Color color)
-        { 
-        
+        public async Task ChangeEmbedColor(string color)
+        {            
+            ColorProvider.SerializeColor(color, Context.Guild);
+
+            await ReplyAsync("Цвет эмбеда сменен");
         }
-        #endregion        
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("ОтвечатьТолькоВ")]
+        [CustomisationCommand]
+        [Summary("устанавливает каналы, в которых бот будет отвечать")]
+        public async Task ChannelsToReply(params SocketTextChannel[] textChannels)
+        {
+            List<SocketTextChannel> sortedTextChannels = new List<SocketTextChannel>();
+            List<ulong> textChannelsIds = new List<ulong>();
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            foreach (var channel in textChannels)
+            { 
+                if (!textChannelsIds.Contains(channel.Id))
+                    textChannelsIds.Add(channel.Id);
+                if (!sortedTextChannels.Contains(channel))
+                    sortedTextChannels.Add(channel);
+            }
+
+            serGuild.CommandsChannels = textChannelsIds;
+            string mentions = null;
+
+            for (int i = 0; i < sortedTextChannels.Count; i++)
+                mentions += i + 1 == sortedTextChannels.Count ? $" {sortedTextChannels[i].Mention}." : $" {sortedTextChannels[i].Mention},";
+
+            FilesProvider.RefreshGuild(serGuild);
+            await ReplyAsync($"Теперь я буду отвечать только в следующих каналах:{mentions}");
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("НеОтвечатьТолькоВ")]
+        [CustomisationCommand]
+        [Summary("устанавливает каналы, в которых бот не будет отвечать")]
+        public async Task ChannelsToNoReply(params SocketTextChannel[] textChannels)
+        {
+            List<SocketTextChannel> sortedTextChannels = new List<SocketTextChannel>();
+            List<ulong> textChannelsIds = new List<ulong>();
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            foreach (var channel in Context.Guild.TextChannels)            
+                if (!textChannels.Contains(channel))
+                    textChannelsIds.Add(channel.Id);                            
+
+            foreach (var channel in textChannels)            
+                if (!sortedTextChannels.Contains(channel))
+                    sortedTextChannels.Add(channel);            
+
+            serGuild.CommandsChannels = textChannelsIds;
+            string mentions = null;
+
+            for (int i = 0; i < sortedTextChannels.Count; i++)            
+                mentions += i + 1 == sortedTextChannels.Count ? $" {sortedTextChannels[i].Mention}." : $" {sortedTextChannels[i].Mention},";           
+
+            if (textChannelsIds.Count != Context.Guild.TextChannels.Count)
+            {
+                FilesProvider.RefreshGuild(serGuild);
+
+                await ReplyAsync($"Теперь я не буду отвечать только в следующих каналах:{mentions}");
+            }
+            else
+                await ReplyAsync("Ты не можешь отключить все каналы");
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("ОтвечатьВезде")]
+        [CustomisationCommand]
+        [Summary("разрешает боту отвечать во всех каналах.")]
+        public async Task AllChannelsToReply()
+        {        
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            serGuild.CommandsChannels.Clear();
+
+            FilesProvider.RefreshGuild(serGuild);
+
+            await ReplyAsync($"Теперь я буду отвечать во всех каналах.");
+        }        
         
+        #endregion
+
         private async void ClearMessages(object count)
         {
             try

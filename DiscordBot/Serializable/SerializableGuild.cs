@@ -20,8 +20,8 @@ _________________________________________________________________________
 _________________________________________________________________________
 */
 
+using System;
 using System.Collections.Generic;
-using Discord;
 
 namespace DiscordBot.Serializable
 {    
@@ -33,6 +33,7 @@ namespace DiscordBot.Serializable
         public int MaxWarns { get; set; } = 5;
         public bool KickForWarns { get; set; } = false;
         public bool BanForWarns { get; set; } = false;
+        public bool MuteForWarns { get; set; } = false;
         public bool WarnsForBadWords { get; set; } = false;
         public bool WarnsForInviteLink { get; set; } = false;
         public bool HelloMessageEnable { get; set; } = false;        
@@ -43,9 +44,10 @@ namespace DiscordBot.Serializable
         public string HelloMessage { get; set; } = null;        
         public string EmojiOfRoom { get; set; } = "🎤";
         public string Prefix { get; set; } = "!";
-        public Color EmbedColor { get; set; } = Color.Blue;
+        public string EmbedColor { get; set; } = "Синий";
+        public List<ulong> CommandsChannels { get; set; } = new List<ulong>();
         public List<string> BadWords { get; set; } = new List<string>();
-        public List<(ulong, int)> BadUsers { get; set; } = new List<(ulong, int)>();
+        public List<(ulong, int)> BadUsers { get; set; } = new List<(ulong, int)>();        
         public SerializableCategories SystemCategories { get; set; } = new SerializableCategories();
         public SerializableChannels SystemChannels { get; set; } = new SerializableChannels();
     }

@@ -28,6 +28,7 @@ using DiscordBot.Providers;
 using System.Collections.Generic;
 using DiscordBot.TextReaders;
 using Discord.Commands;
+using System.Threading;
 
 namespace DiscordBot.Modules.ContentManaging
 {
@@ -105,7 +106,7 @@ namespace DiscordBot.Modules.ContentManaging
                                         warns = serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2;
                                     }
                                     await arg.Channel.SendMessageAsync($"{user.Mention}, на этом сервере запрещены такие слова." +
-                                        $"{(serGuild.WarnsForBadWords == true ? $"\nКоличество предупреждений: ${warns}" : null)}");
+                                        $"{(serGuild.WarnsForBadWords == true ? $"\nКоличество предупреждений: {warns}" : null)}");
                                     if (warns > serGuild.MaxWarns)
                                     {
                                         if (serGuild.KickForWarns || serGuild.BanForWarns)
@@ -118,21 +119,17 @@ namespace DiscordBot.Modules.ContentManaging
                                                               $"Ты превысил лимит предупреждений ({serGuild.MaxWarns}).\n" +
                                                               $"Сообщение из-за которого тебя выгнали:\n" +
                                                               $"`{arg.Content}`",
-                                                Color = Color.Blue,
+                                                Color = ColorProvider.GetColorForCurrentGuild(serGuild),
                                                 ThumbnailUrl = user.Guild.IconUrl
                                             }.Build());
 
-                                            if (serGuild.KickForWarns)
-                                            {
-                                                await arg.Channel.SendMessageAsync("KICK");
-                                                // await user.KickAsync();                                        
-                                            }
-                                            else if(serGuild.BanForWarns)
-                                            {
-                                                await arg.Channel.SendMessageAsync("BAN");
-                                                // await user.BanAsync();                                        
-                                            }
                                         }
+                                        if (serGuild.KickForWarns)                                            
+                                            await user.KickAsync();                                            
+                                        else if (serGuild.BanForWarns)                                            
+                                            await user.BanAsync();                                            
+                                        else if (serGuild.MuteForWarns)
+                                            MuteUser(user);
                                     }
                                 }                                
                                 await arg.DeleteAsync();
@@ -306,7 +303,24 @@ namespace DiscordBot.Modules.ContentManaging
 
             return pathRes;
         }
-        #endregion        
+        #endregion
+
+        #region --СИСТЕМА НАКАЗАНИЙ--
+        private void MuteUser(SocketGuildUser user)
+        {
+            new Thread(async x => 
+            {
+                var textChannels = user.Guild.TextChannels;
+                foreach (var channel in textChannels)                
+                    await channel.AddPermissionOverwriteAsync(user, new OverwritePermissions(sendMessages: PermValue.Deny));
+
+                Thread.Sleep(TimeSpan.FromHours(1));
+
+                foreach (var channel in textChannels)
+                    await channel.RemovePermissionOverwriteAsync(user);
+            }).Start();
+        }
+        #endregion
 
         private enum ProtocolType { HTTP, HTTPS };
     }

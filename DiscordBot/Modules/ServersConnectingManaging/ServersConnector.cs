@@ -48,22 +48,25 @@ namespace DiscordBot.Modules.ServersConnectingManaging
 
         private Task Client_ChannelDestroyed(SocketChannel arg)
         {
-            var guild = (arg as SocketTextChannel).Guild;
+            if (arg is SocketTextChannel channel)
+            { 
+                var guild = channel.Guild;
 
-            if (guild != null)
-            {
-                var connectors = FilesProvider.GetConnectors(guild);
-                SerializableConnector connector = null;
-                if (connectors != null)
-                    foreach (var conn in connectors.SerializableConnectorsChannels)
-                        if ((arg as SocketTextChannel).Id == conn.HostId)
-                            connector = conn;
-
-                if (connector != null)
+                if (guild != null)
                 {
-                    connectors.SerializableConnectorsChannels.Remove(connector);
-                    FilesProvider.RefreshConnectors(connectors);
-                }
+                    var connectors = FilesProvider.GetConnectors(guild);
+                    SerializableConnector connector = null;
+                    if (connectors != null)
+                        foreach (var conn in connectors.SerializableConnectorsChannels)
+                            if (channel.Id == conn.HostId)
+                                connector = conn;
+
+                    if (connector != null)
+                    {
+                        connectors.SerializableConnectorsChannels.Remove(connector);
+                        FilesProvider.RefreshConnectors(connectors);
+                    }
+                }            
             }
             
             return Task.CompletedTask;
@@ -104,6 +107,7 @@ namespace DiscordBot.Modules.ServersConnectingManaging
             string content = message.Content;
             var author = message.Author;
             var guild = (author as SocketGuildUser).Guild;
+            var serGuild = FilesProvider.GetGuild(guild);
 
             return new EmbedBuilder
             {

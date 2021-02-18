@@ -44,6 +44,9 @@ using DiscordBot.Providers.FileManaging;
 using System.Threading;
 using DiscordBot.Modules.EconomicManaging;
 using DiscordBot.TypeReaders;
+using System.Linq;
+using DiscordBot.TextReaders;
+using System.Collections.Generic;
 
 namespace DiscordBot
 {
@@ -55,7 +58,7 @@ namespace DiscordBot
         public DiscordSocketClient Client;
         public CommandService Commands;
         public CommandService BotOptionsCommands;        
-        public IServiceProvider Services;                                      
+        public IServiceProvider Services;        
 
         public async Task RunBotAsync()
         {            
@@ -63,7 +66,8 @@ namespace DiscordBot
 
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                AlwaysDownloadUsers = true
+                AlwaysDownloadUsers = true,
+                MessageCacheSize = 10000
             });
 
             Commands = new CommandService();
@@ -100,7 +104,7 @@ namespace DiscordBot
                 EconomicModule = new EconomicModule(Client)
             }).RunModule();
 
-            Client.Ready += Client_Ready;
+            Client.Ready += Client_Ready;            
 
             await RegisterCommandsAsync();           
 
@@ -138,7 +142,7 @@ namespace DiscordBot
                 var context = new SocketCommandContext(Client, message);                
                 var serGuild = FilesProvider.GetGuild((message.Author as SocketGuildUser).Guild);
 
-                if (message.Author.IsBot || message is null) return;                
+                if (message.Author.IsBot || message is null || (!serGuild.CommandsChannels.Contains(arg.Channel.Id) && serGuild.CommandsChannels.Count > 0)) return;                
                 if (message.HasStringPrefix(serGuild.Prefix, ref argsPos))
                 {                                            
                     IResult result = await Commands.ExecuteAsync(context, argsPos, Services);
@@ -157,8 +161,37 @@ namespace DiscordBot
                         switch (result.Error)
                         {
                             case CommandError.UnknownCommand:
-                                if(serGuild.UnknownCommandMessage)
-                                    await context.Channel.SendMessageAsync($"Неизвестная команда. Пропиши команду {serGuild.Prefix}Хелп.");
+                                if (serGuild.UnknownCommandMessage)
+                                {
+                                    string messCommand = arg.Content.Split(' ').First().Remove(0, serGuild.Prefix.Length);
+                                    string predicateCommand = null;
+                                    string parameters = null;
+                                    List<(string, int, string)> distances = new List<(string, int, string)>();
+                                    int min = 0;
+                                    int index = 0;
+
+                                    foreach (var command in Commands.Commands)
+                                    {                                        
+                                        string p = null;
+                                        foreach (var param in command.Parameters)
+                                            p += $" `{param.Name}`";
+                                        distances.Add((command.Name, Filter.Distance(messCommand, command.Name), p));
+                                        foreach (var alias in command.Aliases)                                        
+                                            distances.Add((alias, Filter.Distance(messCommand, alias), p));
+                                    }
+
+                                    for (int i = 0; i < distances.Count; i++)                                    
+                                        if ((distances[i].Item2 < min && min > 0) || min == 0)
+                                        {
+                                            min = distances[i].Item2;
+                                            index = i;
+                                        }                                    
+
+                                    predicateCommand = distances[index].Item1;
+                                    parameters = distances[index].Item3;
+
+                                    await context.Channel.SendMessageAsync($"Неизвестная команда. Пропиши команду `{serGuild.Prefix}Хелп`.{(predicateCommand != null && predicateCommand != "Хелп"? $"\nМожет быть ты это имел ввиду команду `{serGuild.Prefix}{predicateCommand}`{parameters}?" : null)}");
+                                }                                
                                 break;
                             case CommandError.ParseFailed:
                                 await context.Channel.SendMessageAsync("Наверное ты неправильно ввел данные.");
@@ -197,8 +230,7 @@ namespace DiscordBot
 
         private async Task RegisterCommandsAsync()
         {
-            Commands.AddTypeReader<Emoji>(new EmojiTypeReader());
-            Commands.AddTypeReader<Color>(new ColorTypeReader());
+            Commands.AddTypeReader<Emoji>(new EmojiTypeReader());            
             await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), Services);                                   
             Client.MessageReceived += HandleCommandAsync;
         }
