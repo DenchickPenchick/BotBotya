@@ -56,8 +56,7 @@ namespace DiscordBot
         public string PathToBotDirectory = null;
         
         public DiscordSocketClient Client;
-        public CommandService Commands;
-        public CommandService BotOptionsCommands;        
+        public CommandService Commands;        
         public IServiceProvider Services;        
 
         public async Task RunBotAsync()
@@ -67,11 +66,10 @@ namespace DiscordBot
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 AlwaysDownloadUsers = true,
-                MessageCacheSize = 10000
+                MessageCacheSize = 1000
             });
 
-            Commands = new CommandService();
-            BotOptionsCommands = new CommandService();            
+            Commands = new CommandService();            
             InteractiveService interactiveService = new InteractiveService(Client, new InteractiveServiceConfig
             {
                 DefaultTimeout = TimeSpan.FromMinutes(5)

@@ -61,61 +61,130 @@ namespace DiscordBot.Modules.ContentManaging
             var serGuild = FilesProvider.GetGuild(guild);
 
             int argPos = 0;
-
-            if (!((arg as SocketUserMessage).Author as SocketGuildUser).IsBot)
-            {
-                if (serGuild.CheckingBadWords)
+            if(arg.Author is SocketGuildUser user)
+                if (!user.IsBot)
                 {
-                    bool prefix = mess.HasStringPrefix(serGuild.Prefix, ref argPos);
-                    string str = mess.Content.Remove(0, serGuild.Prefix.Length).Split(' ')[0];
-                    List<string> commandsNames = new List<string>();
-                    foreach (var command in CommandService.Commands)
+                    if (serGuild.CheckingBadWords)
                     {
-                        commandsNames.Add(command.Name.ToLower());
-                        for (int i = 1; i < command.Aliases.Count; i++)
-                            commandsNames.Add(command.Aliases[i].ToLower());
-                    }
-
-                    if ((prefix && !commandsNames.Contains(str.ToLower()))
-                        || !prefix)
-                    {
-                        Filter filter = new Filter(arg.Content, serGuild);
-
-                        var res = filter.Filt();
-                        if (arg.Author is SocketGuildUser user)
+                        bool prefix = mess.HasStringPrefix(serGuild.Prefix, ref argPos);
+                        string str = mess.Content.Remove(0, serGuild.Prefix.Length).Split(' ')[0];
+                        List<string> commandsNames = new List<string>();
+                        foreach (var command in CommandService.Commands)
                         {
-                            List<ulong> badUsersIds = new List<ulong>();
+                            commandsNames.Add(command.Name.ToLower());
+                            for (int i = 1; i < command.Aliases.Count; i++)
+                                commandsNames.Add(command.Aliases[i].ToLower());
+                        }
 
-                            foreach (var badUser in serGuild.BadUsers)
-                                badUsersIds.Add(badUser.Item1);
+                        if ((prefix && !commandsNames.Contains(str.ToLower()))
+                            || !prefix)
+                        {
+                            Filter filter = new Filter(arg.Content, serGuild);
 
-                            if (res == Filter.Result.Words)
-                            {
-                                if (serGuild.WarnsForBadWords)
+                            var res = filter.Filt();
+                            
+                                List<ulong> badUsersIds = new List<ulong>();
+
+                                foreach (var badUser in serGuild.BadUsers)
+                                    badUsersIds.Add(badUser.Item1);
+
+                                if (res == Filter.Result.Words)
                                 {
-                                    int warns;
-                                    if (!badUsersIds.Contains(user.Id))
+                                    if (serGuild.WarnsForBadWords)
                                     {
-                                        serGuild.BadUsers.Add((user.Id, 1));
-                                        warns = 1;
-                                    }
-                                    else
-                                    {
-                                        serGuild.BadUsers[badUsersIds.IndexOf(user.Id)] = (user.Id,
-                                            serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2 + 1);
-                                        warns = serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2;
-                                    }
-                                    await arg.Channel.SendMessageAsync($"{user.Mention}, на этом сервере запрещены такие слова." +
-                                        $"{(serGuild.WarnsForBadWords == true ? $"\nКоличество предупреждений: {warns}" : null)}");
+                                        int warns;
+                                        if (!badUsersIds.Contains(user.Id))
+                                        {
+                                            serGuild.BadUsers.Add((user.Id, 1));
+                                            warns = 1;
+                                        }
+                                        else
+                                        {
+                                            serGuild.BadUsers[badUsersIds.IndexOf(user.Id)] = (user.Id,
+                                                serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2 + 1);
+                                            warns = serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2;
+                                        }
+                                        await arg.Channel.SendMessageAsync($"{user.Mention}, на этом сервере запрещены такие слова." +
+                                            $"{(serGuild.WarnsForBadWords == true ? $"\nКоличество предупреждений: {warns}" : null)}");
+                                        if (warns > serGuild.MaxWarns)
+                                        {
+                                            if (serGuild.KickForWarns || serGuild.BanForWarns)
+                                            { 
+                                                var channel = await user.GetOrCreateDMChannelAsync();
+                                                await channel.SendMessageAsync(embed: new EmbedBuilder
+                                                {
+                                                    Title = serGuild.KickForWarns == true ? $"Ты кикнут с сервера {user.Guild.Name}" : $"Ты забанен на сервере {user.Guild.Name}",
+                                                    Description = $"Ты  {(serGuild.KickForWarns == true ? "кикнут" : "забанен")} из-за нарушений правил сервера, а именно за употребление запрещенных на сервере слов. " +
+                                                                  $"Ты превысил лимит предупреждений ({serGuild.MaxWarns}).\n" +
+                                                                  $"Сообщение из-за которого тебя выгнали:\n" +
+                                                                  $"`{arg.Content}`",
+                                                    Color = ColorProvider.GetColorForCurrentGuild(serGuild),
+                                                    ThumbnailUrl = user.Guild.IconUrl
+                                                }.Build());
+
+                                            }
+                                            if (serGuild.KickForWarns)                                            
+                                                await user.KickAsync();                                            
+                                            else if (serGuild.BanForWarns)                                            
+                                                await user.BanAsync();                                            
+                                            else if (serGuild.MuteForWarns)
+                                                MuteUser(user);
+                                        }
+                                    }                                
+                                    await arg.DeleteAsync();
+
+                                    FilesProvider.RefreshGuild(serGuild);
+                                }                            
+                        }
+                    }
+                    if (serGuild.CheckingContent
+                        && guild.GetTextChannel(serGuild.SystemChannels.LinksChannelId) != null
+                        && guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId) != null)
+                    {
+                        var provider = new GuildProvider(guild);
+                        var linksChannel = provider.LinksTextChannel();
+                        var videosChannel = provider.VideosTextChannel();
+
+                        var uris = GetUrisFromMessage(arg);
+
+                        List<string> VideoHostnames = new List<string>
+                        {
+                            "www.youtube.com",
+                            "youtube.com",
+                            "www.youtu.be",
+                            "youtu.be"
+                        };
+
+                        List<string> ContentLinks = new List<string>
+                        {
+                            "discord.com",
+                            "tenor.com"
+                        };
+
+                        List<string> links = new List<string>();
+
+                        foreach (var uri in uris)
+                        {
+                            bool sorted = false;
+
+                            if (uri.Host == "discord.gg" && uri.AbsolutePath.Length == 11) //Если приглашение, тогда прекращаем операцию
+                            {
+                                await arg.DeleteAsync();
+                                if (serGuild.WarnsForInviteLink)
+                                {
+                                    var bad = provider.GetBadUser(user);
+                                    int warns = bad.Item2;
+                                    await arg.Channel.SendMessageAsync($"{user.Mention}, на этом сервере запрещены ссылки-приглашения." +
+                                                $"{(serGuild.WarnsForBadWords == true ? $"\nКоличество предупреждений: {bad.Item2}" : null)}");
                                     if (warns > serGuild.MaxWarns)
                                     {
                                         if (serGuild.KickForWarns || serGuild.BanForWarns)
-                                        { 
+                                        {
                                             var channel = await user.GetOrCreateDMChannelAsync();
                                             await channel.SendMessageAsync(embed: new EmbedBuilder
                                             {
                                                 Title = serGuild.KickForWarns == true ? $"Ты кикнут с сервера {user.Guild.Name}" : $"Ты забанен на сервере {user.Guild.Name}",
-                                                Description = $"Ты  {(serGuild.KickForWarns == true ? "кикнут" : "забанен")} из-за нарушений правил сервера, а именно за употребление запрещенных на сервере слов. " +
+                                                Description = $"Ты  {(serGuild.KickForWarns == true ? "кикнут" : "забанен")} из-за нарушений правил сервера, а именно за использование ссылок-приглашений." +
                                                               $"Ты превысил лимит предупреждений ({serGuild.MaxWarns}).\n" +
                                                               $"Сообщение из-за которого тебя выгнали:\n" +
                                                               $"`{arg.Content}`",
@@ -124,101 +193,61 @@ namespace DiscordBot.Modules.ContentManaging
                                             }.Build());
 
                                         }
-                                        if (serGuild.KickForWarns)                                            
-                                            await user.KickAsync();                                            
-                                        else if (serGuild.BanForWarns)                                            
-                                            await user.BanAsync();                                            
+                                        if (serGuild.KickForWarns)
+                                            await user.KickAsync();
+                                        else if (serGuild.BanForWarns)
+                                            await user.BanAsync();
                                         else if (serGuild.MuteForWarns)
                                             MuteUser(user);
                                     }
-                                }                                
-                                await arg.DeleteAsync();
-
-                                FilesProvider.RefreshGuild(serGuild);
-                            }
-                        }
-                    }
-                }
-                if (serGuild.CheckingContent
-                    && guild.GetTextChannel(serGuild.SystemChannels.LinksChannelId) != null
-                    && guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId) != null)
-                {
-                    var provider = new GuildProvider(guild);
-                    var linksChannel = provider.LinksTextChannel();
-                    var videosChannel = provider.VideosTextChannel();
-
-                    var uris = GetUrisFromMessage(arg);
-
-                    List<string> VideoHostnames = new List<string>
-                    {
-                        "www.youtube.com",
-                        "youtube.com",
-                        "www.youtu.be",
-                        "youtu.be"
-                    };
-
-                    List<string> ContentLinks = new List<string>
-                    {
-                        "discord.com",
-                        "tenor.com"
-                    };
-
-                    List<string> links = new List<string>();
-
-                    foreach (var uri in uris)
-                    {
-                        bool sorted = false;
-
-                        if (uri.Host == "discord.gg" && uri.AbsolutePath.Length == 11) //Если приглашение, тогда прекращаем операцию
-                        {
-                            await arg.DeleteAsync();
-                            return;
-                        }
-
-                        if (VideoHostnames.Contains(uri.Host))
-                        {
-                            if (videosChannel != null && !links.Contains(uri.ToString()))
-                            {
-                                links.Add(uri.ToString());
-                                if (arg.Channel.Id != videosChannel.Id)
-                                {
-                                    await videosChannel.SendMessageAsync(uri.ToString());
-                                    await arg.DeleteAsync();
                                 }
-
-                                sorted = true;
+                                return;
                             }
-                        }
 
-                        if (ContentLinks.Contains(uri.Host))
-                        {
-                            if (!links.Contains(uri.ToString()))
+                            if (VideoHostnames.Contains(uri.Host))
                             {
-                                links.Add(uri.ToString());
-                                sorted = true;
+                                if (videosChannel != null && !links.Contains(uri.ToString()))
+                                {
+                                    links.Add(uri.ToString());
+                                    if (arg.Channel.Id != videosChannel.Id)
+                                    {
+                                        await videosChannel.SendMessageAsync(uri.ToString());
+                                        await arg.DeleteAsync();
+                                    }
+
+                                    sorted = true;
+                                }
                             }
+
+                            if (ContentLinks.Contains(uri.Host))
+                            {
+                                if (!links.Contains(uri.ToString()))
+                                {
+                                    links.Add(uri.ToString());
+                                    sorted = true;
+                                }
+                            }
+
+                            if (sorted)
+                            {
+                                continue;
+                            }
+
+                            if (linksChannel == null || links.Contains(uri.ToString()))
+                            {
+                                continue;
+                            }
+                            if (arg.Channel.Id != linksChannel.Id)
+                            {
+                                await arg.DeleteAsync();
+                                await linksChannel.SendMessageAsync(uri.ToString());
+                            }
+
+                            links.Add(uri.ToString());
                         }
 
-                        if (sorted)
-                        {
-                            continue;
-                        }
-
-                        if (linksChannel == null || links.Contains(uri.ToString()))
-                        {
-                            continue;
-                        }
-                        if (arg.Channel.Id != linksChannel.Id)
-                        {
-                            await arg.DeleteAsync();
-                            await linksChannel.SendMessageAsync(uri.ToString());
-                        }
-
-                        links.Add(uri.ToString());
                     }
-
                 }
-            }
 
         }
         #region --АЛГОРИТМ ПО ИЗВЛЕЧЕНИЮ ССЫЛОК ИЗ СООБЩЕНИЯ

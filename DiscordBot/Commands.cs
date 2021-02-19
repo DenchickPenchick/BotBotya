@@ -104,7 +104,7 @@ namespace TestBot
                 else
                     categoryAttribute = new StandartCommandAttribute();
 
-                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 0 ? aliases : null)}".Length >= 250)
+                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"{pages[pos]}\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 0 ? aliases : null)}".Length >= 1024)
                 {
                     if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName)
                         posit = 1;
@@ -1227,6 +1227,7 @@ namespace TestBot
 
         [Command("ДобавитьНежелательныеСлова")]
         [CustomisationCommand]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
         [Summary("добавляет список нежелательных слов")]
         public async Task AddBadWords(params string[] wordsInMess)
         {
@@ -1281,6 +1282,7 @@ namespace TestBot
 
         [Command("УдалитьНежелательноеСлово")]
         [CustomisationCommand]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
         [Summary("удаляет нежелательные слова из списка.")]
         public async Task DeleteWord(params string[] words)
         {
@@ -1297,6 +1299,40 @@ namespace TestBot
             }
             else
                 await ReplyAsync("Не могу найти слова в сообщении.");
+        }
+
+        [Command("ПроверкаСлов")]
+        [CustomisationCommand]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Summary("включает/выключает проверку нежелательных слов.")]
+        public async Task CheckingBadWords()
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            serGuild.CheckingBadWords = !serGuild.CheckingBadWords;
+
+            if (serGuild.CheckingBadWords)
+                await ReplyAsync("Теперь я буду проверять нежелательные слова");
+            else
+                await ReplyAsync("Теперь не я буду проверять нежелательные слова");
+
+            FilesProvider.RefreshGuild(serGuild);
+        }
+
+        [Command("ПредупрежденияЗаСлова")]
+        [CustomisationCommand]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Summary("включает/выключает предупреждения за использование нежелательных слов")]
+        public async Task WarnsBadWords()
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            serGuild.WarnsForBadWords = !serGuild.WarnsForBadWords;
+
+            if (serGuild.WarnsForBadWords)
+                await ReplyAsync("Теперь я буду начислять предупреждения за нежелательные слова");
+            else
+                await ReplyAsync("Теперь не я буду начислять предупреждения за нежелательные слова");
+
+            FilesProvider.RefreshGuild(serGuild);
         }
 
         [Command("НаказаниеЗаНарушения")]
