@@ -24,6 +24,8 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
+using System.Text;
+using System.Web;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,9 +45,18 @@ using DiscordBot;
 using DiscordBot.Attributes;
 using DiscordBot.Serializable;
 using DiscordBot.Serializable.SerializableActions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace TestBot
 {
+    // Для команды 'БотПродолжай'
+    public class SentenceStruct
+    {
+        public string prompt { get; set; }
+        public int length { get; set; }
+        public int num_samples { get; set; }
+    }
     public class Commands : InteractiveBase
     {
         private readonly Bot Bot;
@@ -526,6 +537,99 @@ namespace TestBot
             }
             else
                 await ReplyAsync("В данном канале не существует соединения.");
+        }
+
+        [Command("БотДавай")]
+        [Alias("БотПродолжай", "БотГо")]
+        [CustomCommand]
+        [Summary("бот попытается продолжить предложение с помощью нейросети (https://porfirevich.ru).")]
+        public async Task ContinueSentence(params string[] sentence)
+        {
+            if (sentence.Length == 0)
+                await ReplyAsync("Не указан текст сообщения для продолжения.");
+            else
+            {
+                // Длина сообщения по умолчанию.
+                int length = 30;
+
+                string sentence_str = string.Join(" ", sentence);
+
+                if (sentence_str.Length < 30)
+                    length = sentence_str.Length;
+
+                // Структура объекта JSON для отправки на сервер.
+                var account = new SentenceStruct
+                {
+                    prompt = HttpUtility.HtmlEncode(sentence_str),
+                    length = length,
+                    num_samples = 1
+                };
+
+                var request = (HttpWebRequest)WebRequest.Create("https://pelevin.gpt.dobro.ai/generate/");
+
+                // Наши данные.
+                var data = JsonConvert.SerializeObject(account, Newtonsoft.Json.Formatting.Indented);
+
+                // Преобразуем данные в массив байтов.
+                byte[] data_array = Encoding.UTF8.GetBytes(data);
+
+                // Устанавливаем заголовок Content-Length.
+                request.ContentLength = data_array.Length;
+
+                // Автоматическая декомпрессия GZIP ответа.
+                request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+                request.Method = "POST";
+
+                // Заголовки для отправки запроса.
+                request.ContentType = "Content-Type: text/plain;charset=UTF-8";
+                request.Headers.Add("Host: pelevin.gpt.dobro.ai");
+                request.Headers.Add("Connection: keep-alive");
+                request.Headers.Add("User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36");
+                request.Headers.Add("Accept: */*");
+                request.Headers.Add("Origin: https://porfirevich.ru");
+                request.Headers.Add("Sec-Fetch-Site: cross-site");
+                request.Headers.Add("Sec-Fetch-Mode: cors");
+                request.Headers.Add("Sec-Fetch-Dest: empty");
+                request.Headers.Add("Referer: https://porfirevich.ru/");
+                request.Headers.Add("Accept-Language: en-US,en;q=0.9");
+                request.Headers.Add("Accept-Encoding: gzip, deflate");
+
+                using (var request_stream = request.GetRequestStream())
+                {
+                    request_stream.Write(data_array, 0, data_array.Length);
+                }
+
+                var response = await request.GetResponseAsync();
+
+                using (var response_stream = response.GetResponseStream())
+                {
+                    using (var stream_reader = new StreamReader(response_stream))
+                    {
+                        var response_data = stream_reader.ReadToEnd();
+
+                        if (String.IsNullOrEmpty(response_data))
+                            await ReplyAsync("Ответ с сервера ничего не вернул.");
+                        else
+                        {
+                            // Парсинг объекта из ответа.
+                            var json_obj = JObject.Parse(response_data);
+
+                            if (json_obj == null)
+                                await ReplyAsync("Объект JSON вернул null.");
+                            else
+                            {
+                                var included_data = (JArray)json_obj["replies"];
+                                var text = included_data[0].Value<string>();
+
+                                if (!String.IsNullOrEmpty(text))
+                                    await ReplyAsync($"{sentence_str} {HttpUtility.HtmlDecode(text)}");
+                            }
+                        }
+                    }
+                }
+
+                response.Close();
+            }
         }
         #endregion
 
