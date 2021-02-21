@@ -46,6 +46,7 @@ namespace DiscordBot.Serializable
         public string EmbedColor { get; set; } = "Синий";
         public List<ulong> CommandsChannels { get; set; } = new List<ulong>();
         public List<string> BadWords { get; set; } = new List<string>();
+        public List<string> ExceptWords { get; set; } = new List<string>();
         public List<(ulong, int)> BadUsers { get; set; } = new List<(ulong, int)>();        
         public SerializableCategories SystemCategories { get; set; } = new SerializableCategories();
         public SerializableChannels SystemChannels { get; set; } = new SerializableChannels();

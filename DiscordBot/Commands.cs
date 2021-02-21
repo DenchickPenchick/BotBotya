@@ -85,7 +85,7 @@ namespace TestBot
                 string parameters = "\nПараметры";
 
                 foreach (string alias in command.Aliases)
-                    if (alias != command.Name)
+                    if (alias != command.Name.ToLower())
                         aliases += $" `{alias}`";
 
                 foreach (var param in command.Parameters)
@@ -104,21 +104,21 @@ namespace TestBot
                 else
                     categoryAttribute = new StandartCommandAttribute();
 
-                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"{pages[pos]}\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 0 ? aliases : null)}".Length >= 1024)
+                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"{pages[pos]}\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}".Length >= 1024)
                 {
                     if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName)
                         posit = 1;
 
-                    pages.Add($"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 0 ? aliases : null)}");
+                    pages.Add($"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}");
                     pos++;
                 }
                 else if (catpos == 0)
                 {
-                    pages[0] += $"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 0 ? aliases : null)}";
+                    pages[0] += $"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}";
                     catpos++;
                 }
                 else
-                    pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 0 ? aliases : null)}";
+                    pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}";
                 prevCategoryAttribute = categoryAttribute;
             }
             if (page > 0)
@@ -460,7 +460,7 @@ namespace TestBot
 
             provider.MinusWarns(user, count);
 
-            await ReplyAsync($"Добавлено.");
+            await ReplyAsync($"Убрано.");
         }
 
         [Command("МоиПредупреждения")]
@@ -492,6 +492,7 @@ namespace TestBot
 
         #region --КОММУНИКАЦИЯ--
         [Command("ДобавитьСоединение")]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
         [Summary("добаляет соединение с каналами других серверов.")]
         [StandartCommand]
         public async Task AddConnection(params ulong[] id)
@@ -505,6 +506,7 @@ namespace TestBot
         }
 
         [Command("УдалитьСоединение")]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
         [Summary("удаляет соединение с каналами других серверов.")]
         [StandartCommand]
         public async Task DeleteConnection()
@@ -1225,6 +1227,78 @@ namespace TestBot
                 await ReplyAsync("Проверка контента отключена.");
         }
 
+        [Command("УстановитьНежелательныеСлова")]
+        [CustomisationCommand]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Summary("устанавливает список нежелательных слов")]
+        public async Task SetBadWords(params string[] wordsInMess)
+        {
+            if (wordsInMess.Length == 0)
+            {
+                if (Context.Message.Attachments.Count > 0)
+                {
+                    var attachment = Context.Message.Attachments.First();
+                    if (Path.GetExtension(attachment.Filename) == ".txt")
+                    {
+                        WebClient client = new WebClient();
+                        Stream stream = client.OpenRead(attachment.Url);
+                        SerializableGuild guild = FilesProvider.GetGuild(Context.Guild);
+
+                        using StreamReader reader = new StreamReader(stream);
+                        string text = await reader.ReadToEndAsync();
+
+                        string[] words = text.Split("\n");
+                        List<string> filteredWords = new List<string>();
+
+                        foreach (string word in words)
+                            if (!filteredWords.Contains(word.ToLower()) && !guild.BadWords.Contains(word.ToLower()))
+                                filteredWords.Add(word.ToLower());
+
+                        guild.BadWords.Clear();
+                        guild.BadWords.AddRange(filteredWords);
+
+                        FilesProvider.RefreshGuild(guild);
+
+                        await ReplyAsync($"Добавлено {filteredWords.Count} слов. На данный момент в словаре есть {guild.BadWords.Count} слов.");
+                    }
+                    else
+                        await ReplyAsync("Некорректное расширение файла. Файл должен быть текстовый (`.txt`)");
+                }
+                else
+                    await ReplyAsync("Я не могу найти файл в сообщении.");
+            }
+            else
+            {
+                SerializableGuild guild = FilesProvider.GetGuild(Context.Guild);
+                List<string> filteredWords = new List<string>();
+
+                foreach (string word in wordsInMess)
+                    if (!filteredWords.Contains(word.ToLower()) && !guild.BadWords.Contains(word.ToLower()))
+                        filteredWords.Add(word.ToLower());
+
+                guild.BadWords.Clear();
+                guild.BadWords.AddRange(filteredWords);
+                FilesProvider.RefreshGuild(guild);
+
+                await ReplyAsync($"Добавлено {filteredWords.Count} слов. На данный момент в словаре есть {guild.BadWords.Count} слов.");
+            }
+        }
+
+        [Command("ОчиститьСписокНежелательныхСлов")]
+        [CustomisationCommand]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Summary("очищает список нежелательных слов")]
+        public async Task ClearBadWords()
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            int count = serGuild.BadWords.Count;
+
+            serGuild.BadWords.Clear();
+            FilesProvider.RefreshGuild(serGuild);
+
+            await ReplyAsync($"Очищено {count} слов.");
+        }
+
         [Command("ДобавитьНежелательныеСлова")]
         [CustomisationCommand]
         [RequireUserPermission(GuildPermission.ManageGuild)]
@@ -1245,7 +1319,7 @@ namespace TestBot
                         using StreamReader reader = new StreamReader(stream);
                         string text = await reader.ReadToEndAsync();
 
-                        string[] words = text.Split(' ');
+                        string[] words = text.Split("\n");
                         List<string> filteredWords = new List<string>();
 
                         foreach (string word in words)
@@ -1270,8 +1344,8 @@ namespace TestBot
                 List<string> filteredWords = new List<string>();
 
                 foreach (string word in wordsInMess)                
-                    if (!filteredWords.Contains(word) && !guild.BadWords.Contains(word))
-                        filteredWords.Add(word);
+                    if (!filteredWords.Contains(word.ToLower()) && !guild.BadWords.Contains(word.ToLower()))
+                        filteredWords.Add(word.ToLower());
 
                 guild.BadWords.AddRange(filteredWords);
                 FilesProvider.RefreshGuild(guild);
@@ -1280,7 +1354,7 @@ namespace TestBot
             }
         }
 
-        [Command("УдалитьНежелательноеСлово")]
+        [Command("УдалитьНежелательноеСлова")]
         [CustomisationCommand]
         [RequireUserPermission(GuildPermission.ManageGuild)]
         [Summary("удаляет нежелательные слова из списка.")]
@@ -1291,8 +1365,8 @@ namespace TestBot
                 SerializableGuild guild = FilesProvider.GetGuild(Context.Guild);
 
                 foreach (string word in words)                
-                    if (guild.BadWords.Contains(word))                    
-                        guild.BadWords.Remove(word);    
+                    if (guild.BadWords.Contains(word.ToLower()))                    
+                        guild.BadWords.Remove(word.ToLower());    
 
                 FilesProvider.RefreshGuild(guild);
                 await ReplyAsync("Удаление слов произведено успешно.");
@@ -1300,6 +1374,155 @@ namespace TestBot
             else
                 await ReplyAsync("Не могу найти слова в сообщении.");
         }
+
+        [Command("ДобавитьСловаИсключения")]
+        [CustomisationCommand]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Summary("добавляет слова, которые не будут считаться плохими. Их стоит добавлять только в случае, если есть плохое и какое-нибудь другое слово, которые очень похожи.")]
+        public async Task AddExcept(params string[] wordsInMess)
+        {
+            if (wordsInMess.Length == 0)
+            {
+                if (Context.Message.Attachments.Count > 0)
+                {
+                    var attachment = Context.Message.Attachments.First();
+                    if (Path.GetExtension(attachment.Filename) == ".txt")
+                    {
+                        WebClient client = new WebClient();
+                        Stream stream = client.OpenRead(attachment.Url);
+                        SerializableGuild guild = FilesProvider.GetGuild(Context.Guild);
+
+                        using StreamReader reader = new StreamReader(stream);
+                        string text = await reader.ReadToEndAsync();
+
+                        string[] words = text.Split("\n");
+                        List<string> filteredWords = new List<string>();
+
+                        foreach (string word in words)
+                            if (!filteredWords.Contains(word.ToLower()) && !guild.ExceptWords.Contains(word.ToLower()))
+                                filteredWords.Add(word.ToLower());
+
+                        guild.ExceptWords.AddRange(filteredWords);
+
+                        FilesProvider.RefreshGuild(guild);
+
+                        await ReplyAsync($"Добавлено {filteredWords.Count} слов. На данный момент в словаре есть {guild.ExceptWords.Count} слов.");
+                    }
+                    else
+                        await ReplyAsync("Некорректное расширение файла. Файл должен быть текстовый (`.txt`)");
+                }
+                else
+                    await ReplyAsync("Я не могу найти файл в сообщении.");
+            }
+            else
+            {
+                SerializableGuild guild = FilesProvider.GetGuild(Context.Guild);
+                List<string> filteredWords = new List<string>();
+
+                foreach (string word in wordsInMess)
+                    if (!filteredWords.Contains(word) && !guild.ExceptWords.Contains(word))
+                        filteredWords.Add(word.ToLower());
+
+                guild.ExceptWords.AddRange(filteredWords);
+                FilesProvider.RefreshGuild(guild);
+
+                await ReplyAsync($"Добавлено {filteredWords.Count} слов. На данный момент в словаре есть {guild.ExceptWords.Count} слов.");
+            }
+        }
+
+        [Command("УдалитьСловаИсключения")]
+        [CustomisationCommand]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Summary("удаляет слова-исключения из списка.")]
+        public async Task DeleteExceptWord(params string[] words)
+        {
+            if (words.Length > 0)
+            {
+                SerializableGuild guild = FilesProvider.GetGuild(Context.Guild);
+
+                foreach (string word in words)
+                    if (guild.ExceptWords.Contains(word.ToLower()))
+                        guild.ExceptWords.Remove(word.ToLower());
+
+                FilesProvider.RefreshGuild(guild);
+                await ReplyAsync("Удаление слов произведено успешно.");
+            }
+            else
+                await ReplyAsync("Не могу найти слова в сообщении.");
+        }
+
+        [Command("УстановитьСловаИсключения")]
+        [CustomisationCommand]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Summary("устанавливает список слов-исключений")]
+        public async Task SetExceptWords(params string[] wordsInMess)
+        {
+            if (wordsInMess.Length == 0)
+            {
+                if (Context.Message.Attachments.Count > 0)
+                {
+                    var attachment = Context.Message.Attachments.First();
+                    if (Path.GetExtension(attachment.Filename) == ".txt")
+                    {
+                        WebClient client = new WebClient();
+                        Stream stream = client.OpenRead(attachment.Url);
+                        SerializableGuild guild = FilesProvider.GetGuild(Context.Guild);
+
+                        using StreamReader reader = new StreamReader(stream);
+                        string text = await reader.ReadToEndAsync();
+
+                        string[] words = text.Split("\n");
+                        List<string> filteredWords = new List<string>();
+
+                        foreach (string word in words)
+                            if (!filteredWords.Contains(word.ToLower()) && !guild.ExceptWords.Contains(word.ToLower()))
+                                filteredWords.Add(word.ToLower());
+
+                        guild.ExceptWords.Clear();
+                        guild.ExceptWords.AddRange(filteredWords);
+
+                        FilesProvider.RefreshGuild(guild);
+
+                        await ReplyAsync($"Добавлено {filteredWords.Count} слов. На данный момент в словаре есть {guild.ExceptWords.Count} слов.");
+                    }
+                    else
+                        await ReplyAsync("Некорректное расширение файла. Файл должен быть текстовый (`.txt`)");
+                }
+                else
+                    await ReplyAsync("Я не могу найти файл в сообщении.");
+            }
+            else
+            {
+                SerializableGuild guild = FilesProvider.GetGuild(Context.Guild);
+                List<string> filteredWords = new List<string>();
+
+                foreach (string word in wordsInMess)
+                    if (!filteredWords.Contains(word.ToLower()) && !guild.ExceptWords.Contains(word.ToLower()))
+                        filteredWords.Add(word.ToLower());
+
+                guild.ExceptWords.Clear();
+                guild.ExceptWords.AddRange(filteredWords);
+                FilesProvider.RefreshGuild(guild);
+
+                await ReplyAsync($"Добавлено {filteredWords.Count} слов. На данный момент в словаре есть {guild.BadWords.Count} слов.");
+            }
+        }
+
+        [Command("ОчиститьСписокСловИсключений")]
+        [CustomisationCommand]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Summary("очищает список слов-исключений")]
+        public async Task ClearExceptWords()
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            int count = serGuild.ExceptWords.Count;
+
+            serGuild.ExceptWords.Clear();
+            FilesProvider.RefreshGuild(serGuild);
+
+            await ReplyAsync($"Очищено {count} слов.");
+        }
+
 
         [Command("ПроверкаСлов")]
         [CustomisationCommand]
@@ -1330,7 +1553,24 @@ namespace TestBot
             if (serGuild.WarnsForBadWords)
                 await ReplyAsync("Теперь я буду начислять предупреждения за нежелательные слова");
             else
-                await ReplyAsync("Теперь не я буду начислять предупреждения за нежелательные слова");
+                await ReplyAsync("Теперь я не буду начислять предупреждения за нежелательные слова");
+
+            FilesProvider.RefreshGuild(serGuild);
+        }
+
+        [Command("ПредупрежденияЗаПриглашения")]
+        [CustomisationCommand]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Summary("включает/выключает предупреждения за использование ссылок-приглашений")]
+        public async Task WarnsForInvites()
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            serGuild.WarnsForInviteLink = !serGuild.WarnsForInviteLink;
+
+            if (serGuild.WarnsForInviteLink)
+                await ReplyAsync("Теперь я буду начислять предупреждения за ссылки-приглашения");
+            else
+                await ReplyAsync("Теперь я не буду начислять предупреждения за ссылки-приглашения");
 
             FilesProvider.RefreshGuild(serGuild);
         }

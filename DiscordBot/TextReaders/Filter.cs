@@ -23,12 +23,14 @@ _________________________________________________________________________
 using DiscordBot.Serializable;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DiscordBot.TextReaders
 {
     public class Filter 
     {
         public IEnumerable<string> Words { get; set; }
+        public IEnumerable<string> ExceptWords { get; set; }
         public string StringToFilter { get; set; }
 
         public enum Result { Nothing, Error, Words }
@@ -36,6 +38,7 @@ namespace DiscordBot.TextReaders
         public Filter(string str, SerializableGuild guild)
         {
             StringToFilter = str;
+            ExceptWords = guild.ExceptWords;
             Words = guild.BadWords;
         }
 
@@ -55,7 +58,7 @@ namespace DiscordBot.TextReaders
                 {
                     int totalMarks = (Convert.ToSingle(word.Length) % 2F > 0 ? word.Length + 1 : word.Length) / 2;
                     foreach (var toCheck in Words)
-                        if (Distance(word, toCheck) < totalMarks)
+                        if (Distance(word, toCheck) < totalMarks && !ExceptWords.Contains(word.ToLower()))
                             words = true;
                 }
 
@@ -63,7 +66,6 @@ namespace DiscordBot.TextReaders
                     return Result.Words;
                 else
                     return Result.Nothing;
-
             }
             catch (Exception)
             {

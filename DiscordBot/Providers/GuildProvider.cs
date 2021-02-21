@@ -51,12 +51,26 @@ namespace DiscordBot.Providers
         {
             try
             {
+                var botyaEmoji = Emote.Parse("<:botya:812734516829093918>");
                 await Guild.DefaultChannel.SendMessageAsync(embed: new EmbedBuilder
                 {
                     Title = $"👋 Спасибо, что пригласили меня на сервер {Guild.Name} 👋",
-                    Description = $"Меня зовут {client.CurrentUser.Username}. Я много что умею! Пропиши `!Хелп`, чтобы узнать мой функционал.\n" +
-                    $"🤖 *Мой сайт:* https://botbotya.ru 🤖\n" +
-                    $"🤖 *GitHub:* https://github.com/DenchickPenchick/BotBotya 🤖",
+                    Description = $"Меня зовут {client.CurrentUser.Username}. Я много чего умею! Пропиши `!Хелп`, чтобы узнать мой функционал.\nЕсли возникнут проблемы, тогда можешь задать вопрос на [сервере поддержки](https://discord.gg/p6R4yk7uqK).\n",
+                    Fields = new List<EmbedFieldBuilder>
+                    { 
+                        new EmbedFieldBuilder
+                        { 
+                            Name = $"{botyaEmoji} Мой сайт:",
+                            Value = "https://botbotya.ru",
+                            IsInline = true
+                        },
+                        new EmbedFieldBuilder
+                        {
+                            Name = $"{botyaEmoji} Мой GitHub:",
+                            Value = "https://github.com/DenchickPenchick/BotBotya",
+                            IsInline = true
+                        }
+                    },
                     Color = Color.Blue
                 }.Build());
             }
@@ -74,10 +88,12 @@ namespace DiscordBot.Providers
                 ids.Add(bad.Item1);
             int index = ids.IndexOf(user.Id);
 
-            if (index >= 0 && warns > 0)
+            if (index >= 0 && warns >= 0)
                 serGuild.BadUsers[index] = (user.Id, warns);            
-            else
+            else if(warns >= 0)
                 serGuild.BadUsers.Add((user.Id, warns));
+            else if(index >= 0 && warns < 0)
+                serGuild.BadUsers[index] = (user.Id, 0);
 
             FilesProvider.RefreshGuild(serGuild);
         }

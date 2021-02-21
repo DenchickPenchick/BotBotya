@@ -59,6 +59,7 @@ namespace DiscordBot.Modules.ContentManaging
             var mess = arg as SocketUserMessage;
             var guild = ((arg as SocketUserMessage).Author as SocketGuildUser).Guild;
             var serGuild = FilesProvider.GetGuild(guild);
+            var provider = new GuildProvider(guild);
 
             int argPos = 0;
             if(arg.Author is SocketGuildUser user)
@@ -83,65 +84,64 @@ namespace DiscordBot.Modules.ContentManaging
 
                             var res = filter.Filt();
                             
-                                List<ulong> badUsersIds = new List<ulong>();
+                            List<ulong> badUsersIds = new List<ulong>();
 
-                                foreach (var badUser in serGuild.BadUsers)
-                                    badUsersIds.Add(badUser.Item1);
+                            foreach (var badUser in serGuild.BadUsers)
+                                badUsersIds.Add(badUser.Item1);
 
-                                if (res == Filter.Result.Words)
+                            if (res == Filter.Result.Words)
+                            {
+                                if (serGuild.WarnsForBadWords)
                                 {
-                                    if (serGuild.WarnsForBadWords)
+                                    int warns;
+                                    if (!badUsersIds.Contains(user.Id))
                                     {
-                                        int warns;
-                                        if (!badUsersIds.Contains(user.Id))
-                                        {
-                                            serGuild.BadUsers.Add((user.Id, 1));
-                                            warns = 1;
-                                        }
-                                        else
-                                        {
-                                            serGuild.BadUsers[badUsersIds.IndexOf(user.Id)] = (user.Id,
-                                                serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2 + 1);
-                                            warns = serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2;
-                                        }
-                                        await arg.Channel.SendMessageAsync($"{user.Mention}, на этом сервере запрещены такие слова." +
-                                            $"{(serGuild.WarnsForBadWords == true ? $"\nКоличество предупреждений: {warns}" : null)}");
-                                        if (warns > serGuild.MaxWarns)
-                                        {
-                                            if (serGuild.KickForWarns || serGuild.BanForWarns)
-                                            { 
-                                                var channel = await user.GetOrCreateDMChannelAsync();
-                                                await channel.SendMessageAsync(embed: new EmbedBuilder
-                                                {
-                                                    Title = serGuild.KickForWarns == true ? $"Ты кикнут с сервера {user.Guild.Name}" : $"Ты забанен на сервере {user.Guild.Name}",
-                                                    Description = $"Ты  {(serGuild.KickForWarns == true ? "кикнут" : "забанен")} из-за нарушений правил сервера, а именно за употребление запрещенных на сервере слов. " +
-                                                                  $"Ты превысил лимит предупреждений ({serGuild.MaxWarns}).\n" +
-                                                                  $"Сообщение из-за которого тебя выгнали:\n" +
-                                                                  $"`{arg.Content}`",
-                                                    Color = ColorProvider.GetColorForCurrentGuild(serGuild),
-                                                    ThumbnailUrl = user.Guild.IconUrl
-                                                }.Build());
+                                        serGuild.BadUsers.Add((user.Id, 1));
+                                        warns = 1;
+                                    }
+                                    else
+                                    {
+                                        serGuild.BadUsers[badUsersIds.IndexOf(user.Id)] = (user.Id,
+                                            serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2 + 1);
+                                        warns = serGuild.BadUsers[badUsersIds.IndexOf(user.Id)].Item2;
+                                    }
+                                    await arg.Channel.SendMessageAsync($"{user.Mention}, на этом сервере запрещены такие слова." +
+                                        $"{(serGuild.WarnsForBadWords == true ? $"\nКоличество предупреждений: {warns}" : null)}");
+                                    if (warns > serGuild.MaxWarns)
+                                    {
+                                        if (serGuild.KickForWarns || serGuild.BanForWarns)
+                                        { 
+                                            var channel = await user.GetOrCreateDMChannelAsync();
+                                            provider.SetWarns(arg.Author, 0);
+                                            await channel.SendMessageAsync(embed: new EmbedBuilder
+                                            {
+                                                Title = serGuild.KickForWarns == true ? $"Ты кикнут с сервера {user.Guild.Name}" : $"Ты забанен на сервере {user.Guild.Name}",
+                                                Description = $"Ты  {(serGuild.KickForWarns == true ? "кикнут" : "забанен")} из-за нарушений правил сервера, а именно за употребление запрещенных на сервере слов. " +
+                                                                $"Ты превысил лимит предупреждений ({serGuild.MaxWarns}).\n" +
+                                                                $"Сообщение из-за которого тебя выгнали:\n" +
+                                                                $"`{arg.Content}`\n"+
+                                                                "Если ты уверен, что это ошибка, тогда пиши на [сервер поддержки](https://discord.gg/p6R4yk7uqK).",                                                    
+                                                Color = ColorProvider.GetColorForCurrentGuild(serGuild),
+                                                ThumbnailUrl = user.Guild.IconUrl
+                                            }.Build());
 
-                                            }
-                                            if (serGuild.KickForWarns)                                            
-                                                await user.KickAsync();                                            
-                                            else if (serGuild.BanForWarns)                                            
-                                                await user.BanAsync();                                            
-                                            else if (serGuild.MuteForWarns)
-                                                MuteUser(user);
                                         }
-                                    }                                
-                                    await arg.DeleteAsync();
+                                        if (serGuild.KickForWarns)
+                                            await user.KickAsync();
+                                        else if (serGuild.BanForWarns)
+                                            await user.BanAsync();
+                                        else if (serGuild.MuteForWarns)
+                                            MuteUser(user);
+                                    }
+                                }                                
+                                await arg.DeleteAsync();
 
-                                    FilesProvider.RefreshGuild(serGuild);
-                                }                            
+                                FilesProvider.RefreshGuild(serGuild);
+                            }                            
                         }
                     }
-                    if (serGuild.CheckingContent
-                        && guild.GetTextChannel(serGuild.SystemChannels.LinksChannelId) != null
-                        && guild.GetTextChannel(serGuild.SystemChannels.VideosChannelId) != null)
-                    {
-                        var provider = new GuildProvider(guild);
+                    if (serGuild.CheckingContent)
+                    {                        
                         var linksChannel = provider.LinksTextChannel();
                         var videosChannel = provider.VideosTextChannel();
 
@@ -181,13 +181,15 @@ namespace DiscordBot.Modules.ContentManaging
                                         if (serGuild.KickForWarns || serGuild.BanForWarns)
                                         {
                                             var channel = await user.GetOrCreateDMChannelAsync();
+                                            provider.SetWarns(arg.Author, 0);
                                             await channel.SendMessageAsync(embed: new EmbedBuilder
                                             {
                                                 Title = serGuild.KickForWarns == true ? $"Ты кикнут с сервера {user.Guild.Name}" : $"Ты забанен на сервере {user.Guild.Name}",
                                                 Description = $"Ты  {(serGuild.KickForWarns == true ? "кикнут" : "забанен")} из-за нарушений правил сервера, а именно за использование ссылок-приглашений." +
                                                               $"Ты превысил лимит предупреждений ({serGuild.MaxWarns}).\n" +
                                                               $"Сообщение из-за которого тебя выгнали:\n" +
-                                                              $"`{arg.Content}`",
+                                                              $"`{arg.Content}`\n" +
+                                                              "Если ты уверен, что это ошибка, тогда пиши на [сервер поддержки](https://discord.gg/p6R4yk7uqK).",
                                                 Color = ColorProvider.GetColorForCurrentGuild(serGuild),
                                                 ThumbnailUrl = user.Guild.IconUrl
                                             }.Build());

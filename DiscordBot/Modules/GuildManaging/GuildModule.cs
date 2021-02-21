@@ -94,17 +94,20 @@ namespace DiscordBot.GuildManaging
             {                
                 if (arg3.User.Value is SocketGuildUser user)
                 {
-                    var reactRoleMess = message.EmojiesRoleId;
-                    int indexOf = 0;
+                    if (!user.IsBot)
+                    { 
+                        var reactRoleMess = message.EmojiesRoleId;
+                        int indexOf = 0;
 
-                    foreach (var mess in reactRoleMess)
-                        if (mess.Item1 != arg3.Emote.Name)
-                            indexOf++;
-                        else
-                            break;
+                        foreach (var mess in reactRoleMess)
+                            if (mess.Item1 != arg3.Emote.Name)
+                                indexOf++;
+                            else
+                                break;
                     
-                    await user.AddRoleAsync(user.Guild.GetRole(reactRoleMess[indexOf].Item2));
-                    await userMessage.RemoveReactionAsync(arg3.Emote, userMessage.Author);
+                        await user.AddRoleAsync(user.Guild.GetRole(reactRoleMess[indexOf].Item2));
+                        await userMessage.RemoveReactionAsync(arg3.Emote, arg3.User.Value);                    
+                    }
                 }
             }            
         }
