@@ -28,6 +28,7 @@ using System;
 using DiscordBot.Serializable;
 using System.Collections.Generic;
 using Discord;
+using System.Linq;
 
 namespace DiscordBot.Providers
 {
@@ -83,10 +84,7 @@ namespace DiscordBot.Providers
             {
                 using FileStream fs = new FileStream(file, FileMode.Open);
                 var serConn = (SerializableConnectors)serializer.Deserialize(fs);
-                List<ulong> hostsId = new List<ulong>();
-
-                foreach (var serConnector in serConn.SerializableConnectorsChannels)
-                    hostsId.Add(serConnector.HostId);
+                List<ulong> hostsId = serConn.SerializableConnectorsChannels.Select(x => x.HostId).ToList();                
 
                 if (hostsId.Contains(id))
                     return serConn.SerializableConnectorsChannels[hostsId.IndexOf(id)];
@@ -128,10 +126,7 @@ namespace DiscordBot.Providers
 
             if (!conn.SerializableConnectorsChannels.Contains(connector))
             {
-                List<ulong> hostsId = new List<ulong>();
-
-                foreach (var connect in conn.SerializableConnectorsChannels)
-                    hostsId.Add(connect.HostId);
+                List<ulong> hostsId = conn.SerializableConnectorsChannels.Select(x => x.HostId).ToList();
 
                 if (hostsId.Contains(connector.HostId))
                 {

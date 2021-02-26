@@ -50,23 +50,26 @@ namespace DiscordBot.Modules.NotificationsManaging
         private async Task Client_MessageDeleted(Cacheable<IMessage, ulong> arg1, ISocketMessageChannel arg2)
         {
             var mess = arg1.Value;
-            var content = mess.Content;            
+            if (mess != null)
+            { 
+                var content = mess.Content;            
             
-            if (!arg1.Value.Author.IsBot && arg2 is SocketTextChannel channel)
-            {
-                var user = arg1.Value.Author as SocketGuildUser;
-                await SendLog(user, new EmbedBuilder
+                if (!arg1.Value.Author.IsBot && arg2 is SocketTextChannel channel)
                 {
-                    Description = $"Участник {user.Mention} удалил сообщение из канала {channel.Mention}",
-                    Fields = new List<EmbedFieldBuilder>
+                    var user = arg1.Value.Author as SocketGuildUser;
+                    await SendLog(user, new EmbedBuilder
                     {
-                        new EmbedFieldBuilder
+                        Description = $"Участник {user.Mention} удалил сообщение из канала {channel.Mention}",
+                        Fields = new List<EmbedFieldBuilder>
                         {
-                            Name = "Содержание сообщения:",
-                            Value= $"`{content}`"
+                            new EmbedFieldBuilder
+                            {
+                                Name = "Содержание сообщения:",
+                                Value= $"`{content}`"
+                            }
                         }
-                    }
-                });
+                    });
+                }            
             }
         }
 

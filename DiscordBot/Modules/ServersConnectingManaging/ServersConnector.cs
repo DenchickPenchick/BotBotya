@@ -106,8 +106,7 @@ namespace DiscordBot.Modules.ServersConnectingManaging
         {
             string content = message.Content;
             var author = message.Author;
-            var guild = (author as SocketGuildUser).Guild;
-            var serGuild = FilesProvider.GetGuild(guild);
+            var guild = (author as SocketGuildUser).Guild;            
 
             return new EmbedBuilder
             {

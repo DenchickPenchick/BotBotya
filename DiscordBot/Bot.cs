@@ -21,6 +21,7 @@ _________________________________________________________________________
 */
 
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -37,7 +38,7 @@ using DiscordBot.Modules.NotificationsManaging;
 using Victoria;
 using DiscordBot.MusicOperations;
 using DiscordBot.Modules.MusicManaging;
-using System.Reflection;
+using System.Runtime;
 using DiscordBot.Providers;
 using DiscordBot.Modules.ServersConnectingManaging;
 using DiscordBot.Providers.FileManaging;
@@ -60,8 +61,10 @@ namespace DiscordBot
         public IServiceProvider Services;        
 
         public async Task RunBotAsync()
-        {            
-            Console.WriteAscii("Discord Bot Console", Color.Blue);                                                                   
+        {
+            var assembly = Assembly.GetEntryAssembly();
+            Console.WriteAscii("Discord Bot Console", Color.Blue);
+            Console.WriteLine($"{assembly.GetCustomAttribute<AssemblyProductAttribute>().Product}\nVersion: {assembly.GetName().Version}\nGitHub: {assembly.GetCustomAttribute<AssemblyMetadataAttribute>().Value}\n{assembly.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright}\n", Color.Orange);
 
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
@@ -134,13 +137,17 @@ namespace DiscordBot
             int argsPos = 0;
 
             try
-            {
+            {               
                 var message = arg as SocketUserMessage;
                 var provider = new GuildProvider((message.Author as SocketGuildUser).Guild);
                 var context = new SocketCommandContext(Client, message);                
                 var serGuild = FilesProvider.GetGuild((message.Author as SocketGuildUser).Guild);
+                var roles = (context.User as SocketGuildUser).Roles.Select(x => x.Id).ToList();
 
-                if (message.Author.IsBot || message is null || (!serGuild.CommandsChannels.Contains(arg.Channel.Id) && serGuild.CommandsChannels.Count > 0)) return;                
+                if (message.Author.IsBot || 
+                    message is null || 
+                    (!serGuild.CommandsChannels.Contains(arg.Channel.Id) && serGuild.CommandsChannels.Count > 0) ||
+                    roles.Exists(x => serGuild.IgnoreRoles.Contains(x))) return;                
                 if (message.HasStringPrefix(serGuild.Prefix, ref argsPos))
                 {                                            
                     IResult result = await Commands.ExecuteAsync(context, argsPos, Services);

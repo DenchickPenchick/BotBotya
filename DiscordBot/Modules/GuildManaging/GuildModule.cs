@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using Console = Colorful.Console;
 using Discord;
 using DiscordBot.Providers;
+using System.Linq;
 
 namespace DiscordBot.GuildManaging
 {
@@ -97,13 +98,7 @@ namespace DiscordBot.GuildManaging
                     if (!user.IsBot)
                     { 
                         var reactRoleMess = message.EmojiesRoleId;
-                        int indexOf = 0;
-
-                        foreach (var mess in reactRoleMess)
-                            if (mess.Item1 != arg3.Emote.Name)
-                                indexOf++;
-                            else
-                                break;
+                        int indexOf = reactRoleMess.Select(x => x.Item1).ToList().IndexOf(arg3.Emote.Name);
                     
                         await user.AddRoleAsync(user.Guild.GetRole(reactRoleMess[indexOf].Item2));
                         await userMessage.RemoveReactionAsync(arg3.Emote, arg3.User.Value);                    

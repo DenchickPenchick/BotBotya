@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using System;
 using DiscordBot.Serializable;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DiscordBot.Providers
 {
@@ -83,9 +84,7 @@ namespace DiscordBot.Providers
         public void SetWarns(IUser user, int warns)
         {
             var serGuild = SerializableGuild;
-            List<ulong> ids = new List<ulong>();            
-            foreach (var bad in serGuild.BadUsers)
-                ids.Add(bad.Item1);
+            List<ulong> ids = serGuild.BadUsers.Select(x => x.Item1).ToList();                        
             int index = ids.IndexOf(user.Id);
 
             if (index >= 0 && warns >= 0)
@@ -101,9 +100,7 @@ namespace DiscordBot.Providers
         public void PlusWarns(IUser user, int count)
         {
             var serGuild = SerializableGuild;
-            List<ulong> ids = new List<ulong>();
-            foreach (var bad in serGuild.BadUsers)
-                ids.Add(bad.Item1);
+            List<ulong> ids = serGuild.BadUsers.Select(x => x.Item1).ToList();            
             int index = ids.IndexOf(user.Id);
 
             if (index >= 0)
@@ -117,9 +114,7 @@ namespace DiscordBot.Providers
         public void MinusWarns(IUser user, int count)
         {
             var serGuild = SerializableGuild;
-            List<ulong> ids = new List<ulong>();
-            foreach (var bad in serGuild.BadUsers)
-                ids.Add(bad.Item1);
+            List<ulong> ids = serGuild.BadUsers.Select(x => x.Item1).ToList();
             int index = ids.IndexOf(user.Id);
 
             if (index >= 0)
@@ -134,9 +129,8 @@ namespace DiscordBot.Providers
         public (ulong, int) GetBadUser(IUser user)
         {
             var serGuild = SerializableGuild;
-            List<ulong> ids = new List<ulong>();
-            foreach (var bad in serGuild.BadUsers)
-                ids.Add(bad.Item1);
+            List<ulong> ids = serGuild.BadUsers.Select(x => x.Item1).ToList();
+
             int index = ids.IndexOf(user.Id);
             if (index >= 0)
                 return (serGuild.BadUsers[index].Item1, serGuild.BadUsers[index].Item2);

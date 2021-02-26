@@ -34,29 +34,26 @@ using Console = Colorful.Console;
 using DiscordBot.MusicOperations;
 using DiscordBot.Providers;
 using System.Collections.Generic;
-using DiscordBot.CustomCommands;
 using System.IO;
-using System.Xml.Serialization;
 using Victoria;
-using DiscordBot.Compiling;
 using System.Net;
-using System.Xml;
 using DiscordBot;
 using DiscordBot.Attributes;
 using DiscordBot.Serializable;
-using DiscordBot.Serializable.SerializableActions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace TestBot
 {
-    // Для команды 'БотПродолжай'
+    #region --СТРУКТУРЫ--
     public class SentenceStruct
     {
         public string prompt { get; set; }
         public int length { get; set; }
         public int num_samples { get; set; }
     }
+    #endregion
+
     public class Commands : InteractiveBase
     {
         private readonly Bot Bot;
@@ -187,6 +184,23 @@ namespace TestBot
             }.Build());
         }
 
+        [Command("СерверПоддержки")]
+        [Alias("Поддержка")]
+        [StandartCommand]
+        [Summary("получает приглашение на мой сервер поддержки.")]
+        public async Task MyServer() => await ReplyAsync("https://discord.gg/p6R4yk7uqK");        
+
+        [Command("МойРепозиторий")]
+        [StandartCommand]
+        [Summary("получает ссылку на мой GitHub репозиторий.")]
+        public async Task GitHubRepo() => await ReplyAsync("https://github.com/denvot/botbotya");        
+
+        [Command("ДобавитьБота")]
+        [StandartCommand]
+        [Alias("Добавить")]
+        [Summary("получает ссылку-приглашение меня на твой сервер")]
+        public async Task InviteLink() => await ReplyAsync("*Перейди по ссылке и пригласи меня*\n https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991");        
+
         [Command("Очистить", RunMode = RunMode.Async)]
         [StandartCommand]
         [RequireUserPermission(ChannelPermission.ManageMessages)]
@@ -196,47 +210,17 @@ namespace TestBot
             if (count <= 100 && count > 0)
             {
                 if (count == 100 || count == 99)
-                    count = 98;
-                try
-                {
-                    await ReplyAsync("Начинаю удаление сообщений...");
-                    var deleteMessagesThread = new Thread(new ParameterizedThreadStart(ClearMessages));
-                    deleteMessagesThread.Start(count);
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    Console.WriteLine("Error while cleaning", Color.Red);
-                    var errMess = await ReplyAsync("Сообщения двухнедельной давности, поэтому не могу удалить.");
-                    await Task.Delay(1000);
-                    await errMess.DeleteAsync();
-                }
+                    count = 98;                                
+                
+                var deleteMessagesThread = new Thread(new ParameterizedThreadStart(ClearMessages));
+                deleteMessagesThread.Start(count);                                   
             }
             else
-            {
-                Console.WriteLine("Error while cleaning", Color.Red);
-                var errMess = await ReplyAsync("Ты не можешь удалять более 100 сообщений за раз");
+            {                
+                var errMess = await ReplyAsync("Ты не можешь удалять более **100 сообщений** за раз");
                 await Task.Delay(1000);
                 await errMess.DeleteAsync();
             }
-
-        }
-
-        [Command("СерверПоддержки")]
-        [Alias("Поддержка")]
-        [StandartCommand]
-        [Summary("получает приглашение на мой сервер поддержки.")]
-        public async Task MyServer()
-        {
-            await ReplyAsync("https://discord.gg/p6R4yk7uqK");
-        }
-
-        [Command("ДобавитьБота")]
-        [StandartCommand]
-        [Alias("Добавить")]
-        [Summary("получает ссылку-приглашение меня на твой сервер")]
-        public async Task InviteLink()
-        {
-            await ReplyAsync("*Перейди по ссылке и пригласи меня*\n https://discord.com/oauth2/authorize?client_id=749991391639109673&scope=bot&permissions=1573583991");
         }
 
         [Command("Жалоба", RunMode = RunMode.Async)]
@@ -286,29 +270,18 @@ namespace TestBot
         [Summary("позволяет кикнуть пользователя с сервера.")]
         public async Task Kick(SocketGuildUser user)
         {
-            var contextRoles = (Context.User as SocketGuildUser).Roles;
-            int contextMaxPos = 0;
+            var maxContextRole = (Context.User as SocketGuildUser).Roles.OrderBy(x => x.Position).Last();
+            var userMaxRole = user.Roles.OrderBy(x => x.Position).Last();
 
-            foreach (var role in contextRoles)
-                if (role.Position > contextMaxPos)
-                    contextMaxPos = role.Position;
-
-            var toKickRoles = user.Roles;
-            int toKickMaxPos = 0;
-
-            foreach (var role in toKickRoles)
-                if (role.Position > toKickMaxPos)
-                    toKickMaxPos = role.Position;
-
-            if (contextMaxPos == toKickMaxPos)
+            if (maxContextRole.Position == userMaxRole.Position)
             {
-                await ReplyAsync("Ты не можешь его кикнуть, т.к. ты стоишь в ролевой иерархии вместе с ним/ее.");
+                await ReplyAsync("Ты не можешь его/ее кикнуть, т.к. ты стоишь в ролевой иерархии вместе с ним/ней.");
                 return;
             }
 
-            if (contextMaxPos < toKickMaxPos)
+            if (maxContextRole.Position < userMaxRole.Position)
             {
-                await ReplyAsync("Ты не можешь его кикнуть, т.к. ты стоишь ниже него/его в ролевой иерархии.");
+                await ReplyAsync("Ты не можешь его/ее кикнуть, т.к. ты стоишь ниже него/ее в ролевой иерархии.");
                 return;
             }
 
@@ -317,7 +290,6 @@ namespace TestBot
                 await user.KickAsync();
                 await ReplyAsync($"Я кикнул {user.Username}.");
             }
-
             else
                 await ReplyAsync($"Пользователь не найден.");
         }
@@ -328,29 +300,18 @@ namespace TestBot
         [Summary("позволяет забанить пользователя на сервере.")]
         public async Task Ban(SocketGuildUser user)
         {
-            var contextRoles = (Context.User as SocketGuildUser).Roles;
-            int contextMaxPos = 0;
+            var maxContextRole = (Context.User as SocketGuildUser).Roles.OrderBy(x => x.Position).Last();            
+            var userMaxRole = user.Roles.OrderBy(x => x.Position).Last();
 
-            foreach (var role in contextRoles)
-                if (role.Position > contextMaxPos)
-                    contextMaxPos = role.Position;
-
-            var toBanRoles = user.Roles;
-            int toBanMaxPos = 0;
-
-            foreach (var role in toBanRoles)
-                if (role.Position > toBanMaxPos)
-                    toBanMaxPos = role.Position;
-
-            if (contextMaxPos == toBanMaxPos)
+            if (maxContextRole.Position == userMaxRole.Position)
             {
-                await ReplyAsync("Ты не можешь его забанить, т.к. ты стоишь в ролевой иерархии вместе с ним/ее.");
+                await ReplyAsync("Ты не можешь его забанить, т.к. ты стоишь в ролевой иерархии вместе с ним/ней.");
                 return;
             }
 
-            if (contextMaxPos < toBanMaxPos)
+            if (maxContextRole.Position < userMaxRole.Position)
             {
-                await ReplyAsync("Ты не можешь его забанить, т.к. ты стоишь ниже него/его в ролевой иерархии.");
+                await ReplyAsync("Ты не можешь его забанить, т.к. ты стоишь ниже него/ее в ролевой иерархии.");
                 return;
             }
 
@@ -499,50 +460,11 @@ namespace TestBot
                     }.Build());
             }
         }
-        #endregion
-
-        #region --КОММУНИКАЦИЯ--
-        [Command("ДобавитьСоединение")]
-        [RequireUserPermission(GuildPermission.ManageGuild)]
-        [Summary("добаляет соединение с каналами других серверов.")]
-        [StandartCommand]
-        public async Task AddConnection(params ulong[] id)
-        {
-            FilesProvider.AddConnector(Context.Guild, new SerializableConnector
-            {
-                HostId = Context.Channel.Id,
-                EndPointsId = id.ToList()
-            });
-            await ReplyAsync("Соединение добавлено.");
-        }
-
-        [Command("УдалитьСоединение")]
-        [RequireUserPermission(GuildPermission.ManageGuild)]
-        [Summary("удаляет соединение с каналами других серверов.")]
-        [StandartCommand]
-        public async Task DeleteConnection()
-        {
-            var connectors = FilesProvider.GetConnectors(Context.Guild);
-            SerializableConnector connector = null;
-            if (connectors != null)
-                foreach (var conn in connectors.SerializableConnectorsChannels)
-                    if (Context.Channel.Id == conn.HostId)
-                        connector = conn;
-
-            if (connector != null)
-            {
-                connectors.SerializableConnectorsChannels.Remove(connector);
-                FilesProvider.RefreshConnectors(connectors);
-                await ReplyAsync("Удаление произведено успешно");
-            }
-            else
-                await ReplyAsync("В данном канале не существует соединения.");
-        }
 
         [Command("БотДавай")]
         [Alias("БотПродолжай", "БотГо")]
-        [CustomCommand]
-        [Summary("бот попытается продолжить предложение с помощью нейросети (https://porfirevich.ru).")]
+        [StandartCommand]
+        [Summary("попытается продолжить предложение с помощью [нейросети](https://porfirevich.ru).")]
         public async Task ContinueSentence(params string[] sentence)
         {
             if (sentence.Length == 0)
@@ -635,6 +557,43 @@ namespace TestBot
         }
         #endregion
 
+        #region --КОММУНИКАЦИЯ--
+        [Command("ДобавитьСоединение")]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Summary("добаляет соединение с каналами других серверов.")]
+        [StandartCommand]
+        public async Task AddConnection(params ulong[] id)
+        {
+            FilesProvider.AddConnector(Context.Guild, new SerializableConnector
+            {
+                HostId = Context.Channel.Id,
+                EndPointsId = id.ToList()
+            });
+            await ReplyAsync("Соединение добавлено.");
+        }
+
+        [Command("УдалитьСоединение")]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Summary("удаляет соединение с каналами других серверов.")]
+        [StandartCommand]
+        public async Task DeleteConnection()
+        {
+            var connectors = FilesProvider.GetConnectors(Context.Guild);
+            SerializableConnector connector = null;
+            if (connectors != null)
+                connector = connectors.SerializableConnectorsChannels.Where(x => x.HostId == Context.Channel.Id).First();                
+
+            if (connector != null)
+            {
+                connectors.SerializableConnectorsChannels.Remove(connector);
+                FilesProvider.RefreshConnectors(connectors);
+                await ReplyAsync("Удаление произведено успешно");
+            }
+            else
+                await ReplyAsync("В данном канале не существует соединения.");
+        }        
+        #endregion
+
         #region --РОЛЬ РЕАКЦИЯ--
         [Command("ДобавитьРольЗаРеакцию")]
         [RequireUserPermission(GuildPermission.ManageGuild)]
@@ -642,35 +601,39 @@ namespace TestBot
         [StandartCommand]
         public async Task AddReaction(ulong id, SocketTextChannel channel, Emoji emoji, IRole role)
         {
-            var reactRoleMessages = FilesProvider.GetReactRoleMessages();
-            List<ulong> reactRoleMessagesId = new List<ulong>();
+            var contextMaxRole = (Context.User as SocketGuildUser).Roles.OrderBy(x => x.Position).Last();
 
-            if (channel.GetMessageAsync(id) == null)
+            if (contextMaxRole.Position > role.Position)
             {
-                await ReplyAsync($"Не могу найти сообщение в {channel.Mention}.");
-                return;
-            }
+                var reactRoleMessages = FilesProvider.GetReactRoleMessages();
+                List<ulong> reactRoleMessagesId = reactRoleMessages.ReactRoleMessages.Select(x => x.Id).ToList();
 
-            foreach (var reactRoleMessage in reactRoleMessages.ReactRoleMessages)
-                reactRoleMessagesId.Add(reactRoleMessage.Id);
+                if (channel.GetMessageAsync(id) == null)
+                {
+                    await ReplyAsync($"Не могу найти сообщение в {channel.Mention}.");
+                    return;
+                }
 
-            if (reactRoleMessagesId.Contains(id))
-            {
-                FilesProvider.AddReactRoleToReactRoleMessage(id, emoji.Name, role.Id);
+                if (reactRoleMessagesId.Contains(id))
+                {
+                    FilesProvider.AddReactRoleToReactRoleMessage(id, emoji.Name, role.Id);
+                }
+                else
+                    FilesProvider.AddReactRoleMessage(new SerializableReactRoleMessage
+                    {
+                        Id = id,
+                        EmojiesRoleId = new List<(string, ulong)>
+                        {
+                            (emoji.Name, role.Id)
+                        }
+                    });
+
+                await channel.GetMessageAsync(id).Result.AddReactionAsync(emoji);
+
+                await ReplyAsync("Добавлено");
             }
             else
-                FilesProvider.AddReactRoleMessage(new SerializableReactRoleMessage
-                {
-                    Id = id,
-                    EmojiesRoleId = new List<(string, ulong)>
-                    {
-                        (emoji.Name, role.Id)
-                    }
-                });
-
-            await channel.GetMessageAsync(id).Result.AddReactionAsync(emoji);
-
-            await ReplyAsync("Добавлено");
+                await ReplyAsync("Ты стоишь либо ниже него/ее в ролевой иерархии, либо на одном с уровне с ним/ней");
         }
 
         [Command("УдалитьРольЗаРеакцию")]
@@ -680,10 +643,7 @@ namespace TestBot
         public async Task DeleteReaction(ulong id, Emoji emoji)
         {
             var reactRoleMessages = FilesProvider.GetReactRoleMessages();
-            List<ulong> reactRoleMessagesId = new List<ulong>();
-
-            foreach (var reactRoleMessage in reactRoleMessages.ReactRoleMessages)
-                reactRoleMessagesId.Add(reactRoleMessage.Id);
+            List<ulong> reactRoleMessagesId = reactRoleMessages.ReactRoleMessages.Select(x => x.Id).ToList();
 
             if (!reactRoleMessagesId.Contains(id))
             {
@@ -797,18 +757,22 @@ namespace TestBot
         [Summary("добавляет роль на продажу. Ее нужно упомянуть")]
         public async Task AddEconomicRole(int price, IRole role)
         {
-            if (Context.Message.MentionedRoles.Count > 0)
-            {
-                var economProvider = new EconomicProvider(Context.Guild);
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            if (!serGuild.BlaskListedRolesToSale.Contains(role.Id))
+                if (Context.Message.MentionedRoles.Count > 0)
+                {
+                    var economProvider = new EconomicProvider(Context.Guild);
 
-                var res = economProvider.AddRole(role, price);
-                if (res != EconomicProvider.Result.RoleAlreadyAdded)
-                    await ReplyAsync("Роль добавлена на продажу.");
+                    var res = economProvider.AddRole(role, price);
+                    if (res != EconomicProvider.Result.RoleAlreadyAdded)
+                        await ReplyAsync("Роль добавлена на продажу.");
+                    else
+                        await ReplyAsync("Роль уже добавлена на продажу.");
+                }
                 else
-                    await ReplyAsync("Роль уже добавлена на продажу.");
-            }
+                    await ReplyAsync("Не могу найти роль в сообщении.");
             else
-                await ReplyAsync("Не могу найти роль в сообщении.");
+                await ReplyAsync("Я не могу добавить данную роль, т.к. она находится в черном списке.");
         }
 
         [Command("УбратьРоль")]
@@ -830,24 +794,47 @@ namespace TestBot
             else
                 await ReplyAsync("Не могу найти роль в сообщении.");
         }
-         
+
+        [Command("Перевести")]
+        [RolesCommand]
+        [Summary("осуществляет перевод валюты другому участнику.")]
+        public async Task TransferBalance(int count, SocketGuildUser user)
+        {
+            var economicProvider = new EconomicProvider(Context.Guild);
+            var contextEconomUser = economicProvider.GetEconomicGuildUser(Context.User.Id);
+
+            if (contextEconomUser.Item1.Balance - count >= 0)
+            {
+                economicProvider.MinusBalance(Context.User, count);
+                economicProvider.AddBalance(user, count);
+                await ReplyAsync("Операция прошла успешно.");
+            }
+            else
+                await ReplyAsync("У тебя недостаточно средств.");
+        }
+
         [Command("КупитьРоль")]
         [RolesCommand]
         [Summary("покупает роль участнику. Ее нужно упомянуть.")]
         public async Task BuyRole(IRole role)
-        {
+        {            
             if (Context.Message.MentionedRoles.Count > 0)
             {
                 var economProvider = new EconomicProvider(Context.Guild);
                 var res = economProvider.BuyRole(role, Context.User as SocketGuildUser);
-                if (res == EconomicProvider.Result.NoRole)
-                    await ReplyAsync($"Роли {role.Mention} нет в каталоге.");
-                else if (res == EconomicProvider.Result.NoBalance)
-                    await ReplyAsync($"У тебя не хватает средств на покупку роли {role.Mention}");
-                else if (res == EconomicProvider.Result.Error)
-                    await ReplyAsync($"Произошла ошибка при покупке роли. Можешь обратиться на сервер поддержки.\n**Ссылка:** https://discord.gg/p6R4yk7uqK");
-                else if (res == EconomicProvider.Result.Succesfull)
-                    await ReplyAsync($"Роль {role.Mention} куплена");
+                if (Context.Guild.GetUser(Context.Client.CurrentUser.Id).Roles.OrderBy(x => x.Position).Last().Position > role.Position)
+                {
+                    if (res == EconomicProvider.Result.NoRole)
+                        await ReplyAsync($"Роли {role.Mention} нет в каталоге.");
+                    else if (res == EconomicProvider.Result.NoBalance)
+                        await ReplyAsync($"У тебя не хватает средств на покупку роли {role.Mention}");
+                    else if (res == EconomicProvider.Result.Error)
+                        await ReplyAsync($"Произошла ошибка при покупке роли. Можешь обратиться на сервер поддержки.\n**Ссылка:** https://discord.gg/p6R4yk7uqK");
+                    else if (res == EconomicProvider.Result.Succesfull)
+                        await ReplyAsync($"Роль {role.Mention} куплена");
+                }
+                else
+                    await ReplyAsync("Я не могу выдать тебе эту роль, так как я нахожусь в ролевой иерархии на одном уровне или ниже относительно данной роли.");
             }
             else
                 await ReplyAsync("Не могу найти роль в сообщении.");
@@ -1064,123 +1051,30 @@ namespace TestBot
             else
                 await ReplyAsync("Ты не можешь поставить ставку, т.к. у тебя недостаточно средств.");
         }
-        #endregion
 
-        #region --КАСТОМНЫЕ КОМАНДЫ--
-        [Command("ВсеКоманды")]
-        [CustomCommand]
-        [Summary("выводит все кастомные команды.")]
-        public async Task GetAllCustomCommands()
+        [Command("ДобавитьРолиВЧерныйСписок")]
+        [RolesCommand]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("добавляет роли в черный список на продажу. Когда роли находятся в черном списке на продажу, они не могут быть выставлены на продажу.")]
+        public async Task AddRoleToBlackList(params IRole[] roles)
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);            
+            serGuild.BlaskListedRolesToSale.AddRange(roles.Select(x => x.Id).ToList().Distinct());
+            FilesProvider.RefreshGuild(serGuild);
+            await ReplyAsync("Добавлено");
+        }
+
+        [Command("УбратьРолиИзЧерногоСписка")]
+        [RolesCommand]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("убирает роли из черного списка.")]
+        public async Task RemoveRolesFromBlackList(params IRole[] roles)
         {
             var serGuild = FilesProvider.GetGuild(Context.Guild);
-            var guild = Context.Guild;
-            var serial = new CustomCommandsSerial(guild);
-            var commands = serial.GetCustomCommands();
-            string allComm = null;
-            int arg = 1;
-
-            foreach (var command in commands.Commands)
-            {
-                allComm += $"\n{arg++}. {command.Name}. Алгоритм:";
-                var actions = command.Actions;
-                int argPos = 1;
-                foreach (var action in actions)
-                    switch (action.Item1)
-                    {
-                        case SerializableCommand.CommandActionType.Message:
-                            allComm += $"\n{arg - 1}.{argPos++}) Отправляет сообщение ({(action.Item2 as SerializableMessage).Message}).";
-                            break;
-                        case SerializableCommand.CommandActionType.Kick:
-                            allComm += $"\n{arg - 1}.{argPos++}) Кикает с сервера.";
-                            break;
-                        case SerializableCommand.CommandActionType.Ban:
-                            allComm += $"\n{arg - 1}.{argPos++}) Банит на сервере.";
-                            break;
-                        case SerializableCommand.CommandActionType.Interactive:
-                            allComm += $"\n{arg - 1}.{argPos++}) Ожидает нового сообщения.";
-                            break;
-                    }
-            }
-
-
-            await ReplyAsync(embed: new EmbedBuilder
-            {
-                Title = $"Кастомные команды сервера {Context.Guild.Name}",
-                Description = allComm,
-                Color = ColorProvider.GetColorForCurrentGuild(serGuild)
-            }.Build());
+            roles.Distinct().Select(x => x.Id).ToList().ForEach(x => serGuild.BlaskListedRolesToSale.Remove(x));
+            await ReplyAsync("Убрано");
         }
-
-        [Command("ПримерКоманды")]
-        [CustomCommand]
-        [Summary("отправляет XML файл с примером кастомной команды")]
-        public async Task SendExample()
-        {
-            string name = "example.xml";
-
-            try
-            {
-                var example = new SerializableCommand
-                {
-                    GuildId = Context.Guild.Id,
-                    Name = "ПриветМир",
-                    Actions = new List<ValueTuple<SerializableCommand.CommandActionType, object>>
-                { new ValueTuple<SerializableCommand.CommandActionType, object>(SerializableCommand.CommandActionType.Message, new SerializableMessage { Message = "Привет мир!", DataFromBuffer = false }) }
-                };
-                using (FileStream fs = new FileStream(name, FileMode.Create))
-                {
-                    var xml = new XmlSerializer(typeof(SerializableCommand), new[] { typeof(SerializableBan), typeof(SerializableKick), typeof(SerializableMessage) });
-                    xml.Serialize(fs, example);
-                }
-
-                await Context.Channel.SendFileAsync(name, "Пример кастомной команды");
-
-                File.Delete(name);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ex: {ex}");
-            }
-            finally
-            {
-                if (File.Exists(name))
-                    File.Delete(name);
-            }
-        }
-
-        [RequireUserPermission(GuildPermission.ManageGuild)]
-        [Command("ДобавитьКоманду")]
-        [CustomCommand]
-        [Summary("добавляет команду.")]
-        public async Task AddCommand()
-        {
-            var provider = new CustomCommandsProvider(Context.Guild);
-
-            await provider.AddCommand(Context);
-        }
-
-        [RequireUserPermission(GuildPermission.ManageGuild)]
-        [Command("К")]
-        [CustomCommand]
-        [Summary("позволяет использовать кастомную команду.")]
-        public async Task UseCommand(string name, params string[] args)
-        {
-            CustomCommandsCore core = new CustomCommandsCore(Context);
-
-            await core.ExecuteCommand(name);
-        }
-
-        [RequireUserPermission(GuildPermission.ManageGuild)]
-        [Command("УдалитьКоманду")]
-        [CustomCommand]
-        [Summary("удаляет команду.")]
-        public async Task DeleteCommand(string name)
-        {
-            var serial = new CustomCommandsSerial(Context.Guild);
-            serial.DeleteCommand(name);
-            await ReplyAsync($"Команда {name} удалена успешно");
-        }
-        #endregion
+        #endregion        
 
         #region --КАСТОМИЗАЦИЯ--
         [Command("ПоменятьНикнеймБота")]
@@ -1212,16 +1106,21 @@ namespace TestBot
         [Summary("устанавливает роль по-умолчанию, которая будет выдаваться каждому пользователю.\nДля того чтобы установить роль нужно ее отметить.")]
         public async Task AddDefaultRole(IRole role)
         {
-            SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
+            if (Context.Guild.GetUser(Context.Client.CurrentUser.Id).Roles.OrderBy(x => x.Position).Last().Position > role.Position)
+            {
+                SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
 
-            serializableGuild.DefaultRoleId = role.Id;
+                serializableGuild.DefaultRoleId = role.Id;
 
-            FilesProvider.RefreshGuild(serializableGuild);
+                FilesProvider.RefreshGuild(serializableGuild);
 
-            await ReplyAsync("Роль успешно задана. Она будет выдаваться всем пользователям по-умолчанию.");
+                await ReplyAsync("Роль успешно задана. Она будет выдаваться всем пользователям по-умолчанию.");
 
-            foreach (var user in Context.Guild.Users)
-                await user.AddRoleAsync(role);
+                foreach (var user in Context.Guild.Users)
+                    await user.AddRoleAsync(role);
+            }
+            else
+                await ReplyAsync("Я не могу выдавать роль, т.к. нахожусь ниже или на одном уровне в иерархии ролей.");
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
@@ -1376,7 +1275,7 @@ namespace TestBot
             else
             {
                 SerializableGuild guild = FilesProvider.GetGuild(Context.Guild);
-                List<string> filteredWords = new List<string>();
+                List<string> filteredWords = new List<string>();                
 
                 foreach (string word in wordsInMess)
                     if (!filteredWords.Contains(word.ToLower()) && !guild.BadWords.Contains(word.ToLower()))
@@ -1628,7 +1527,6 @@ namespace TestBot
 
             await ReplyAsync($"Очищено {count} слов.");
         }
-
 
         [Command("ПроверкаСлов")]
         [CustomisationCommand]
@@ -1905,7 +1803,7 @@ namespace TestBot
         [CustomisationCommand]
         [Summary("разрешает боту отвечать во всех каналах.")]
         public async Task AllChannelsToReply()
-        {        
+        {
             var serGuild = FilesProvider.GetGuild(Context.Guild);
 
             serGuild.CommandsChannels.Clear();
@@ -1913,7 +1811,43 @@ namespace TestBot
             FilesProvider.RefreshGuild(serGuild);
 
             await ReplyAsync($"Теперь я буду отвечать во всех каналах.");
-        }        
+        }
+
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [Command("ИгнорироватьРоли")]
+        [CustomisationCommand]
+        [Summary("устанавливает роли, которым бот не будет отвечать")]
+        public async Task IgnoreRoles(params IRole[] roles)
+        {
+            List<ulong> filteredIgnoreRoles = new List<ulong>();
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            string rolesMent = null;            
+                
+            for(int i = 0; i < roles.Length; i++)
+                if (!filteredIgnoreRoles.Contains(roles[i].Id))
+                {
+                    filteredIgnoreRoles.Add(roles[i].Id);
+                    rolesMent += i == roles.Length - 1 ? $" {roles[i].Mention}." : $" {roles[i].Mention},";
+                }
+
+            serGuild.IgnoreRoles = filteredIgnoreRoles;
+            FilesProvider.RefreshGuild(serGuild);
+            await ReplyAsync($"Теперь я буду игнорировать следующие роли: {rolesMent}");
+        }
+        
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [Command("ОтвечатьВсем")]
+        [CustomisationCommand]
+        [Summary("разрешает боту отвечать всем ролям на сервере")]
+        public async Task FullNoIgnoreRoles()
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            serGuild.IgnoreRoles.Clear();
+
+            FilesProvider.RefreshGuild(serGuild);
+            await ReplyAsync("Теперь я буду отвечать всем пользователям на это сервере");
+        }
         
         #endregion
 
@@ -1921,12 +1855,23 @@ namespace TestBot
         {
             try
             {
-                var messages = await Context.Channel.GetMessagesAsync((int)count + 2).FlattenAsync();
-                await (Context.Channel as SocketTextChannel).DeleteMessagesAsync(messages);
-                var delMess = await ReplyAsync("Удаление сообщений произведено успешно");
-                Console.WriteLine("Cleared", Color.Green);
-                Thread.Sleep(1000);
-                await delMess.DeleteAsync();
+                var thrStMess = await ReplyAsync("Начинаю удаление сообщений...");
+
+                var messages = await Context.Channel.GetMessagesAsync((int)count + 2).FlattenAsync();                
+                if (messages.Any(x => DateTimeOffset.Now.ToUniversalTime().Subtract(x.Timestamp) > TimeSpan.FromSeconds(14)))
+                {
+                    var mess = await ReplyAsync("Я не могу удалить сообщения двухнедельной давности");
+                    Thread.Sleep(1000);
+                    await mess.DeleteAsync();
+                    await thrStMess.DeleteAsync();
+                }                
+                else
+                {
+                    await (Context.Channel as SocketTextChannel).DeleteMessagesAsync(messages);
+                    var delMess = await ReplyAsync("Удаление сообщений произведено успешно");                    
+                    Thread.Sleep(1000);
+                    await delMess.DeleteAsync();                    
+                }
                 Thread.Sleep(0);
             }
             catch (Exception ex)
