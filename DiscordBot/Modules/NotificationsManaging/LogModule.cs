@@ -101,8 +101,8 @@ namespace DiscordBot.Modules.NotificationsManaging
 
         private async Task Client_MessageUpdated(Cacheable<IMessage, ulong> arg1, SocketMessage arg2, ISocketMessageChannel arg3)
         {
-            if (!arg2.Author.IsBot && arg3 is SocketTextChannel channel)
-                await SendLog((arg2 as SocketUserMessage).Author, new EmbedBuilder
+            if (!arg2.Author.IsBot && arg3 is SocketTextChannel channel && arg2 is SocketUserMessage message)
+                await SendLog(message.Author, new EmbedBuilder
                 {
                     Description = $"Участник {(arg2.Author as SocketGuildUser).Mention} отредактировал сообщение в канале {channel.Mention}.",
                     Fields = new List<EmbedFieldBuilder>

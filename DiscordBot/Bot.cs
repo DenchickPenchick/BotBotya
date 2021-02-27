@@ -69,7 +69,7 @@ namespace DiscordBot
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 AlwaysDownloadUsers = true,
-                MessageCacheSize = 1000
+                MessageCacheSize = 1024
             });
 
             Commands = new CommandService();            
