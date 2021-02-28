@@ -116,17 +116,7 @@ namespace DiscordBot.Providers.FileManaging
                 Console.WriteLine("BotGuilds created", Color.Green);
             }
             else
-                Console.WriteLine("BotGuilds found", Color.Green);
-            
-            Console.WriteLine("Checking directory CustomCommandsDirectory...");
-            if (!Directory.Exists(@$"{Bot.PathToBotDirectory}/CustomCommandsDirectory"))
-            {
-                Console.WriteLine("CustomCommandsDirectory not found", Color.Red);
-                Directory.CreateDirectory($@"{Bot.PathToBotDirectory}/CustomCommandsDirectory");
-                Console.WriteLine("CustomCommandsDirectory created", Color.Green);
-            }
-            else
-                Console.WriteLine("CustomCommandsDirectory found", Color.Green);
+                Console.WriteLine("BotGuilds found", Color.Green);           
 
             Console.WriteLine("Checking directory ServerConnectorsHandlers...");
             if (!Directory.Exists(@$"{Bot.PathToBotDirectory}/ServerConnectorsHandlers"))
