@@ -109,6 +109,8 @@ namespace TestBot
                     categoryAttribute = new MusicCommandAttribute();
                 else if (command.Attributes.Contains(new RolesCommandAttribute()))
                     categoryAttribute = new RolesCommandAttribute();
+                else if(command.Attributes.Contains(new ConsoleCommandsAttribute())
+                    categoryAttribute = new ConsoleCommandsAttribute();
                 else
                     categoryAttribute = new StandartCommandAttribute();
 
