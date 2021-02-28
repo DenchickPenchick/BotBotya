@@ -109,7 +109,7 @@ namespace TestBot
                     categoryAttribute = new MusicCommandAttribute();
                 else if (command.Attributes.Contains(new RolesCommandAttribute()))
                     categoryAttribute = new RolesCommandAttribute();
-                else if(command.Attributes.Contains(new ConsoleCommandsAttribute())
+                else if(command.Attributes.Contains(new ConsoleCommandsAttribute()))
                     categoryAttribute = new ConsoleCommandsAttribute();
                 else
                     categoryAttribute = new StandartCommandAttribute();
@@ -1867,7 +1867,7 @@ namespace TestBot
                 var thrStMess = await ReplyAsync("Начинаю удаление сообщений...");
 
                 var messages = await Context.Channel.GetMessagesAsync((int)count + 2).FlattenAsync();                
-                if (messages.Any(x => DateTimeOffset.Now.ToUniversalTime().Subtract(x.Timestamp) > TimeSpan.FromSeconds(14)))
+                if (messages.Any(x => DateTimeOffset.Now.ToUniversalTime().Subtract(x.Timestamp) > TimeSpan.FromDays(14)))
                 {
                     var mess = await ReplyAsync("Я не могу удалить сообщения двухнедельной давности");
                     Thread.Sleep(1000);
