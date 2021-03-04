@@ -102,9 +102,7 @@ namespace TestBot
                 if (command.Attributes.Contains(new StandartCommandAttribute()))
                     categoryAttribute = new StandartCommandAttribute();
                 else if (command.Attributes.Contains(new CustomisationCommandAttribute()))
-                    categoryAttribute = new CustomisationCommandAttribute();
-                else if (command.Attributes.Contains(new CustomCommandAttribute()))
-                    categoryAttribute = new CustomCommandAttribute();
+                    categoryAttribute = new CustomisationCommandAttribute();                
                 else if (command.Attributes.Contains(new MusicCommandAttribute()))
                     categoryAttribute = new MusicCommandAttribute();
                 else if (command.Attributes.Contains(new RolesCommandAttribute()))
