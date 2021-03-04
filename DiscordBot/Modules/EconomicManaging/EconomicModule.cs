@@ -26,10 +26,17 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.EconomicManaging
 {
+    /// <summary>
+    /// Модуль, который отвечает за "экономику" серверов
+    /// </summary>
     public class EconomicModule : IModule
     {        
         private DiscordSocketClient Client { get; set; }
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="EconomicModule"/>
+        /// </summary>
+        /// <param name="client">Клиент (<see cref="DiscordSocketClient"/>)</param>
         public EconomicModule(DiscordSocketClient client)
         {
             Client = client;
@@ -38,6 +45,9 @@ namespace DiscordBot.Modules.EconomicManaging
             client.Ready += Client_Ready;
         }        
 
+        /// <summary>
+        /// Не нужны какие-либо действия, поэтому здесь <see cref="RunModule()"/> - это заглушка
+        /// </summary>
         public void RunModule()
         {
             

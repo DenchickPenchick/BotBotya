@@ -15,18 +15,42 @@ _________________________________________________________________________
 |GitHub: https://github.com/DenchickPenchick/BotBotya                   |
 |______________________________________________________________________ |
 |© Copyright 2021 Denis Voitenko                                        |
-|© Copyright 2021 All rigths reserved                                   |
+|© Copyright 2021 All rights reserved                                   |
 |License: http://opensource.org/licenses/MIT                            |
 _________________________________________________________________________
 */
 
-using System;
 
-namespace DiscordBot.Serializable.SerializableActions
+using DiscordBot.TextReaders;
+using System.Collections.Generic;
+
+namespace DiscordBot.Models
 {
-    [Serializable]
-    public class SerializableBan : IBufferable
+    /// <summary>
+    /// В данный момент на стадии разработки модель слова. Не использовать!
+    /// </summary>
+    public class WordModel
     {
-        public bool DataFromBuffer { get; set; } = false;
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="WordModel"/>.
+        /// </summary>
+        /// <param name="word"></param>
+        public WordModel(string word)
+        {
+            this.word = word;            
+        }
+        
+        private readonly string word = null;
+
+        /// <summary>
+        /// Слова с опечатками
+        /// </summary>
+        public List<string> Exceptions { get; private set; } = new List<string>();
+        /// <summary>
+        /// Считает редакционное расстояние Левенштейна.
+        /// </summary>
+        /// <param name="wordToCalc">Слово, для которого нужно посчитать редакционное расстояние</param>
+        /// <returns>Расстояние Левенштейна. Тип: <see cref="int"/>.</returns>
+        public int CalculateLevensteinDistanse(string wordToCalc) => Filter.Distance(word, wordToCalc);        
     }
 }

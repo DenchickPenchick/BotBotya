@@ -32,17 +32,28 @@ using System.Threading;
 
 namespace DiscordBot.Modules.ContentManaging
 {
+    /// <summary>
+    /// Модуль, который отвечает за сортировку и фильтрацию контента. Должен быть инициализирован и запущен только один раз.
+    /// </summary>
     public class ContentModule : IModule
     {
         private DiscordSocketClient Client { get; set; }
         private CommandService CommandService { get; set; }
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="ContentModule"/>
+        /// </summary>
+        /// <param name="client">Клиент (<see cref="DiscordSocketClient"/>)</param>
+        /// <param name="commandService">Команды (<see cref="Discord.Commands.CommandService"/>)</param>
         public ContentModule(DiscordSocketClient client, CommandService commandService)
         {
             Client = client;
             CommandService = commandService;
         }
 
+        /// <summary>
+        /// Запускает модуль.
+        /// </summary>
         public void RunModule()
         {
             Client.MessageReceived += CheckContent;
