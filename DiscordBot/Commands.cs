@@ -292,11 +292,10 @@ namespace TestBot
                     await guild.CreateVoiceChannelAsync("ГС #2", x => x.CategoryId = voiceChats.Id);
                     await guild.CreateVoiceChannelAsync("ГС #3", x => x.CategoryId = voiceChats.Id);
                     var createRoomChannelForGroup = await guild.CreateVoiceChannelAsync("➕Создать комнату", x => x.CategoryId = roomsChats.Id);
-
-                    serGuild.GuildNotifications = true;
+                    
                     serGuild.SystemChannels.CreateRoomChannelId = createRoomChannelForGroup.Id;
                     serGuild.SystemCategories.VoiceRoomsCategoryId = roomsChats.Id;
-                    serGuild.LoggerId = logsChat.Id;
+                    serGuild.SystemChannels.LogsChannelId = logsChat.Id;
                     serGuild.EmojiOfRoom = "🖌";
                     FilesProvider.RefreshGuild(serGuild);
                     await mainAudChat.SendMessageAsync($"Я успешно завершил настройку сервера {guild.Name}.");
@@ -1570,39 +1569,22 @@ namespace TestBot
         }
 
         [RequireUserPermission(GuildPermission.Administrator)]
-        [Command("Уведомления", RunMode = RunMode.Async)]
+        [Command("Уведомления")]
         [Alias("Логирование", "Лог")]
         [Summary("включает/выключает уведомления сервера. При бане, кике, добавлении на сервер пользователя бот тебя уведомит")]
         [CustomisationCommand]
-        public async Task EnableGuildNotifications()
+        public async Task EnableGuildNotifications(SocketTextChannel logChannel)
         {
             SerializableGuild serializableGuild = FilesProvider.GetGuild(Context.Guild);
 
-            serializableGuild.GuildNotifications = !serializableGuild.GuildNotifications;
-
-            if (serializableGuild.GuildNotifications)
-            {
-                await ReplyAsync("Упомяни канал куда нужно присылать логи.");
-                var respondChannelMessage = await NextMessageAsync();
-                if (respondChannelMessage != null)
-                {
-                    if (respondChannelMessage.MentionedChannels != null)
-                        serializableGuild.LoggerId = respondChannelMessage.MentionedChannels.ToArray()[0].Id;
-                    else
-                    {
-                        await ReplyAsync("Ни одного канала не найдено.");
-                        return;
-                    }
-                }
-                else
-                {
-                    await ReplyAsync("Ты не ответил в течении 5 минут. Команда аннулированна.");
-                    return;
-                }
-                await ReplyAsync("Уведомления включены.");
-            }
-            else
-                await ReplyAsync("Уведомления выключены.");
+            serializableGuild.SystemChannels.LogsChannelId = logChannel.Id;
+            await ReplyAsync($"Теперь я буду присылать логи в {logChannel.Mention}");
+            await logChannel.SendMessageAsync(embed: new EmbedBuilder
+            { 
+                Title = "В данный канал теперь будут присылаться логи",
+                Color = ColorProvider.GetColorForCurrentGuild(Context.Guild),
+                Description = "Если вы хотите отключить логирование, тогда удалите этот канал или сбросьте настройки бота."
+            }.Build());
 
             FilesProvider.RefreshGuild(serializableGuild);
         }

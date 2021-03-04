@@ -12,7 +12,7 @@ namespace DiscordBot.Providers
             switch (name.ToLower())
             {
                 case "синий":
-                    color = Color.Blue;
+                    color = new Color(18, 124, 164);
                     break;
                 case "красный":
                     color = Color.Red;
@@ -30,7 +30,7 @@ namespace DiscordBot.Providers
                     color = Color.LightGrey;
                     break;
                 default:
-                    return Color.Blue;
+                    return new Color(18, 124, 164);
             }
 
             return color;

@@ -143,7 +143,7 @@ namespace DiscordBot.Modules.NotificationsManaging
         {
             var guild = (user as SocketGuildUser).Guild;
             var serGuild = FilesProvider.GetGuild(guild);
-            if (FilesProvider.GetGuild((user as SocketGuildUser).Guild).GuildNotifications && serGuild.LoggerId != default)
+            if (serGuild.SystemChannels.LogsChannelId != default)
             {                                
                 string time = $"Время: {DateTime.Now.ToShortTimeString()}";                
 
@@ -154,13 +154,12 @@ namespace DiscordBot.Modules.NotificationsManaging
                 };
                 builder.Color = ColorProvider.GetColorForCurrentGuild(serGuild);
 
-                var channel = guild.GetTextChannel(serGuild.LoggerId);
+                var channel = guild.GetTextChannel(serGuild.SystemChannels.LogsChannelId);
                 if (channel != null)
                     await channel.SendMessageAsync(embed: builder.Build());
                 else 
-                {                   
-                    serGuild.GuildNotifications = false;
-                    serGuild.LoggerId = default;
+                {                                       
+                    serGuild.SystemChannels.LogsChannelId = default;
                     FilesProvider.RefreshGuild(serGuild);
                 }                    
             }            
