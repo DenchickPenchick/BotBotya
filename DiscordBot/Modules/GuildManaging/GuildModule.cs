@@ -30,16 +30,26 @@ using System.Linq;
 
 namespace DiscordBot.GuildManaging
 {
+    /// <summary>
+    /// Модуль, который отвечает за правильную работу с серверами.
+    /// </summary>
     public class GuildModule : IModule
     {        
         private readonly DiscordSocketClient Client;        
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="GuildModule"/>
+        /// </summary>
+        /// <param name="client">Клиент (<see cref="DiscordSocketClient"/>)</param>
         public GuildModule(DiscordSocketClient client)
         {
             Client = client;
             Client.ReactionAdded += Client_ReactionAdded;
         }        
 
+        /// <summary>
+        /// Запускает модуль
+        /// </summary>
         public void RunModule()
         {
             Client.JoinedGuild += Client_JoinedGuild;            

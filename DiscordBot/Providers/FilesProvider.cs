@@ -49,6 +49,28 @@ namespace DiscordBot.Providers
             return (SerializableGuild)serializer.Deserialize(stream);
         }
 
+        public static IEnumerable<SerializableGuild> GetAllGuilds()
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
+            string directoryWithGuilds = $"{GetBotDirectoryPath()}/BotGuilds";
+            string[] files = Directory.GetFiles(directoryWithGuilds);            
+
+            foreach (string file in files)
+            {
+                using FileStream stream = new FileStream(file, FileMode.Open);
+                yield return (SerializableGuild)serializer.Deserialize(stream);
+            }
+        }
+
+        public static SerializableGlobalOptions GetGlobalOptions()
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializableGlobalOptions));
+            string pathToXML = $"{GetBotDirectoryPath()}/GlobalOptions.xml";
+
+            using FileStream stream = new FileStream(pathToXML, FileMode.Open);
+            return (SerializableGlobalOptions)serializer.Deserialize(stream);
+        }
+
         public static void DeleteGuild(ulong id)
         {
             File.Delete($@"{GetBotDirectoryPath()}/BotGuilds/{id}.xml");
@@ -73,6 +95,16 @@ namespace DiscordBot.Providers
             File.WriteAllText($@"{GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml", string.Empty);
             using FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml", FileMode.Open, FileAccess.ReadWrite);
             serializer.Serialize(stream, guild);
+        }
+
+        public static void RefreshGlobalOptions(SerializableGlobalOptions options)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializableGlobalOptions));
+            string pathToXML = $"{GetBotDirectoryPath()}/GlobalOptions.xml";
+
+            File.WriteAllText(pathToXML, string.Empty);
+            using FileStream stream = new FileStream(pathToXML, FileMode.Open);
+            serializer.Serialize(stream, options);
         }
 
         public static SerializableConnector GetConnector(ulong id)

@@ -32,12 +32,19 @@ using Victoria.EventArgs;
 
 namespace DiscordBot.Modules.MusicManaging
 {
+    /// <summary>
+    /// Музыкальный модуль
+    /// </summary>
     public class MusicModule : IModule
     {
         private readonly DiscordSocketClient Client;
         private readonly LavaNode LavaNode;
         private readonly LavaOperations LavaOperations;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="MusicModule"/>
+        /// </summary>
+        /// <param name="services">Зависимости, которые являются частью пространства имен <see cref="Microsoft.Extensions.DependencyInjection"/>. В зависимости обязательно должны быть следующие типы: <see cref="Victoria.LavaNode"/>, <see cref="DiscordSocketClient"/>, <see cref="DiscordBot.MusicOperations.LavaOperations"/>.</param>
         public MusicModule(IServiceProvider services)
         {
             LavaNode = services.GetRequiredService<LavaNode>();
@@ -48,6 +55,9 @@ namespace DiscordBot.Modules.MusicManaging
             Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;            
         }                
 
+        /// <summary>
+        /// Запускает модуль
+        /// </summary>
         public void RunModule()
         {
             //Метод пустой, т.к. не нужно запускать setup методов для модулей.

@@ -36,15 +36,25 @@ using System.Text;
 
 namespace DiscordBot.Providers.FileManaging
 {
+    /// <summary>
+    /// Один из ключевых модулей, который отвечает за сохранность структуры данных бота.
+    /// </summary>
     public class FilesModule : IModule
     {
-        public Bot Bot { get; set; }
+        private Bot Bot { get;  }
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="FilesModule"/>.
+        /// </summary>
+        /// <param name="bot"></param>
         public FilesModule(Bot bot)
         {
             Bot = bot;
         }        
 
+        /// <summary>
+        /// Запускает модуль.
+        /// </summary>
         public void RunModule()
         {
             ConfigureBot();
@@ -197,8 +207,8 @@ namespace DiscordBot.Providers.FileManaging
                 serializer.Serialize(stream, serializableGuild);         
             Console.WriteLine($"Guild({guild.Id}) serialized.", Color.Green);
         }
-
-        public void DeleteGuild(ulong id)
+        
+        private void DeleteGuild(ulong id)
         {            
             File.Delete($@"{FilesProvider.GetBotDirectoryPath()}/BotGuilds/{id}.xml");
         }
