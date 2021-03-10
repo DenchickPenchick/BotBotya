@@ -32,18 +32,23 @@ namespace DiscordBot.RoomManaging
 {
     public class RoomModule : IModule
     {
-        private DiscordSocketClient Client { get; set; }                
+        private DiscordSocketClient Client { get; set; }
+
+        public delegate Task RoomEventsHandler(SocketGuildUser user, IVoiceChannel channel);       
+        public event RoomEventsHandler OnRoomCreated;
+        public event RoomEventsHandler OnRoomDestroyed;
 
         public RoomModule(DiscordSocketClient client)
         {
             Client = client;
+            Client.Ready += Client_Ready;
+            Client.ChannelDestroyed += Client_ChannelDestroyed;
+            Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
         }
 
         public void RunModule()
         {
-            Client.Ready += Client_Ready;
-            Client.ChannelDestroyed += Client_ChannelDestroyed;
-            Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;           
+            
         }
 
         private async Task Client_Ready()
@@ -80,16 +85,24 @@ namespace DiscordBot.RoomManaging
                     if (channel != null && prevchannel != null && channel != prevchannel)
                     {
                         if (channel == provider.CreateRoomChannel())
-                        {                                                        
+                        {
                             if (prevchannel.Name.Contains(socketGuildUser.Nickname) || prevchannel.Name.Contains(socketGuildUser.Username))
                                 await socketGuildUser.ModifyAsync(x => x.Channel = prevchannel);
                             else if (prevchannel.Users.Count == 0 && prevchannel.Category == provider.RoomsCategoryChannel())
+                            {
+                                await OnRoomDestroyed.Invoke(socketGuildUser, prevchannel);
                                 await prevchannel.DeleteAsync();
+                            }
+
                             else
-                                await CreateRoom(socketGuildUser, provider);                            
+                                await CreateRoom(socketGuildUser, provider);
                         }
                         else if (prevchannel != provider.CreateRoomChannel() && prevchannel.Category == provider.RoomsCategoryChannel() && prevchannel.Users.Count == 0)
+                        {
+                            await OnRoomDestroyed.Invoke(socketGuildUser, prevchannel);
                             await prevchannel.DeleteAsync();
+                        }
+                        
                     }
                     else if (channel != null)//Пользователь подкючился
                     {
@@ -98,7 +111,10 @@ namespace DiscordBot.RoomManaging
                     }
                     else if (prevchannel != null)//Пользователь отключился
                         if (prevchannel.Users.Count == 0 && prevchannel.Category == provider.RoomsCategoryChannel() && prevchannel.Name != provider.CreateRoomChannel().Name)
-                            await prevchannel.DeleteAsync();
+                        {                            
+                            await OnRoomDestroyed.Invoke(socketGuildUser, prevchannel);
+                            await prevchannel.DeleteAsync();                            
+                        }                        
                 }
                     
             }
@@ -143,6 +159,7 @@ namespace DiscordBot.RoomManaging
                         }
                 }                
             }
+            Console.WriteLine("Checked");
         }
 
         private async Task<SocketVoiceChannel> CreateRoom(SocketGuildUser user, GuildProvider provider)
@@ -168,6 +185,7 @@ namespace DiscordBot.RoomManaging
             if (!haveChannel)
             {                
                 var newChannel = await guild.CreateVoiceChannelAsync($"{serGuild.EmojiOfRoom}Комната {user.Nickname ?? user.Username}", x => x.CategoryId = provider.RoomsCategoryChannel().Id);
+                await OnRoomCreated.Invoke(user, newChannel);
                 await user.ModifyAsync(x =>
                 {
                     x.Channel = newChannel;

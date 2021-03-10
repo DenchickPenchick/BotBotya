@@ -674,10 +674,10 @@ namespace TestBot
                                 var included_data = (JArray)json_obj["replies"];
                                 var text = included_data[0].Value<string>();
 
-                                if (String.IsNullOrEmpty(text))
+                                if (string.IsNullOrEmpty(text))
                                     await ReplyAsync("В ответе пусто.");
                                 else
-                                    await ReplyAsync($"{sentence_str} {HttpUtility.HtmlDecode(text)}");
+                                    await ReplyAsync($"{sentence_str.First().ToString().ToUpper() + sentence_str[1..]} {HttpUtility.HtmlDecode(text)}");
                             }
                         }
                     }

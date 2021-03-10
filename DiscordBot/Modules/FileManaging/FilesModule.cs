@@ -164,6 +164,9 @@ namespace DiscordBot.Providers.FileManaging
                 }
                 Console.WriteLine("ReactRoleMessages.xml created", Color.Green);
             }
+            else
+                Console.WriteLine("ReactRoleMessages.xml found", Color.Green);
+            Console.WriteLine("Files checked");
         }
 
         private async void SetupBotGuildData()

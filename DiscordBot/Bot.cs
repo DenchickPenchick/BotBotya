@@ -56,9 +56,10 @@ namespace DiscordBot
         public string TOKEN = null;
         public string PathToBotDirectory = null;
         
-        public DiscordSocketClient Client;
-        public CommandService Commands;        
-        public IServiceProvider Services;        
+        public DiscordSocketClient Client { get; private set; }
+        public CommandService Commands { get; private set; }
+        public IServiceProvider Services { get; private set; }    
+        public IServiceProvider Modules { get; private set; }
 
         public async Task RunBotAsync()
         {
@@ -90,20 +91,25 @@ namespace DiscordBot
                 .AddSingleton(new LavaConfig())
                 .AddLavaNode()
                 .AddSingleton<LavaOperations>()
+                .BuildServiceProvider();            
+
+            Modules = new ServiceCollection()
+                .AddSingleton(Client)
+                .AddSingleton(Commands)
+                .AddSingleton(Services.GetRequiredService<LavaNode>())
+                .AddSingleton(Services.GetRequiredService<LavaOperations>())
+                .AddSingleton(this)
+                .AddSingleton(new FilesModule(this))
+                .AddSingleton(new GuildModule(Client))
+                .AddSingleton(new RoomModule(Client))
+                .AddSingleton(new ContentModule(Client, Commands))
+                .AddSingleton(new LogModule(Client))
+                .AddSingleton(new MusicModule(Services))
+                .AddSingleton(new ServersConnector(Client))
+                .AddSingleton(new EconomicModule(Client))
                 .BuildServiceProvider();
 
-            new ProcessingModule(new ProcessingConfiguration
-            {
-                DiscordSocketClient = Client,
-                RoomModule = new RoomModule(Client),
-                ContentModule = new ContentModule(Client, Commands),
-                FileModule = new FilesModule(this),
-                GuildModule = new GuildModule(Client),
-                NotificationsModule = new LogModule(Client),
-                MusicModule = new MusicModule(Services),
-                ServersConnector = new ServersConnector(Client),
-                EconomicModule = new EconomicModule(Client)
-            }).RunModule();
+            new ProcessingModule(Modules).RunModule();
 
             Client.Ready += Client_Ready;            
 

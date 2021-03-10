@@ -26,25 +26,49 @@ using Discord.WebSocket;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using DiscordBot.Providers;
+using DiscordBot.RoomManaging;
 
 namespace DiscordBot.Modules.NotificationsManaging
 {
     public class LogModule : IModule
     {
         private DiscordSocketClient Client { get; }
+        private RoomModule RoomModuleInstance { get; set; }
 
         public LogModule(DiscordSocketClient client)
         {
-            Client = client;
+            Client = client;            
+        }
+
+        public void SetInstanceOfRoomModule(RoomModule instance)
+        {
+            RoomModuleInstance = instance;
         }
 
         public void RunModule()
         {
+            RoomModuleInstance.OnRoomCreated += RoomModuleInstance_OnRoomCreated;
+            RoomModuleInstance.OnRoomDestroyed += RoomModuleInstance_OnRoomDestroyed;
             Client.MessageDeleted += Client_MessageDeleted;
             Client.UserLeft += Client_UserLeft;
             Client.UserJoined += Client_UserJoined;
-            Client.MessageUpdated += Client_MessageUpdated;            
-            Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;            
+            Client.MessageUpdated += Client_MessageUpdated;                                  
+        }
+
+        private async Task RoomModuleInstance_OnRoomDestroyed(SocketGuildUser user, IVoiceChannel channel)
+        {
+            await SendLog(user, new EmbedBuilder
+            { 
+                Description = $"{user.Mention} удалил комнату {channel.Name}"
+            });
+        }
+
+        private async Task RoomModuleInstance_OnRoomCreated(SocketGuildUser user, IVoiceChannel channel)
+        {
+            await SendLog(user, new EmbedBuilder
+            {
+                Description = $"{user.Mention} создал комнату {channel.Name}"
+            });
         }
 
         private async Task Client_MessageDeleted(Cacheable<IMessage, ulong> arg1, ISocketMessageChannel arg2)
@@ -71,33 +95,7 @@ namespace DiscordBot.Modules.NotificationsManaging
                     });
                 }            
             }
-        }
-
-        private async Task Client_UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
-        {
-            if (arg3.IsStreaming == arg2.IsStreaming &&                  
-                (arg3.IsMuted == arg2.IsMuted) && 
-                (arg2.IsSelfMuted == arg3.IsSelfMuted) &&
-                (arg2.IsSelfDeafened == arg3.IsSelfDeafened) && 
-                (arg2.IsDeafened == arg3.IsDeafened) && !arg1.IsBot && arg1 is SocketGuildUser user)
-            {                
-                if (arg2.VoiceChannel != null && arg3.VoiceChannel != null)
-                    await SendLog(arg1, new EmbedBuilder
-                    {
-                        Description = $"Участник {user.Mention} покинул канал `{arg2.VoiceChannel.Name}` и присоединился к каналу `{arg3.VoiceChannel.Name}`."
-                    });
-                else if (arg2.VoiceChannel != null && arg3.VoiceChannel == null)
-                    await SendLog(arg1, new EmbedBuilder
-                    {
-                        Description = $"Участник {user.Mention} покинул канал `{arg2.VoiceChannel.Name}`."
-                    });
-                else if (arg3.VoiceChannel != null && arg2.VoiceChannel == null)
-                    await SendLog(arg1, new EmbedBuilder
-                    {
-                        Description = $"Участник {user.Mention} присоединился к каналу `{arg3.VoiceChannel.Name}`."
-                    });
-            }            
-        }        
+        }     
 
         private async Task Client_MessageUpdated(Cacheable<IMessage, ulong> arg1, SocketMessage arg2, ISocketMessageChannel arg3)
         {
@@ -139,7 +137,7 @@ namespace DiscordBot.Modules.NotificationsManaging
             });
         }       
 
-        private async Task SendLog(SocketUser user, EmbedBuilder builder)
+        private async Task SendLog(IUser user, EmbedBuilder builder)
         {
             var guild = (user as SocketGuildUser).Guild;
             var serGuild = FilesProvider.GetGuild(guild);
