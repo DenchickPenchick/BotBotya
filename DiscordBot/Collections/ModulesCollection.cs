@@ -12,7 +12,7 @@ _________________________________________________________________________
 |GitHub: https://github.com/DenchickPenchick                            |
 |DEV: https://dev.to/denchickpenchick                                   |
 |_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenchickPenchick/BotBotya                   |
+|GitHub: https://github.com/DenVot/BotBotya                             |
 |______________________________________________________________________ |
 |© Copyright 2021 Denis Voitenko                                        |
 |© Copyright 2021 All rights reserved                                   |
@@ -20,25 +20,34 @@ _________________________________________________________________________
 _________________________________________________________________________
 */
 
-using System;
+using DiscordBot.Modules;
+using System.Collections;
+using System.Collections.Generic;
 
-namespace DiscordBot
+namespace DiscordBot.Collections
 {
-    public class ProgressBar
+    public class ModulesCollection : IEnumerable
     {
-        private readonly double count;
-        private double pos = 0;
-
-        public ProgressBar(int count)
-        {
-            this.count = count;
+        public ModulesCollection()
+        { 
+        
         }
 
-        public void PlusVal(int posY)
+        private ModulesCollection(List<IModule> modules)
         {
-            Console.SetCursorPosition(0, posY);
-            pos++;
-            Console.WriteLine($"Done {Convert.ToInt32(pos / count * 100)}%");
+            Modules = modules;
         }
+
+        public ModulesCollection AddModule(IModule module)
+        {
+            Modules.Add(module);
+            return new ModulesCollection(Modules);
+        }
+
+        public void RunAllModules() => Modules.ForEach(x => x.RunModule());        
+
+        public IEnumerator GetEnumerator() => Modules.GetEnumerator();
+
+        private List<IModule> Modules { get; set; } = new List<IModule>();
     }
 }

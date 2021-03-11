@@ -12,7 +12,7 @@ _________________________________________________________________________
 |GitHub: https://github.com/DenchickPenchick                            |
 |DEV: https://dev.to/denchickpenchick                                   |
 |_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenchickPenchick/BotBotya                   |
+|GitHub: https://github.com/DenVot/BotBotya                             |
 |______________________________________________________________________ |
 |© Copyright 2021 Denis Voitenko                                        |
 |© Copyright 2021 All rights reserved                                   |
@@ -37,13 +37,12 @@ using System.Collections.Generic;
 using System.IO;
 using Victoria;
 using System.Net;
-using DiscordBot;
 using DiscordBot.Attributes;
 using DiscordBot.Serializable;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace TestBot
+namespace DiscordBot
 {
     #region --СТРУКТУРЫ--
     public class SentenceStruct
@@ -102,12 +101,12 @@ namespace TestBot
                 if (command.Attributes.Contains(new StandartCommandAttribute()))
                     categoryAttribute = new StandartCommandAttribute();
                 else if (command.Attributes.Contains(new CustomisationCommandAttribute()))
-                    categoryAttribute = new CustomisationCommandAttribute();                
+                    categoryAttribute = new CustomisationCommandAttribute();
                 else if (command.Attributes.Contains(new MusicCommandAttribute()))
                     categoryAttribute = new MusicCommandAttribute();
                 else if (command.Attributes.Contains(new RolesCommandAttribute()))
                     categoryAttribute = new RolesCommandAttribute();
-                else if(command.Attributes.Contains(new ConsoleCommandsAttribute()))
+                else if (command.Attributes.Contains(new ConsoleCommandsAttribute()))
                     categoryAttribute = new ConsoleCommandsAttribute();
                 else
                     categoryAttribute = new StandartCommandAttribute();
@@ -172,22 +171,22 @@ namespace TestBot
             var predictCommand = Bot.Commands.Commands.Where(x => x.Name.ToLower() == commandName.ToLower() || x.Aliases.Any(a => a.ToLower() == commandName.ToLower())).First();
             string parameters = null;
             predictCommand.Parameters.ToList().ForEach(x => parameters += $" `{(x.IsOptional ? "|" : null)}{x}{(x.IsOptional ? "|" : null)}`");
-            await ReplyAsync(embed: new EmbedBuilder 
-            { 
+            await ReplyAsync(embed: new EmbedBuilder
+            {
                 Title = $"Справка по команде {predictCommand.Name}",
                 Fields = new List<EmbedFieldBuilder>
-                { 
+                {
                     new EmbedFieldBuilder
                     {
                         Name = "Описание",
-                        Value = $"Данная команда {predictCommand.Summary}"                      
+                        Value = $"Данная команда {predictCommand.Summary}"
                     },
                     new EmbedFieldBuilder
-                    { 
+                    {
                         Name = "Формат ввода",
-                        Value = $"`{serGuild.Prefix}{predictCommand.Name}`{parameters}"                        
+                        Value = $"`{serGuild.Prefix}{predictCommand.Name}`{parameters}"
                     }
-                }, 
+                },
                 Color = ColorProvider.GetColorForCurrentGuild(Context.Guild)
             }.Build());
         }
@@ -239,15 +238,15 @@ namespace TestBot
         [Alias("Шаблон", "Конструктор")]
         [Summary("создает каналы в соответствии с шаблоном. Возможные шаблоны:\n1. Игровой (подойдет для игровых серверов)\n2. Группа (подойдет для сообщества)\n3. Учебная (подойдет для групп для одноклассников/однокурсников)\n4. Стандарт (создет дефолтный сервер)\n**ЕСЛИ ТЫ ХОЧЕШЬ УДАЛИТЬ КАНАЛЫ, ТОГДА ВВЕДИ ТОКЕН** `r` **ПОСЛЕ ТИПА**")]
         public async Task FastStart(string start, string token = null)
-        {            
+        {
             start = start.ToLower();
             if (start != "игровой" && start != "группа" && start != "учебная" && start != "стандарт")
             {
                 await ReplyAsync("Ты указал неверный тип сервера. Повтори попытку.");
                 return;
             }
-            if (token == "r")            
-                Context.Guild.Channels.ToList().ForEach(async x => await x.DeleteAsync());                       
+            if (token == "r")
+                Context.Guild.Channels.ToList().ForEach(async x => await x.DeleteAsync());
 
             var guild = Context.Guild;
             var serGuild = FilesProvider.GetGuild(Context.Guild);
@@ -273,7 +272,7 @@ namespace TestBot
                     serGuild.SystemCategories.VoiceRoomsCategoryId = audioCat.Id;
                     serGuild.CheckingContent = true;
                     serGuild.EmojiOfRoom = "🎮";
-                    FilesProvider.RefreshGuild(serGuild);                    
+                    FilesProvider.RefreshGuild(serGuild);
                     await defaultTextChannel.SendMessageAsync($"Я успешно завершил настройку сервера {guild.Name}.");
                     break;
                 case "группа":
@@ -290,7 +289,7 @@ namespace TestBot
                     await guild.CreateVoiceChannelAsync("ГС #2", x => x.CategoryId = voiceChats.Id);
                     await guild.CreateVoiceChannelAsync("ГС #3", x => x.CategoryId = voiceChats.Id);
                     var createRoomChannelForGroup = await guild.CreateVoiceChannelAsync("➕Создать комнату", x => x.CategoryId = roomsChats.Id);
-                    
+
                     serGuild.SystemChannels.CreateRoomChannelId = createRoomChannelForGroup.Id;
                     serGuild.SystemCategories.VoiceRoomsCategoryId = roomsChats.Id;
                     serGuild.SystemChannels.LogsChannelId = logsChat.Id;
@@ -329,7 +328,7 @@ namespace TestBot
                     FilesProvider.RefreshGuild(serGuild);
                     await defCh.SendMessageAsync($"Я успешно завершил настройку сервера {guild.Name}.");
                     break;
-            }            
+            }
         }
 
         [Command("Очистить", RunMode = RunMode.Async)]
@@ -621,7 +620,7 @@ namespace TestBot
                 var request = (HttpWebRequest)WebRequest.Create("https://pelevin.gpt.dobro.ai/generate/");
 
                 // Наши данные.
-                var data = JsonConvert.SerializeObject(account, Newtonsoft.Json.Formatting.Indented);
+                var data = JsonConvert.SerializeObject(account, Formatting.Indented);
 
                 // Преобразуем данные в массив байтов.
                 byte[] data_array = Encoding.UTF8.GetBytes(data);
@@ -660,7 +659,7 @@ namespace TestBot
                     {
                         var response_data = stream_reader.ReadToEnd();
 
-                        if (String.IsNullOrEmpty(response_data))
+                        if (string.IsNullOrEmpty(response_data))
                             await ReplyAsync("Ответ с сервера ничего не вернул.");
                         else
                         {
@@ -685,6 +684,57 @@ namespace TestBot
 
                 response.Close();
             }
+        }
+
+        [Command("ПройтиОпрос", RunMode = RunMode.Async)]
+        [StandartCommand]
+        [Summary("позволяет обучать бота для лучшего распознования ошибок")]
+        public async Task EducReq()
+        {
+            await ReplyAsync("Сейчас я вам покажу предпологаемое слово и покажу это же слово, но с ошибкой. Ответьте, асоциируется ли неправильное слово с исходным?\nДля ответа поставьте **1 (да)** или **0 (нет)**");
+            var options = FilesProvider.GetGlobalOptions();
+            var badWords = options.GlobalBadWords;
+            Random random = new Random();
+
+            int index = random.Next(0, badWords.Count);
+            var badWord = badWords[index];
+
+            string content = badWord.Word;            
+            string predException = null;
+
+            var builder = new EmbedBuilder
+            { 
+                Title = $"Слово {content}",
+                Color = ColorProvider.GetColorForCurrentGuild(Context.Guild)
+            };
+
+            //1 Удаление
+            //2 Добавление
+            //3 Замена
+            int operType = random.Next(1, 2);
+            char[] alpha = "абвгдеёжзиклмнопрстуфхцчшщъыьэюя".ToCharArray();                
+            switch (operType)
+            {
+                case 1:
+                    predException = badWord.Word.Remove(random.Next(0, badWord.Word.Length - 1), 1);                    
+                    break;
+                case 2:
+                    predException = badWord.Word.Insert(random.Next(0, badWord.Word.Length - 1), alpha[random.Next(0, alpha.Length - 1)].ToString());
+                    break;
+            }
+
+            builder.WithDescription(predException);
+            await ReplyAsync(embed: builder.Build());
+
+            var nextMess = await NextMessageAsync();
+            if (nextMess != null)
+            {                
+                options.GlobalBadWords[index].Exceptions.Add(predException);
+                FilesProvider.RefreshGlobalOptions(options);
+                await ReplyAsync("Спасибо за участие в опросе!");
+            }
+            else
+                await ReplyAsync("Ты не ответил в течении 5 минут");
         }
         #endregion
 
@@ -1156,9 +1206,9 @@ namespace TestBot
             await ReplyAsync($"Теперь награда за сообщение равна {economGuild.RewardForMessage}");
         }
 
-        [Command("Монетка")]
+        [Command("ИгровойАвтомат")]
         [RolesCommand]
-        [Summary("играй на удачу и получай валюту!")]
+        [Summary("позволяет выставить ставку и уйти либо в плюс, либо в минус.")]
         public async Task Monet(int count)
         {
             var economProvider = new EconomicProvider(Context.Guild);
@@ -1578,7 +1628,7 @@ namespace TestBot
             serializableGuild.SystemChannels.LogsChannelId = logChannel.Id;
             await ReplyAsync($"Теперь я буду присылать логи в {logChannel.Mention}");
             await logChannel.SendMessageAsync(embed: new EmbedBuilder
-            { 
+            {
                 Title = "В данный канал теперь будут присылаться логи",
                 Color = ColorProvider.GetColorForCurrentGuild(Context.Guild),
                 Description = "Если вы хотите отключить логирование, тогда удалите этот канал или сбросьте настройки бота."
@@ -1789,9 +1839,9 @@ namespace TestBot
         [Summary("синхронизирует разрешения ролей относительно одной")]
         public async Task SyncRoles(IRole syncRole, params IRole[] toSyncRoles)
         {
-            toSyncRoles = toSyncRoles.Distinct().ToArray().Where(x => x.Position < (Context.Guild.GetUser(Context.Client.CurrentUser.Id)).Roles.OrderBy(a => a.Position).Last().Position).ToArray();                        
+            toSyncRoles = toSyncRoles.Distinct().ToArray().Where(x => x.Position < Context.Guild.GetUser(Context.Client.CurrentUser.Id).Roles.OrderBy(a => a.Position).Last().Position).ToArray();
 
-            foreach(var role in toSyncRoles)            
+            foreach (var role in toSyncRoles)
                 await role.ModifyAsync(x => x.Permissions = syncRole.Permissions);
 
             char lastCharOfNum = toSyncRoles.Length.ToString().Last();
@@ -1846,20 +1896,20 @@ namespace TestBot
             {
                 var thrStMess = await ReplyAsync("Начинаю удаление сообщений...");
 
-                var messages = await Context.Channel.GetMessagesAsync((int)count + 2).FlattenAsync();                
+                var messages = await Context.Channel.GetMessagesAsync((int)count + 2).FlattenAsync();
                 if (messages.Any(x => DateTimeOffset.Now.ToUniversalTime().Subtract(x.Timestamp) > TimeSpan.FromDays(14)))
                 {
                     var mess = await ReplyAsync("Я не могу удалить сообщения двухнедельной давности");
                     Thread.Sleep(1000);
                     await mess.DeleteAsync();
                     await thrStMess.DeleteAsync();
-                }                
+                }
                 else
                 {
                     await (Context.Channel as SocketTextChannel).DeleteMessagesAsync(messages);
-                    var delMess = await ReplyAsync("Удаление сообщений произведено успешно");                    
+                    var delMess = await ReplyAsync("Удаление сообщений произведено успешно");
                     Thread.Sleep(1000);
-                    await delMess.DeleteAsync();                    
+                    await delMess.DeleteAsync();
                 }
                 Thread.Sleep(0);
             }
@@ -1871,7 +1921,7 @@ namespace TestBot
 
         private enum ExceptOrBad { Except, Bad }
         private async Task AddExceptOrBadWords(ExceptOrBad type, SerializableGuild guild, params string[] wordsInMess)
-        {            
+        {
             bool added = false;
             int count = 0;
             if (wordsInMess.Length == 0)
@@ -1919,7 +1969,7 @@ namespace TestBot
                     .Distinct()
                     .Where(x => !guild.BadWords.Contains(x.ToLower())).ToList();
 
-                if (type == ExceptOrBad.Bad)                
+                if (type == ExceptOrBad.Bad)
                     guild.BadWords.AddRange(filteredWords);
                 else
                     guild.ExceptWords.AddRange(filteredWords);

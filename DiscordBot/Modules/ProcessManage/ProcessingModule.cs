@@ -12,7 +12,7 @@ _________________________________________________________________________
 |GitHub: https://github.com/DenchickPenchick                            |
 |DEV: https://dev.to/denchickpenchick                                   |
 |_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenchickPenchick/BotBotya                   |
+|GitHub: https://github.com/DenVot/BotBotya                             |
 |______________________________________________________________________ |
 |© Copyright 2021 Denis Voitenko                                        |
 |© Copyright 2021 All rights reserved                                   |
@@ -20,42 +20,17 @@ _________________________________________________________________________
 _________________________________________________________________________
 */
 
-using System;
-using DiscordBot.GuildManaging;
-using DiscordBot.Modules.ContentManaging;
-using DiscordBot.Modules.EconomicManaging;
-using DiscordBot.Modules.MusicManaging;
-using DiscordBot.Modules.NotificationsManaging;
-using DiscordBot.Modules.ServersConnectingManaging;
-using DiscordBot.Providers.FileManaging;
-using DiscordBot.RoomManaging;
-using Microsoft.Extensions.DependencyInjection;
+using DiscordBot.Collections;
 
 namespace DiscordBot.Modules.ProcessManage
 {
     public class ProcessingModule : IModule
     {
-        private readonly IServiceProvider Modules;
+        private ModulesCollection ModulesCollection { get; }
 
-        public ProcessingModule(IServiceProvider modules) 
-        {
-            Modules = modules;
-        }
+        public ProcessingModule(ModulesCollection modulesCollection) => ModulesCollection = modulesCollection;        
 
-        public void RunModule()
-        {
-            Modules.GetRequiredService<FilesModule>().RunModule();
-            Modules.GetRequiredService<GuildModule>().RunModule();
-            Modules.GetRequiredService<RoomModule>().RunModule();
-
-            var logMod = Modules.GetRequiredService<LogModule>();
-            logMod.SetInstanceOfRoomModule(Modules.GetRequiredService<RoomModule>());
-            logMod.RunModule();
-
-            Modules.GetRequiredService<MusicModule>().RunModule();
-            Modules.GetRequiredService<ServersConnector>().RunModule();
-            Modules.GetRequiredService<EconomicModule>().RunModule();
-            Modules.GetRequiredService<ContentModule>().RunModule();            
-        }
+        public void RunModule() => ModulesCollection.RunAllModules();
+        
     }
 }

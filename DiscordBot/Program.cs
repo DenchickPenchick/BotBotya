@@ -12,7 +12,7 @@ _________________________________________________________________________
 |GitHub: https://github.com/DenchickPenchick                            |
 |DEV: https://dev.to/denchickpenchick                                   |
 |_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenchickPenchick/BotBotya                   |
+|GitHub: https://github.com/DenVot/BotBotya                             |
 |______________________________________________________________________ |
 |© Copyright 2021 Denis Voitenko                                        |
 |© Copyright 2021 All rights reserved                                   |
@@ -20,16 +20,15 @@ _________________________________________________________________________
 _________________________________________________________________________
 */
 
-using DiscordBot;
 using System;
 using System.Drawing;
 using Console = Colorful.Console;
 
-namespace TestBot
+namespace DiscordBot
 {
     class Program
     {
-        static void Main(string[] args) 
+        static void Main(string[] args)
         {
             try
             {

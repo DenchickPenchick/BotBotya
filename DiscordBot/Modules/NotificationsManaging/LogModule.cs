@@ -12,7 +12,7 @@ _________________________________________________________________________
 |GitHub: https://github.com/DenchickPenchick                            |
 |DEV: https://dev.to/denchickpenchick                                   |
 |_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenchickPenchick/BotBotya                   |
+|GitHub: https://github.com/DenVot/BotBotya                             |
 |______________________________________________________________________ |
 |© Copyright 2021 Denis Voitenko                                        |
 |© Copyright 2021 All rights reserved                                   |
@@ -27,35 +27,38 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using DiscordBot.Providers;
 using DiscordBot.RoomManaging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DiscordBot.Modules.NotificationsManaging
 {
     public class LogModule : IModule
     {
         private DiscordSocketClient Client { get; }
-        private RoomModule RoomModuleInstance { get; set; }
+        private RoomModule RoomModuleInstance { get; set; }        
 
-        public LogModule(DiscordSocketClient client)
+        public LogModule(DiscordSocketClient client, IServiceProvider modules)
         {
-            Client = client;            
+            Client = client;           
+            RoomModuleInstance = modules.GetRequiredService<RoomModule>();
+            Client.Ready += Client_Ready;            
         }
 
-        public void SetInstanceOfRoomModule(RoomModule instance)
-        {
-            RoomModuleInstance = instance;
+        private Task Client_Ready()
+        {            
+            RoomModuleInstance.OnRoomCreated += RoomModuleInstance_OnRoomCreated;
+            RoomModuleInstance.OnRoomDestroyed += RoomModuleInstance_OnRoomDestroyed;
+            return Task.CompletedTask;
         }
 
         public void RunModule()
-        {
-            RoomModuleInstance.OnRoomCreated += RoomModuleInstance_OnRoomCreated;
-            RoomModuleInstance.OnRoomDestroyed += RoomModuleInstance_OnRoomDestroyed;
+        {            
             Client.MessageDeleted += Client_MessageDeleted;
             Client.UserLeft += Client_UserLeft;
             Client.UserJoined += Client_UserJoined;
             Client.MessageUpdated += Client_MessageUpdated;                                  
         }
 
-        private async Task RoomModuleInstance_OnRoomDestroyed(SocketGuildUser user, IVoiceChannel channel)
+        private async void RoomModuleInstance_OnRoomDestroyed(SocketGuildUser user, IVoiceChannel channel)
         {
             await SendLog(user, new EmbedBuilder
             { 
@@ -63,7 +66,7 @@ namespace DiscordBot.Modules.NotificationsManaging
             });
         }
 
-        private async Task RoomModuleInstance_OnRoomCreated(SocketGuildUser user, IVoiceChannel channel)
+        private async void RoomModuleInstance_OnRoomCreated(SocketGuildUser user, IVoiceChannel channel)
         {
             await SendLog(user, new EmbedBuilder
             {

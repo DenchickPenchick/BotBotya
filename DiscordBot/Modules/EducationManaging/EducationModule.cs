@@ -12,7 +12,7 @@ _________________________________________________________________________
 |GitHub: https://github.com/DenchickPenchick                            |
 |DEV: https://dev.to/denchickpenchick                                   |
 |_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenchickPenchick/BotBotya                   |
+|GitHub: https://github.com/DenVot/BotBotya                             |
 |______________________________________________________________________ |
 |© Copyright 2021 Denis Voitenko                                        |
 |© Copyright 2021 All rights reserved                                   |
@@ -35,7 +35,7 @@ namespace DiscordBot.Modules.EducationManaging
     public class EducationModule : IModule
     {           
         /// <summary>
-        /// Инициализирует новый объект класса <see cref="EducationModule"/>.
+        /// Запускает модуль
         /// </summary>
         public void RunModule()
         {

@@ -12,7 +12,7 @@ _________________________________________________________________________
 |GitHub: https://github.com/DenchickPenchick                            |
 |DEV: https://dev.to/denchickpenchick                                   |
 |_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenchickPenchick/BotBotya                   |
+|GitHub: https://github.com/DenVot/BotBotya                             |
 |______________________________________________________________________ |
 |© Copyright 2021 Denis Voitenko                                        |
 |© Copyright 2021 All rights reserved                                   |
@@ -34,7 +34,7 @@ namespace DiscordBot.RoomManaging
     {
         private DiscordSocketClient Client { get; set; }
 
-        public delegate Task RoomEventsHandler(SocketGuildUser user, IVoiceChannel channel);       
+        public delegate void RoomEventsHandler(SocketGuildUser user, IVoiceChannel channel);
         public event RoomEventsHandler OnRoomCreated;
         public event RoomEventsHandler OnRoomDestroyed;
 
@@ -90,7 +90,7 @@ namespace DiscordBot.RoomManaging
                                 await socketGuildUser.ModifyAsync(x => x.Channel = prevchannel);
                             else if (prevchannel.Users.Count == 0 && prevchannel.Category == provider.RoomsCategoryChannel())
                             {
-                                await OnRoomDestroyed.Invoke(socketGuildUser, prevchannel);
+                                OnRoomDestroyed?.Invoke(socketGuildUser, prevchannel);
                                 await prevchannel.DeleteAsync();
                             }
 
@@ -99,7 +99,7 @@ namespace DiscordBot.RoomManaging
                         }
                         else if (prevchannel != provider.CreateRoomChannel() && prevchannel.Category == provider.RoomsCategoryChannel() && prevchannel.Users.Count == 0)
                         {
-                            await OnRoomDestroyed.Invoke(socketGuildUser, prevchannel);
+                            OnRoomDestroyed?.Invoke(socketGuildUser, prevchannel);
                             await prevchannel.DeleteAsync();
                         }
                         
@@ -112,7 +112,7 @@ namespace DiscordBot.RoomManaging
                     else if (prevchannel != null)//Пользователь отключился
                         if (prevchannel.Users.Count == 0 && prevchannel.Category == provider.RoomsCategoryChannel() && prevchannel.Name != provider.CreateRoomChannel().Name)
                         {                            
-                            await OnRoomDestroyed.Invoke(socketGuildUser, prevchannel);
+                            OnRoomDestroyed?.Invoke(socketGuildUser, prevchannel);
                             await prevchannel.DeleteAsync();                            
                         }                        
                 }
@@ -185,7 +185,7 @@ namespace DiscordBot.RoomManaging
             if (!haveChannel)
             {                
                 var newChannel = await guild.CreateVoiceChannelAsync($"{serGuild.EmojiOfRoom}Комната {user.Nickname ?? user.Username}", x => x.CategoryId = provider.RoomsCategoryChannel().Id);
-                await OnRoomCreated.Invoke(user, newChannel);
+                OnRoomCreated?.Invoke(user, newChannel);
                 await user.ModifyAsync(x =>
                 {
                     x.Channel = newChannel;

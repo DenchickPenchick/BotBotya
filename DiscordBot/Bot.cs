@@ -12,7 +12,7 @@ _________________________________________________________________________
 |GitHub: https://github.com/DenchickPenchick                            |
 |DEV: https://dev.to/denchickpenchick                                   |
 |_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenchickPenchick/BotBotya                   |
+|GitHub: https://github.com/DenVot/BotBotya                             |
 |______________________________________________________________________ |
 |© Copyright 2021 Denis Voitenko                                        |
 |© Copyright 2021 All rights reserved                                   |
@@ -32,13 +32,11 @@ using DiscordBot.Modules.ProcessManage;
 using DiscordBot.RoomManaging;
 using Microsoft.Extensions.DependencyInjection;
 using Console = Colorful.Console;
-using TestBot;
 using DiscordBot.GuildManaging;
 using DiscordBot.Modules.NotificationsManaging;
 using Victoria;
 using DiscordBot.MusicOperations;
 using DiscordBot.Modules.MusicManaging;
-using System.Runtime;
 using DiscordBot.Providers;
 using DiscordBot.Modules.ServersConnectingManaging;
 using DiscordBot.Providers.FileManaging;
@@ -48,6 +46,7 @@ using DiscordBot.TypeReaders;
 using System.Linq;
 using DiscordBot.TextReaders;
 using System.Collections.Generic;
+using DiscordBot.Collections;
 
 namespace DiscordBot
 {
@@ -58,8 +57,7 @@ namespace DiscordBot
         
         public DiscordSocketClient Client { get; private set; }
         public CommandService Commands { get; private set; }
-        public IServiceProvider Services { get; private set; }    
-        public IServiceProvider Modules { get; private set; }
+        public IServiceProvider Services { get; private set; }        
 
         public async Task RunBotAsync()
         {
@@ -91,25 +89,22 @@ namespace DiscordBot
                 .AddSingleton(new LavaConfig())
                 .AddLavaNode()
                 .AddSingleton<LavaOperations>()
-                .BuildServiceProvider();            
-
-            Modules = new ServiceCollection()
-                .AddSingleton(Client)
-                .AddSingleton(Commands)
-                .AddSingleton(Services.GetRequiredService<LavaNode>())
-                .AddSingleton(Services.GetRequiredService<LavaOperations>())
-                .AddSingleton(this)
-                .AddSingleton(new FilesModule(this))
-                .AddSingleton(new GuildModule(Client))
-                .AddSingleton(new RoomModule(Client))
-                .AddSingleton(new ContentModule(Client, Commands))
-                .AddSingleton(new LogModule(Client))
-                .AddSingleton(new MusicModule(Services))
-                .AddSingleton(new ServersConnector(Client))
-                .AddSingleton(new EconomicModule(Client))
                 .BuildServiceProvider();
 
-            new ProcessingModule(Modules).RunModule();
+            var modulesForLogs = new ServiceCollection()
+                .AddSingleton(new RoomModule(Client))
+                .BuildServiceProvider();
+
+            var modulesCollection = new ModulesCollection()
+                .AddModule(new FilesModule(this))
+                .AddModule(new GuildModule(Client))
+                .AddModule(modulesForLogs.GetRequiredService<RoomModule>())
+                .AddModule(new ContentModule(Client, Commands))
+                .AddModule(new LogModule(Client, modulesForLogs))
+                .AddModule(new ServersConnector(Client))
+                .AddModule(new EconomicModule(Client));
+
+            new ProcessingModule(modulesCollection).RunModule();
 
             Client.Ready += Client_Ready;            
 
