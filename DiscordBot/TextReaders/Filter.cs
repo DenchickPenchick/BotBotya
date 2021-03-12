@@ -1,25 +1,7 @@
-﻿/*
-_________________________________________________________________________
-|                                                                       |
-|██████╗░░█████╗░████████╗  ██████╗░░█████╗░████████╗██╗░░░██╗░█████╗░  |
-|██╔══██╗██╔══██╗╚══██╔══╝  ██╔══██╗██╔══██╗╚══██╔══╝╚██╗░██╔╝██╔══██╗  |
-|██████╦╝██║░░██║░░░██║░░░  ██████╦╝██║░░██║░░░██║░░░░╚████╔╝░███████║  |
-|██╔══██╗██║░░██║░░░██║░░░  ██╔══██╗██║░░██║░░░██║░░░░░╚██╔╝░░██╔══██║  |
-|██████╦╝╚█████╔╝░░░██║░░░  ██████╦╝╚█████╔╝░░░██║░░░░░░██║░░░██║░░██║  |
-|╚═════╝░░╚════╝░░░░╚═╝░░░  ╚═════╝░░╚════╝░░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝  |
-|______________________________________________________________________ |
-|Author: Denis Voitenko.                                                |
-|GitHub: https://github.com/DenchickPenchick                            |
-|DEV: https://dev.to/denchickpenchick                                   |
-|_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenVot/BotBotya                             |
-|______________________________________________________________________ |
-|© Copyright 2021 Denis Voitenko                                        |
-|© Copyright 2021 All rights reserved                                   |
-|License: http://opensource.org/licenses/MIT                            |
-_________________________________________________________________________
-*/
+﻿//© Copyright 2021 Denis Voitenko MIT License
+//GitHub repository: https://github.com/DenVot/BotBotya
 
+using DiscordBot.Providers;
 using DiscordBot.Serializable;
 using System;
 using System.Collections.Generic;
@@ -48,28 +30,40 @@ namespace DiscordBot.TextReaders
             Words = words;
         }
 
-        public Result Filt()
+        public Tuple<string, Result> Filt()
         {
             try
             {
                 bool words = false;
+                string Word = null;
 
                 foreach (string word in StringToFilter.Split(' '))
                 {
+                    var globCheck = IsGlobalBadWord(word);
+                    if (globCheck.Item1)
+                    { 
+                        words = true;
+                        Word = globCheck.Item2;
+                    }
+
                     int totalMarks = (Convert.ToSingle(word.Length) % 2F > 0 ? word.Length + 1 : word.Length) / 2;
                     foreach (var toCheck in Words)
                         if (Distance(word, toCheck) < totalMarks && !ExceptWords.Contains(word.ToLower()))
+                        {
                             words = true;
+                            Word = toCheck;
+                        }
+                        
                 }
 
                 if (words)
-                    return Result.Words;
+                    return new Tuple<string, Result>(Word, Result.Words);
                 else
-                    return Result.Nothing;
+                    return new Tuple<string, Result>(null, Result.Nothing);
             }
             catch (Exception)
             {
-                return Result.Error;
+                return new Tuple<string, Result>(null, Result.Error);
             }
         }
 
@@ -107,6 +101,17 @@ namespace DiscordBot.TextReaders
             }
 
             return matrixD[n - 1, m - 1];
+        }
+
+        private (bool, string) IsGlobalBadWord(string word)
+        {
+            var GlobalOptions = FilesProvider.GetGlobalOptions();
+
+            foreach (var bad in GlobalOptions.GlobalBadWords)            
+                if (bad.Word == word || bad.Exceptions.Contains(word))
+                    return (true, bad.Word);
+            
+            return (false, null);
         }
 
         private static int Minimum(int a, int b, int c) => (a = a < b ? a : b) < c ? a : c;

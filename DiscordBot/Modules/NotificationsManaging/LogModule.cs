@@ -1,24 +1,5 @@
-﻿/*
-_________________________________________________________________________
-|                                                                       |
-|██████╗░░█████╗░████████╗  ██████╗░░█████╗░████████╗██╗░░░██╗░█████╗░  |
-|██╔══██╗██╔══██╗╚══██╔══╝  ██╔══██╗██╔══██╗╚══██╔══╝╚██╗░██╔╝██╔══██╗  |
-|██████╦╝██║░░██║░░░██║░░░  ██████╦╝██║░░██║░░░██║░░░░╚████╔╝░███████║  |
-|██╔══██╗██║░░██║░░░██║░░░  ██╔══██╗██║░░██║░░░██║░░░░░╚██╔╝░░██╔══██║  |
-|██████╦╝╚█████╔╝░░░██║░░░  ██████╦╝╚█████╔╝░░░██║░░░░░░██║░░░██║░░██║  |
-|╚═════╝░░╚════╝░░░░╚═╝░░░  ╚═════╝░░╚════╝░░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝  |
-|______________________________________________________________________ |
-|Author: Denis Voitenko.                                                |
-|GitHub: https://github.com/DenchickPenchick                            |
-|DEV: https://dev.to/denchickpenchick                                   |
-|_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenVot/BotBotya                             |
-|______________________________________________________________________ |
-|© Copyright 2021 Denis Voitenko                                        |
-|© Copyright 2021 All rights reserved                                   |
-|License: http://opensource.org/licenses/MIT                            |
-_________________________________________________________________________
-*/
+﻿//© Copyright 2021 Denis Voitenko MIT License
+//GitHub repository: https://github.com/DenVot/BotBotya
 
 using System;
 using Discord;
@@ -28,18 +9,21 @@ using System.Collections.Generic;
 using DiscordBot.Providers;
 using DiscordBot.RoomManaging;
 using Microsoft.Extensions.DependencyInjection;
+using DiscordBot.Modules.ContentManaging;
 
 namespace DiscordBot.Modules.NotificationsManaging
 {
     public class LogModule : IModule
     {
         private DiscordSocketClient Client { get; }
-        private RoomModule RoomModuleInstance { get; set; }        
+        private RoomModule RoomModuleInstance { get; }        
+        private ContentModule ContentModuleInstance { get; }
 
         public LogModule(DiscordSocketClient client, IServiceProvider modules)
         {
             Client = client;           
             RoomModuleInstance = modules.GetRequiredService<RoomModule>();
+            ContentModuleInstance = modules.GetRequiredService<ContentModule>();
             Client.Ready += Client_Ready;            
         }
 
@@ -47,6 +31,8 @@ namespace DiscordBot.Modules.NotificationsManaging
         {            
             RoomModuleInstance.OnRoomCreated += RoomModuleInstance_OnRoomCreated;
             RoomModuleInstance.OnRoomDestroyed += RoomModuleInstance_OnRoomDestroyed;
+            ContentModuleInstance.OnBadWordCommited += ContentModuleInstance_OnBadWordCommited;
+            ContentModuleInstance.OnInviteLinkCommited += ContentModuleInstance_OnInviteLinkCommited;
             return Task.CompletedTask;
         }
 
@@ -56,6 +42,38 @@ namespace DiscordBot.Modules.NotificationsManaging
             Client.UserLeft += Client_UserLeft;
             Client.UserJoined += Client_UserJoined;
             Client.MessageUpdated += Client_MessageUpdated;                                  
+        }
+
+        private async void ContentModuleInstance_OnInviteLinkCommited(string content, ITextChannel sourceChannel, SocketGuildUser user)
+        {
+            await SendLog(user, new EmbedBuilder
+            {
+                Description = $"{user.Mention} разместил ссылку-приглашение",
+                Fields = new List<EmbedFieldBuilder>
+                { 
+                    new EmbedFieldBuilder
+                    { 
+                        Name = "Ссылка:",
+                        Value = $"`{content}`"
+                    }
+                }
+            });
+        }
+
+        private async void ContentModuleInstance_OnBadWordCommited(string content, ITextChannel sourceChannel, SocketGuildUser user)
+        {
+            await SendLog(user, new EmbedBuilder
+            {
+                Description = $"{user.Mention} сказал запрещенное слово",
+                Fields = new List<EmbedFieldBuilder>
+                {
+                    new EmbedFieldBuilder
+                    {
+                        Name = "Слово:",
+                        Value = $"`{content}`"
+                    }
+                }
+            });
         }
 
         private async void RoomModuleInstance_OnRoomDestroyed(SocketGuildUser user, IVoiceChannel channel)

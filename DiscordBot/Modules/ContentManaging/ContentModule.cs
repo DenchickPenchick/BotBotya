@@ -1,24 +1,5 @@
-﻿/*
-_________________________________________________________________________
-|                                                                       |
-|██████╗░░█████╗░████████╗  ██████╗░░█████╗░████████╗██╗░░░██╗░█████╗░  |
-|██╔══██╗██╔══██╗╚══██╔══╝  ██╔══██╗██╔══██╗╚══██╔══╝╚██╗░██╔╝██╔══██╗  |
-|██████╦╝██║░░██║░░░██║░░░  ██████╦╝██║░░██║░░░██║░░░░╚████╔╝░███████║  |
-|██╔══██╗██║░░██║░░░██║░░░  ██╔══██╗██║░░██║░░░██║░░░░░╚██╔╝░░██╔══██║  |
-|██████╦╝╚█████╔╝░░░██║░░░  ██████╦╝╚█████╔╝░░░██║░░░░░░██║░░░██║░░██║  |
-|╚═════╝░░╚════╝░░░░╚═╝░░░  ╚═════╝░░╚════╝░░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝  |
-|______________________________________________________________________ |
-|Author: Denis Voitenko.                                                |
-|GitHub: https://github.com/DenchickPenchick                            |
-|DEV: https://dev.to/denchickpenchick                                   |
-|_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenVot/BotBotya                             |
-|______________________________________________________________________ |
-|© Copyright 2021 Denis Voitenko                                        |
-|© Copyright 2021 All rights reserved                                   |
-|License: http://opensource.org/licenses/MIT                            |
-_________________________________________________________________________
-*/
+﻿//© Copyright 2021 Denis Voitenko MIT License
+//GitHub repository: https://github.com/DenVot/BotBotya
 
 using Discord;
 using Discord.WebSocket;
@@ -39,6 +20,11 @@ namespace DiscordBot.Modules.ContentManaging
     {
         private DiscordSocketClient Client { get; set; }
         private CommandService CommandService { get; set; }
+
+        public delegate void WordCommitedHandler(string content, ITextChannel sourceChannel, SocketGuildUser user);
+
+        public event WordCommitedHandler OnBadWordCommited;
+        public event WordCommitedHandler OnInviteLinkCommited;
 
         /// <summary>
         /// Инициализирует новый экземпляр класса <see cref="ContentModule"/>
@@ -103,7 +89,7 @@ namespace DiscordBot.Modules.ContentManaging
                                     foreach (var badUser in serGuild.BadUsers)
                                         badUsersIds.Add(badUser.Item1);
 
-                                    if (res == Filter.Result.Words)
+                                    if (res.Item2 == Filter.Result.Words)
                                     {
                                         if (serGuild.WarnsForBadWords)
                                         {
@@ -146,6 +132,8 @@ namespace DiscordBot.Modules.ContentManaging
                                                     await user.BanAsync();
                                                 else if (serGuild.MuteForWarns)
                                                     MuteUser(user);
+                                                if (arg.Channel is ITextChannel textChannel)
+                                                    OnBadWordCommited?.Invoke(res.Item1, textChannel, user);
                                             }
                                         }
                                         await arg.DeleteAsync();
@@ -215,6 +203,9 @@ namespace DiscordBot.Modules.ContentManaging
                                                     await user.BanAsync();
                                                 else if (serGuild.MuteForWarns)
                                                     MuteUser(user);
+
+                                                if (arg.Channel is ITextChannel textChannel)
+                                                    OnInviteLinkCommited?.Invoke(uri.AbsoluteUri, textChannel, user);
                                             }
                                         }
                                         return;
@@ -266,6 +257,7 @@ namespace DiscordBot.Modules.ContentManaging
                         }
                 }            
         }
+
         #region --АЛГОРИТМ ПО ИЗВЛЕЧЕНИЮ ССЫЛОК ИЗ СООБЩЕНИЯ
         private List<Uri> GetUrisFromMessage(SocketMessage message)
         {

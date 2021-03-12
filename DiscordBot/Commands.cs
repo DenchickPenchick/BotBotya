@@ -1,24 +1,5 @@
-﻿/*
-_________________________________________________________________________
-|                                                                       |
-|██████╗░░█████╗░████████╗  ██████╗░░█████╗░████████╗██╗░░░██╗░█████╗░  |
-|██╔══██╗██╔══██╗╚══██╔══╝  ██╔══██╗██╔══██╗╚══██╔══╝╚██╗░██╔╝██╔══██╗  |
-|██████╦╝██║░░██║░░░██║░░░  ██████╦╝██║░░██║░░░██║░░░░╚████╔╝░███████║  |
-|██╔══██╗██║░░██║░░░██║░░░  ██╔══██╗██║░░██║░░░██║░░░░░╚██╔╝░░██╔══██║  |
-|██████╦╝╚█████╔╝░░░██║░░░  ██████╦╝╚█████╔╝░░░██║░░░░░░██║░░░██║░░██║  |
-|╚═════╝░░╚════╝░░░░╚═╝░░░  ╚═════╝░░╚════╝░░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝  |
-|______________________________________________________________________ |
-|Author: Denis Voitenko.                                                |
-|GitHub: https://github.com/DenchickPenchick                            |
-|DEV: https://dev.to/denchickpenchick                                   |
-|_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenVot/BotBotya                             |
-|______________________________________________________________________ |
-|© Copyright 2021 Denis Voitenko                                        |
-|© Copyright 2021 All rights reserved                                   |
-|License: http://opensource.org/licenses/MIT                            |
-_________________________________________________________________________
-*/
+﻿//© Copyright 2021 Denis Voitenko MIT License
+//GitHub repository: https://github.com/DenVot/BotBotya
 
 using Discord;
 using Discord.Commands;
@@ -41,6 +22,7 @@ using DiscordBot.Attributes;
 using DiscordBot.Serializable;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using DiscordBot.Providers.Entities;
 
 namespace DiscordBot
 {
@@ -220,10 +202,31 @@ namespace DiscordBot
         [Summary("получает приглашение на мой сервер поддержки.")]
         public async Task MyServer() => await ReplyAsync("https://discord.gg/p6R4yk7uqK");
 
-        [Command("МойРепозиторий")]
+        [Command("Апгрейднуть")]
+        [Alias("Прокачать")]
         [StandartCommand]
-        [Summary("получает ссылку на мой GitHub репозиторий.")]
-        public async Task GitHubRepo() => await ReplyAsync("https://github.com/denvot/botbotya");
+        [Summary("позволяет апргейднуть бота")]
+        public async Task RepositoryAd() => await ReplyAsync(embed: new EmbedBuilder
+        {
+            Title = "Хочешь прокачать меня?",
+            Description = "Ты можешь это очень легко сделать. Но как? Есть два варианта:",
+            Fields = new List<EmbedFieldBuilder>
+            {
+                new EmbedFieldBuilder
+                {
+                    Name = "Предлагать свои идеи напрямую разработчику",
+                    Value = "Ты можешь зайти на [сервер поддержки](https://discord.gg/p6R4yk7uqK) и рассказать о своей идее разработчику бота!"
+                },
+                new EmbedFieldBuilder
+                {
+                    Name = "Стать контрибутором",
+                    Value = "Если ты умеешь программировать на *C#* и знаешь как работать с *[Discord.NET](https://github.com/discord-net/Discord.Net)*, тогда ты можешь попробовать создать свой модуль или команду!\nКак это сделать?\n" +
+                    "Зайди в [репозиторий бота](https://github.com/DenVot/BotBotya), придумай какую-нибудь крутую вещь для бота и сделай Pull-request в репозиторий бота! И все! Если тебе будет что-то непонятно, ты можешь прочесть [wiki](https://github.com/DenVot/BotBotya/wiki) или же можешь зайти на [сервер поддержки](https://discord.gg/p6R4yk7uqK) и задать вопрос."
+                }                
+            },
+            Color = ColorProvider.GetColorForCurrentGuild(Context.Guild),
+            ThumbnailUrl = Context.Client.CurrentUser.GetAvatarUrl()
+        }.Build());
 
         [Command("ДобавитьБота")]
         [StandartCommand]
@@ -699,39 +702,43 @@ namespace DiscordBot
             int index = random.Next(0, badWords.Count);
             var badWord = badWords[index];
 
-            string content = badWord.Word;            
-            string predException = null;
-
+            string content = badWord.Word;
             var builder = new EmbedBuilder
-            { 
+            {
                 Title = $"Слово {content}",
                 Color = ColorProvider.GetColorForCurrentGuild(Context.Guild)
             };
 
-            //1 Удаление
-            //2 Добавление
-            //3 Замена
-            int operType = random.Next(1, 2);
-            char[] alpha = "абвгдеёжзиклмнопрстуфхцчшщъыьэюя".ToCharArray();                
-            switch (operType)
-            {
-                case 1:
-                    predException = badWord.Word.Remove(random.Next(0, badWord.Word.Length - 1), 1);                    
-                    break;
-                case 2:
-                    predException = badWord.Word.Insert(random.Next(0, badWord.Word.Length - 1), alpha[random.Next(0, alpha.Length - 1)].ToString());
-                    break;
-            }
+            //Меньше 50 - удаление
+            //Больше 50 - добавление            
+            int operType = new Random().Next(0, 100);
+            char[] alpha = "абвгдеёжзиклмнопрстуфхцчшщъыьэюя".ToCharArray();
+
+            string predException;
+            if (operType <= 50)
+                predException = badWord.Word.Remove(random.Next(0, badWord.Word.Length - 1), 1);
+            else
+                predException = badWord.Word.Insert(random.Next(0, badWord.Word.Length - 1), alpha[random.Next(0, alpha.Length - 1)].ToString());
 
             builder.WithDescription(predException);
             await ReplyAsync(embed: builder.Build());
 
             var nextMess = await NextMessageAsync();
             if (nextMess != null)
-            {                
-                options.GlobalBadWords[index].Exceptions.Add(predException);
-                FilesProvider.RefreshGlobalOptions(options);
-                await ReplyAsync("Спасибо за участие в опросе!");
+            {
+                var isVariant = int.TryParse(nextMess.Content, out int variant);
+                if (isVariant)
+                {
+                    if (variant == 1)
+                    {
+                        options.GlobalBadWords[index].Exceptions.Add(predException);
+                        FilesProvider.RefreshGlobalOptions(options);
+                    }                    
+
+                    await ReplyAsync("Спасибо за участие в опросе!");
+                }
+                else
+                    await ReplyAsync("Некорректный формат ответа");
             }
             else
                 await ReplyAsync("Ты не ответил в течении 5 минут");
@@ -1207,30 +1214,87 @@ namespace DiscordBot
         }
 
         [Command("ИгровойАвтомат")]
+        [Alias("Автомат", "Лотерея", "Сыграть", "Играть", "Казино", "Рулетка")]
         [RolesCommand]
         [Summary("позволяет выставить ставку и уйти либо в плюс, либо в минус.")]
         public async Task Monet(int count)
         {
-            var economProvider = new EconomicProvider(Context.Guild);
-            Random random = new Random();
-            int value = random.Next(0, 100);
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            var economProvider = new EconomicProvider(Context.Guild);                        
             var economUser = economProvider.GetEconomicGuildUser(Context.User.Id);
 
             if (economUser.Item1.Balance >= count)
             {
-                if (value <= 30)
+                var val = LoteryEntity.CalculateWon(serGuild.LotsCount);
+
+                string rep;
+                if (val.Item2 == 0)
                 {
-                    economProvider.AddBalance(Context.User, count);
-                    await ReplyAsync("Ты выиграл!");
+                    rep = "Ты проиграл!";
+                    economProvider.MinusBalance(Context.User, count);
                 }
                 else
-                {
-                    economProvider.MinusBalance(Context.User, count);
-                    await ReplyAsync("Ты проиграл!");
+                { 
+                    rep = $"Ты выиграл {count * val.Item2}!";
+                    economProvider.AddBalance(Context.User, (int)(count * val.Item2));
                 }
+
+                await ReplyAsync(embed: new EmbedBuilder
+                { 
+                    Title = "Игровой автомат",
+                    Description = rep,
+                    Fields = new List<EmbedFieldBuilder>
+                    { 
+                        new EmbedFieldBuilder
+                        { 
+                            Name = "Комбинация:",
+                            Value = $"`{val.Item1}`"
+                        }
+                    },
+                    Color = ColorProvider.GetColorForCurrentGuild(Context.Guild)
+                }.Build());                
             }
             else
                 await ReplyAsync("Ты не можешь поставить ставку, т.к. у тебя недостаточно средств.");
+        }
+
+        [Command("РассчитатьВероятностьВыигрыша")]
+        [Alias("Вероятность")]
+        [RolesCommand]
+        [Summary("рассчитывает вероятность выигрыша для определенного количества лотов.")]
+        public async Task CalculateChances(int count)
+        {
+            if (count <= 10)
+            {
+                // Выигрыш в 50%
+                float chanceOneToSix = 1F / 6F;
+                double halfPartChance = Math.Pow(1, count / 2) * Math.Pow(5, count) / (Math.Pow(6, count / 2) * Math.Pow(6, count));
+                // Джекпот
+                double jackpotChance = Math.Pow(chanceOneToSix, count);
+
+                await ReplyAsync(embed: new EmbedBuilder
+                { 
+                    Title = "Вероятности выигрышей:",
+                    Fields = new List<EmbedFieldBuilder>
+                    { 
+                        new EmbedFieldBuilder
+                        { 
+                            Name = "Выбить половину фишек:",
+                            Value = halfPartChance,
+                            IsInline = true
+                        },
+                        new EmbedFieldBuilder
+                        {
+                            Name = "Сорвать джекпот:",
+                            Value = jackpotChance,
+                            IsInline = true
+                        }
+                    },
+                    Color = ColorProvider.GetColorForCurrentGuild(Context.Guild)
+                }.Build());
+            }
+            else
+                await ReplyAsync("Количество лотов не может быть больше 10!");
         }
 
         [Command("ДобавитьРолиВЧерныйСписок")]

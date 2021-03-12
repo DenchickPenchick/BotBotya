@@ -1,24 +1,5 @@
-﻿/*
-_________________________________________________________________________
-|                                                                       |
-|██████╗░░█████╗░████████╗  ██████╗░░█████╗░████████╗██╗░░░██╗░█████╗░  |
-|██╔══██╗██╔══██╗╚══██╔══╝  ██╔══██╗██╔══██╗╚══██╔══╝╚██╗░██╔╝██╔══██╗  |
-|██████╦╝██║░░██║░░░██║░░░  ██████╦╝██║░░██║░░░██║░░░░╚████╔╝░███████║  |
-|██╔══██╗██║░░██║░░░██║░░░  ██╔══██╗██║░░██║░░░██║░░░░░╚██╔╝░░██╔══██║  |
-|██████╦╝╚█████╔╝░░░██║░░░  ██████╦╝╚█████╔╝░░░██║░░░░░░██║░░░██║░░██║  |
-|╚═════╝░░╚════╝░░░░╚═╝░░░  ╚═════╝░░╚════╝░░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝  |
-|______________________________________________________________________ |
-|Author: Denis Voitenko.                                                |
-|GitHub: https://github.com/DenchickPenchick                            |
-|DEV: https://dev.to/denchickpenchick                                   |
-|_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenVot/BotBotya                             |
-|______________________________________________________________________ |
-|© Copyright 2021 Denis Voitenko                                        |
-|© Copyright 2021 All rights reserved                                   |
-|License: http://opensource.org/licenses/MIT                            |
-_________________________________________________________________________
-*/
+﻿//© Copyright 2021 Denis Voitenko MIT License
+//GitHub repository: https://github.com/DenVot/BotBotya
 
 using Discord;
 using Discord.WebSocket;
@@ -68,7 +49,7 @@ namespace DiscordBot.Providers
                         new EmbedFieldBuilder
                         {
                             Name = $"{botyaEmoji} Мой GitHub:",
-                            Value = "https://github.com/DenchickPenchick/BotBotya",
+                            Value = "https://github.com/denvot/BotBotya",
                             IsInline = true
                         }
                     },

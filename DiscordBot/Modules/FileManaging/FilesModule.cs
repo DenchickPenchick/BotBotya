@@ -1,24 +1,5 @@
-﻿/*
-_________________________________________________________________________
-|                                                                       |
-|██████╗░░█████╗░████████╗  ██████╗░░█████╗░████████╗██╗░░░██╗░█████╗░  |
-|██╔══██╗██╔══██╗╚══██╔══╝  ██╔══██╗██╔══██╗╚══██╔══╝╚██╗░██╔╝██╔══██╗  |
-|██████╦╝██║░░██║░░░██║░░░  ██████╦╝██║░░██║░░░██║░░░░╚████╔╝░███████║  |
-|██╔══██╗██║░░██║░░░██║░░░  ██╔══██╗██║░░██║░░░██║░░░░░╚██╔╝░░██╔══██║  |
-|██████╦╝╚█████╔╝░░░██║░░░  ██████╦╝╚█████╔╝░░░██║░░░░░░██║░░░██║░░██║  |
-|╚═════╝░░╚════╝░░░░╚═╝░░░  ╚═════╝░░╚════╝░░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝  |
-|______________________________________________________________________ |
-|Author: Denis Voitenko.                                                |
-|GitHub: https://github.com/DenchickPenchick                            |
-|DEV: https://dev.to/denchickpenchick                                   |
-|_____________________________Project__________________________________ |
-|GitHub: https://github.com/DenVot/BotBotya                             |
-|______________________________________________________________________ |
-|© Copyright 2021 Denis Voitenko                                        |
-|© Copyright 2021 All rights reserved                                   |
-|License: http://opensource.org/licenses/MIT                            |
-_________________________________________________________________________
-*/
+﻿//© Copyright 2021 Denis Voitenko MIT License
+//GitHub repository: https://github.com/DenVot/BotBotya
 
 using Discord;
 using Discord.WebSocket;
@@ -163,6 +144,20 @@ namespace DiscordBot.Providers.FileManaging
                     });
                 }
                 Console.WriteLine("ReactRoleMessages.xml created", Color.Green);
+            }
+            else
+                Console.WriteLine("ReactRoleMessages.xml found", Color.Green);
+
+            if (!File.Exists($"{Bot.PathToBotDirectory}/GlobalOptions.xml"))
+            {
+                Console.WriteLine("GlobalOptions.xml not found", Color.Red);
+                using (FileStream stream = new FileStream($"{Bot.PathToBotDirectory}/GlobalOptions.xml", FileMode.Create))
+                {
+                    var serializer = new XmlSerializer(typeof(SerializableGlobalOptions));
+
+                    serializer.Serialize(stream, new SerializableGlobalOptions());
+                }
+                Console.WriteLine("GlobalOptions.xml created", Color.Green);
             }
             else
                 Console.WriteLine("ReactRoleMessages.xml found", Color.Green);
