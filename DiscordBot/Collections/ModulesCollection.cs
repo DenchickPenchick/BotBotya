@@ -10,8 +10,8 @@ namespace DiscordBot.Collections
     public class ModulesCollection : IEnumerable
     {
         public ModulesCollection()
-        { 
-        
+        {
+
         }
 
         private ModulesCollection(List<IModule> modules)
@@ -25,7 +25,7 @@ namespace DiscordBot.Collections
             return new ModulesCollection(Modules);
         }
 
-        public void RunAllModules() => Modules.ForEach(x => x.RunModule());        
+        public void RunAllModules() => Modules.ForEach(x => x.RunModule());
 
         public IEnumerator GetEnumerator() => Modules.GetEnumerator();
 

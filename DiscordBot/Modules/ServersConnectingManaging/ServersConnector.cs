@@ -24,13 +24,13 @@ namespace DiscordBot.Modules.ServersConnectingManaging
 
         public void RunModule()
         {
-            
+
         }
 
         private Task Client_ChannelDestroyed(SocketChannel arg)
         {
             if (arg is SocketTextChannel channel)
-            { 
+            {
                 var guild = channel.Guild;
 
                 if (guild != null)
@@ -47,9 +47,9 @@ namespace DiscordBot.Modules.ServersConnectingManaging
                         connectors.SerializableConnectorsChannels.Remove(connector);
                         FilesProvider.RefreshConnectors(connectors);
                     }
-                }            
+                }
             }
-            
+
             return Task.CompletedTask;
         }
 
@@ -63,7 +63,7 @@ namespace DiscordBot.Modules.ServersConnectingManaging
                     return;
 
                 var messageEmbed = GenerateUserMessage(arg);
-                if(!arg.Author.IsBot && arg.Author.Id != Client.CurrentUser.Id)
+                if (!arg.Author.IsBot && arg.Author.Id != Client.CurrentUser.Id)
                     foreach (ulong id in connector.EndPointsId)
                     {
                         SocketTextChannel channel = (SocketTextChannel)Client.GetChannel(id);
@@ -87,20 +87,20 @@ namespace DiscordBot.Modules.ServersConnectingManaging
         {
             string content = message.Content;
             var author = message.Author;
-            var guild = (author as SocketGuildUser).Guild;            
+            var guild = (author as SocketGuildUser).Guild;
 
             return new EmbedBuilder
             {
                 Title = $"Сообщение с сервера {guild.Name}",
                 Description = content,
                 Author = new EmbedAuthorBuilder
-                { 
+                {
                     IconUrl = author.GetAvatarUrl(),
                     Name = author.Username
                 },
                 Footer = new EmbedFooterBuilder
-                { 
-                Text = $"{DateTime.Now.ToShortTimeString()} | {DateTime.Now.ToShortDateString()}"
+                {
+                    Text = $"{DateTime.Now.ToShortTimeString()} | {DateTime.Now.ToShortDateString()}"
                 },
                 Color = Color.Blue
             }.Build();

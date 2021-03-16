@@ -1,8 +1,8 @@
 ﻿//© Copyright 2021 Denis Voitenko MIT License
 //GitHub repository: https://github.com/DenVot/BotBotya
 
-using System.Collections.Generic;
 using DiscordBot.Models;
+using System.Collections.Generic;
 
 namespace DiscordBot.Serializable
 {

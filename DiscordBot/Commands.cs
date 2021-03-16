@@ -2,27 +2,27 @@
 //GitHub repository: https://github.com/DenVot/BotBotya
 
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
-using System;
-using System.Text;
-using System.Web;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Discord.Addons.Interactive;
-using Console = Colorful.Console;
+using DiscordBot.Attributes;
 using DiscordBot.MusicOperations;
 using DiscordBot.Providers;
-using System.Collections.Generic;
-using System.IO;
-using Victoria;
-using System.Net;
-using DiscordBot.Attributes;
+using DiscordBot.Providers.Entities;
 using DiscordBot.Serializable;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using DiscordBot.Providers.Entities;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web;
+using Victoria;
+using Console = Colorful.Console;
 
 namespace DiscordBot
 {
@@ -93,7 +93,7 @@ namespace DiscordBot
                 else
                     categoryAttribute = new StandartCommandAttribute();
 
-                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"{pages[pos]}\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}".Length >= 1024)
+                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"{pages[pos]}\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}".Length >= 1023)
                 {
                     if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName)
                         posit = 1;
@@ -128,18 +128,34 @@ namespace DiscordBot
                     }.Build());
             }
             else
-                await PagedReplyAsync(pager: new PaginatedMessage
+                try
                 {
-                    Title = "Справка по командам",
-                    Pages = pages,
-                    Color = ColorProvider.GetColorForCurrentGuild(serGuild),
-                    Options = new PaginatedAppearanceOptions
+                    var paged = new PaginatedMessage();
+                    paged.Title = "Справка по командам";
+                    paged.Pages = pages;
+                    paged.Color = ColorProvider.GetColorForCurrentGuild(serGuild);
+                    paged.Options = new PaginatedAppearanceOptions
                     {
                         Jump = null,
-                        Info = null,
-                        Stop = null
-                    }
-                });
+                        Info = null
+                    };
+                    await PagedReplyAsync(paged);
+                    //{
+                    //    Title = "Справка по командам",
+                    //    Pages = (IEnumerable<string>)pages,
+                    //    Color = ColorProvider.GetColorForCurrentGuild(serGuild),
+                    //    Options = new PaginatedAppearanceOptions
+                    //    {
+                    //        Jump = null,
+                    //        Info = null,
+                    //        Stop = null
+                    //    }
+                    //});
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
         }
 
         [Command("Хелп", RunMode = RunMode.Async)]
@@ -222,7 +238,7 @@ namespace DiscordBot
                     Name = "Стать контрибутором",
                     Value = "Если ты умеешь программировать на *C#* и знаешь как работать с *[Discord.NET](https://github.com/discord-net/Discord.Net)*, тогда ты можешь попробовать создать свой модуль или команду!\nКак это сделать?\n" +
                     "Зайди в [репозиторий бота](https://github.com/DenVot/BotBotya), придумай какую-нибудь крутую вещь для бота и сделай Pull-request в репозиторий бота! И все! Если тебе будет что-то непонятно, ты можешь прочесть [wiki](https://github.com/DenVot/BotBotya/wiki) или же можешь зайти на [сервер поддержки](https://discord.gg/p6R4yk7uqK) и задать вопрос."
-                }                
+                }
             },
             Color = ColorProvider.GetColorForCurrentGuild(Context.Guild),
             ThumbnailUrl = Context.Client.CurrentUser.GetAvatarUrl()
@@ -733,7 +749,7 @@ namespace DiscordBot
                     {
                         options.GlobalBadWords[index].Exceptions.Add(predException);
                         FilesProvider.RefreshGlobalOptions(options);
-                    }                    
+                    }
 
                     await ReplyAsync("Спасибо за участие в опросе!");
                 }
@@ -1220,7 +1236,7 @@ namespace DiscordBot
         public async Task Monet(int count)
         {
             var serGuild = FilesProvider.GetGuild(Context.Guild);
-            var economProvider = new EconomicProvider(Context.Guild);                        
+            var economProvider = new EconomicProvider(Context.Guild);
             var economUser = economProvider.GetEconomicGuildUser(Context.User.Id);
 
             if (economUser.Item1.Balance >= count)
@@ -1234,25 +1250,25 @@ namespace DiscordBot
                     economProvider.MinusBalance(Context.User, count);
                 }
                 else
-                { 
+                {
                     rep = $"Ты выиграл {count * val.Item2}!";
                     economProvider.AddBalance(Context.User, (int)(count * val.Item2));
                 }
 
                 await ReplyAsync(embed: new EmbedBuilder
-                { 
+                {
                     Title = "Игровой автомат",
                     Description = rep,
                     Fields = new List<EmbedFieldBuilder>
-                    { 
+                    {
                         new EmbedFieldBuilder
-                        { 
+                        {
                             Name = "Комбинация:",
                             Value = $"`{val.Item1}`"
                         }
                     },
                     Color = ColorProvider.GetColorForCurrentGuild(Context.Guild)
-                }.Build());                
+                }.Build());
             }
             else
                 await ReplyAsync("Ты не можешь поставить ставку, т.к. у тебя недостаточно средств.");
@@ -1273,12 +1289,12 @@ namespace DiscordBot
                 double jackpotChance = Math.Pow(chanceOneToSix, count);
 
                 await ReplyAsync(embed: new EmbedBuilder
-                { 
+                {
                     Title = "Вероятности выигрышей:",
                     Fields = new List<EmbedFieldBuilder>
-                    { 
+                    {
                         new EmbedFieldBuilder
-                        { 
+                        {
                             Name = "Выбить половину фишек:",
                             Value = halfPartChance,
                             IsInline = true

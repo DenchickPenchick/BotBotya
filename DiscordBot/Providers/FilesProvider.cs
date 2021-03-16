@@ -1,15 +1,15 @@
 ﻿//© Copyright 2021 Denis Voitenko MIT License
 //GitHub repository: https://github.com/DenVot/BotBotya
 
-using System.IO;
-using System.Text.Json;
-using Discord.WebSocket;
-using System.Xml.Serialization;
-using System;
-using DiscordBot.Serializable;
-using System.Collections.Generic;
 using Discord;
+using Discord.WebSocket;
+using DiscordBot.Serializable;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Xml.Serialization;
 
 namespace DiscordBot.Providers
 {
@@ -34,7 +34,7 @@ namespace DiscordBot.Providers
         {
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
             string directoryWithGuilds = $"{GetBotDirectoryPath()}/BotGuilds";
-            string[] files = Directory.GetFiles(directoryWithGuilds);            
+            string[] files = Directory.GetFiles(directoryWithGuilds);
 
             foreach (string file in files)
             {
@@ -97,7 +97,7 @@ namespace DiscordBot.Providers
             {
                 using FileStream fs = new FileStream(file, FileMode.Open);
                 var serConn = (SerializableConnectors)serializer.Deserialize(fs);
-                List<ulong> hostsId = serConn.SerializableConnectorsChannels.Select(x => x.HostId).ToList();                
+                List<ulong> hostsId = serConn.SerializableConnectorsChannels.Select(x => x.HostId).ToList();
 
                 if (hostsId.Contains(id))
                     return serConn.SerializableConnectorsChannels[hostsId.IndexOf(id)];
@@ -247,13 +247,13 @@ namespace DiscordBot.Providers
         }
 
         public static void AddReactRoleMessage(SerializableReactRoleMessage message)
-        {            
+        {
             var messages = GetReactRoleMessages();
             if (!messages.ReactRoleMessages.Contains(message))
             {
                 messages.ReactRoleMessages.Add(message);
                 RefreshReactRoleMessages(messages);
-            }            
+            }
         }
 
         public static SerializableReactRoleMessage GetReactRoleMessage(ulong id)
@@ -285,14 +285,14 @@ namespace DiscordBot.Providers
                 {
                     indexOf++;
                     changed = true;
-                }                
+                }
                 else
                     break;
             if (changed)
             {
                 message.EmojiesRoleId.Remove(message.EmojiesRoleId[indexOf]);
                 RefreshReactRoleMessage(message);
-            }            
+            }
         }
     }
 }

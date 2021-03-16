@@ -32,9 +32,9 @@ namespace DiscordBot.Modules.MusicManaging
             Client = services.GetRequiredService<DiscordSocketClient>();
             LavaOperations = services.GetRequiredService<LavaOperations>();
             Client.ReactionAdded += Client_ReactionAdded;
-            LavaNode.OnTrackEnded += LavaNode_OnTrackEnded;            
-            Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;            
-        }                
+            LavaNode.OnTrackEnded += LavaNode_OnTrackEnded;
+            Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
+        }
 
         /// <summary>
         /// Запускает модуль
@@ -42,12 +42,12 @@ namespace DiscordBot.Modules.MusicManaging
         public void RunModule()
         {
             //Метод пустой, т.к. не нужно запускать setup методов для модулей.
-        }        
-        
+        }
+
         private async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
             IMessage message = await arg1.GetOrDownloadAsync();
-            var user = arg3.User.GetValueOrDefault() as SocketGuildUser;           
+            var user = arg3.User.GetValueOrDefault() as SocketGuildUser;
             if (!user.IsBot && message.Id == LavaOperations.PlayersMessagesCollection[user.Guild].Id)
             {
                 LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
@@ -56,29 +56,29 @@ namespace DiscordBot.Modules.MusicManaging
                 {
                     case "⏯️":
                         switch (player.PlayerState)
-                        {                            
+                        {
                             case Victoria.Enums.PlayerState.Playing:
                                 await player.PauseAsync();
                                 break;
                             case Victoria.Enums.PlayerState.Paused:
                                 await player.ResumeAsync();
-                                break;                            
+                                break;
                         }
                         break;
                     case "⏹":
                         await player.StopAsync();
-                        break;                    
+                        break;
                     case "❌":
                         await ((RestUserMessage)LavaOperations.PlayersMessagesCollection[user.Guild]).DeleteAsync();
                         LavaOperations.PlayersMessagesCollection[user.Guild] = null;
                         break;
                     case "➕":
-                        if(player.Volume + 100 <= ushort.MaxValue)
-                            await player.UpdateVolumeAsync((ushort)(player.Volume + 10));                        
+                        if (player.Volume + 100 <= ushort.MaxValue)
+                            await player.UpdateVolumeAsync((ushort)(player.Volume + 10));
                         break;
                     case "➖":
-                        if(player.Volume - 100 >= ushort.MaxValue)
-                            await player.UpdateVolumeAsync((ushort)(player.Volume + 10));                        
+                        if (player.Volume - 100 >= ushort.MaxValue)
+                            await player.UpdateVolumeAsync((ushort)(player.Volume + 10));
                         break;
                 }
                 await message.RemoveReactionAsync(arg3.Emote, user);
@@ -103,15 +103,15 @@ namespace DiscordBot.Modules.MusicManaging
                 await LavaNode.LeaveAsync(prevChannel);
                 LavaOperations.PlayersMessagesCollection[prevChannel.Guild] = null;
             }
-            
+
         }
 
         private async Task LavaNode_OnTrackEnded(TrackEndedEventArgs arg)
-        {                                           
+        {
             var guild = arg.Player.VoiceState.VoiceChannel.Guild;
             var playerMessage = (RestUserMessage)LavaOperations.PlayersMessagesCollection[guild];
             await playerMessage.DeleteAsync();
             LavaOperations.PlayersMessagesCollection[guild] = null;
-        }        
+        }
     }
 }

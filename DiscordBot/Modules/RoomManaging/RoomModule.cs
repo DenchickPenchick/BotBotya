@@ -29,7 +29,7 @@ namespace DiscordBot.RoomManaging
 
         public void RunModule()
         {
-            
+
         }
 
         private async Task Client_Ready()
@@ -45,7 +45,7 @@ namespace DiscordBot.RoomManaging
             var serGuild = FilesProvider.GetGuild(guild);
 
             if (serGuild.SystemChannels.CreateRoomChannelId == arg.Id && provider.RoomsCategoryChannel() != null)
-            {                
+            {
                 var createRoomChannel = await guild.CreateVoiceChannelAsync("➕Создать комнату", x => x.CategoryId = provider.RoomsCategoryChannel().Id);
                 serGuild.SystemChannels.CreateRoomChannelId = createRoomChannel.Id;
                 FilesProvider.RefreshGuild(serGuild);
@@ -53,7 +53,7 @@ namespace DiscordBot.RoomManaging
         }
 
         private async Task Client_UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
-        {            
+        {
             try
             {
                 var channel = arg3.VoiceChannel;
@@ -83,7 +83,7 @@ namespace DiscordBot.RoomManaging
                             OnRoomDestroyed?.Invoke(socketGuildUser, prevchannel);
                             await prevchannel.DeleteAsync();
                         }
-                        
+
                     }
                     else if (channel != null)//Пользователь подкючился
                     {
@@ -92,12 +92,12 @@ namespace DiscordBot.RoomManaging
                     }
                     else if (prevchannel != null)//Пользователь отключился
                         if (prevchannel.Users.Count == 0 && prevchannel.Category == provider.RoomsCategoryChannel() && prevchannel.Name != provider.CreateRoomChannel().Name)
-                        {                            
+                        {
                             OnRoomDestroyed?.Invoke(socketGuildUser, prevchannel);
-                            await prevchannel.DeleteAsync();                            
-                        }                        
+                            await prevchannel.DeleteAsync();
+                        }
                 }
-                    
+
             }
             catch (Exception e)
             {
@@ -106,19 +106,19 @@ namespace DiscordBot.RoomManaging
         }
 
         private async Task CheckRooms()
-        {            
+        {
             foreach (var guild in Client.Guilds)
-            {                   
+            {
                 GuildProvider provider = new GuildProvider(guild);
-                    
+
                 var RoomsCategory = provider.RoomsCategoryChannel();
-                var CreateRoomChannel = provider.CreateRoomChannel();                
+                var CreateRoomChannel = provider.CreateRoomChannel();
 
                 if (RoomsCategory != null)
                 {
                     if (CreateRoomChannel == null)
                     {
-                        var serGuild = FilesProvider.GetGuild(guild);                        
+                        var serGuild = FilesProvider.GetGuild(guild);
                         var channel = await guild.CreateVoiceChannelAsync("➕Создать комнату", x => x.CategoryId = RoomsCategory.Id);
                         serGuild.SystemChannels.CreateRoomChannelId = channel.Id;
                         FilesProvider.RefreshGuild(serGuild);
@@ -138,7 +138,7 @@ namespace DiscordBot.RoomManaging
                                 await guildUser.ModifyAsync(x => { x.Channel = newChannel; });
                             continue;
                         }
-                }                
+                }
             }
             Console.WriteLine("Checked");
         }
@@ -157,27 +157,27 @@ namespace DiscordBot.RoomManaging
                     if (oneofchannel.Name.Contains(user.Nickname)) { socketVoiceChannel = oneofchannel; haveChannel = true; }
                     continue;
                 }
-                else 
+                else
                 {
                     if (oneofchannel.Name.Contains(user.Username)) { socketVoiceChannel = oneofchannel; haveChannel = true; }
                     continue;
                 }
-                    
+
             if (!haveChannel)
-            {                
+            {
                 var newChannel = await guild.CreateVoiceChannelAsync($"{serGuild.EmojiOfRoom}Комната {user.Nickname ?? user.Username}", x => x.CategoryId = provider.RoomsCategoryChannel().Id);
                 OnRoomCreated?.Invoke(user, newChannel);
                 await user.ModifyAsync(x =>
                 {
                     x.Channel = newChannel;
-                });                
+                });
                 return guild.GetVoiceChannel(newChannel.Id);
             }
             else
             {
                 await user.ModifyAsync(x => { x.Channel = socketVoiceChannel; });
                 return socketVoiceChannel;
-            }            
+            }
         }
     }
 }

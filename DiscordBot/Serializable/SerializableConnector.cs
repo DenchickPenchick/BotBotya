@@ -7,7 +7,7 @@ namespace DiscordBot.Serializable
 {
     public class SerializableConnector
     {
-        public ulong HostId { get; set; } = 0;    
+        public ulong HostId { get; set; } = 0;
         public List<ulong> EndPointsId { get; set; } = new List<ulong>();
     }
 }

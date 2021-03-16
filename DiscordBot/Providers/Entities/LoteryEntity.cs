@@ -14,7 +14,7 @@ namespace DiscordBot.Providers.Entities
             string[] currentPoints = new string[lotsCount];
 
             for (int i = 0; i < currentPoints.Length; i++)
-                currentPoints[i] = allPoints[random.Next(0, allPoints.Length - 1)];            
+                currentPoints[i] = allPoints[random.Next(0, allPoints.Length - 1)];
 
             Dictionary<string, int> table = new Dictionary<string, int>();
 

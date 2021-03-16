@@ -2,12 +2,8 @@
 //GitHub repository: https://github.com/DenVot/BotBotya
 
 using DiscordBot.Modules;
-using DiscordBot.Collections.Exceptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DiscordBot.Collections
 {
@@ -36,12 +32,12 @@ namespace DiscordBot.Collections
         //        var allParams = constructor.GetParameters();
 
         //        var allTypesOfServiceProvider = Set.GetServices<Type>();
-                
+
         //    }
         //    else
         //        throw new NotExtendsModuleInterfaceException(typeof(T));
         //}
 
-        private Assembly GetAssembly() => typeof(IModule).Assembly;        
+        private Assembly GetAssembly() => typeof(IModule).Assembly;
     }
 }

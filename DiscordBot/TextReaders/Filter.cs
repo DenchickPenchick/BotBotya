@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace DiscordBot.TextReaders
 {
-    public class Filter 
+    public class Filter
     {
         public IEnumerable<string> Words { get; set; }
         public IEnumerable<string> ExceptWords { get; set; }
@@ -41,7 +41,7 @@ namespace DiscordBot.TextReaders
                 {
                     var globCheck = IsGlobalBadWord(word);
                     if (globCheck.Item1)
-                    { 
+                    {
                         words = true;
                         Word = globCheck.Item2;
                     }
@@ -53,7 +53,7 @@ namespace DiscordBot.TextReaders
                             words = true;
                             Word = toCheck;
                         }
-                        
+
                 }
 
                 if (words)
@@ -94,9 +94,9 @@ namespace DiscordBot.TextReaders
                 {
                     var substitutionCost = firstWord[i - 1] == secondWord[j - 1] ? 0 : 1;
 
-                    matrixD[i, j] = Minimum(matrixD[i - 1, j] + deletionCost,          
-                                            matrixD[i, j - 1] + insertionCost,         
-                                            matrixD[i - 1, j - 1] + substitutionCost); 
+                    matrixD[i, j] = Minimum(matrixD[i - 1, j] + deletionCost,
+                                            matrixD[i, j - 1] + insertionCost,
+                                            matrixD[i - 1, j - 1] + substitutionCost);
                 }
             }
 
@@ -107,10 +107,10 @@ namespace DiscordBot.TextReaders
         {
             var GlobalOptions = FilesProvider.GetGlobalOptions();
 
-            foreach (var bad in GlobalOptions.GlobalBadWords)            
+            foreach (var bad in GlobalOptions.GlobalBadWords)
                 if (bad.Word == word || bad.Exceptions.Contains(word))
                     return (true, bad.Word);
-            
+
             return (false, null);
         }
 

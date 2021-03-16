@@ -1,44 +1,43 @@
 ﻿//© Copyright 2021 Denis Voitenko MIT License
 //GitHub repository: https://github.com/DenVot/BotBotya
 
-using System;
-using System.Reflection;
-using System.Threading.Tasks;
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
-using Discord.Addons.Interactive;
-using DiscordBot.Modules.ContentManaging;
-using DiscordBot.Modules.ProcessManage;
-using DiscordBot.RoomManaging;
-using Microsoft.Extensions.DependencyInjection;
-using Console = Colorful.Console;
-using DiscordBot.GuildManaging;
-using DiscordBot.Modules.NotificationsManaging;
-using Victoria;
-using DiscordBot.MusicOperations;
-using DiscordBot.Modules.MusicManaging;
-using DiscordBot.Providers;
-using DiscordBot.Modules.ServersConnectingManaging;
-using DiscordBot.Providers.FileManaging;
-using System.Threading;
-using DiscordBot.Modules.EconomicManaging;
-using DiscordBot.TypeReaders;
-using System.Linq;
-using DiscordBot.TextReaders;
-using System.Collections.Generic;
 using DiscordBot.Collections;
+using DiscordBot.GuildManaging;
+using DiscordBot.Modules.ContentManaging;
+using DiscordBot.Modules.EconomicManaging;
+using DiscordBot.Modules.NotificationsManaging;
+using DiscordBot.Modules.ProcessManage;
+using DiscordBot.Modules.ServersConnectingManaging;
+using DiscordBot.MusicOperations;
+using DiscordBot.Providers;
+using DiscordBot.Providers.FileManaging;
+using DiscordBot.RoomManaging;
+using DiscordBot.TextReaders;
+using DiscordBot.TypeReaders;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using Victoria;
+using Console = Colorful.Console;
 
 namespace DiscordBot
 {
     public class Bot
-    {        
+    {
         public string TOKEN = null;
         public string PathToBotDirectory = null;
-        
-        public DiscordSocketClient Client { get; private set; }
+
+        public DiscordSocketClient Client { get; set; }
         public CommandService Commands { get; private set; }
-        public IServiceProvider Services { get; private set; }        
+        public IServiceProvider Services { get; set; }
 
         public async Task RunBotAsync()
         {
@@ -52,7 +51,7 @@ namespace DiscordBot
                 MessageCacheSize = 1024
             });
 
-            Commands = new CommandService();            
+            Commands = new CommandService();
             InteractiveService interactiveService = new InteractiveService(Client, new InteractiveServiceConfig
             {
                 DefaultTimeout = TimeSpan.FromMinutes(5)
@@ -60,15 +59,14 @@ namespace DiscordBot
             Services = new ServiceCollection()
                 .AddSingleton(this)
                 .AddSingleton(Client)
-                .AddSingleton(interactiveService)
+                .AddSingleton<InteractiveService>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<Commands>()
                 .AddSingleton(new LavaNode(Client, new LavaConfig
                 {
                     ResumeTimeout = TimeSpan.MaxValue
                 }))
-                .AddSingleton(new LavaConfig())
-                .AddLavaNode()
+                .AddSingleton(new LavaConfig())                
                 .AddSingleton<LavaOperations>()
                 .BuildServiceProvider();
 
@@ -88,31 +86,32 @@ namespace DiscordBot
 
             new ProcessingModule(modulesCollection).RunModule();
 
-            Client.Ready += Client_Ready;            
+            Client.Ready += Client_Ready;
 
-            await RegisterCommandsAsync();           
+            await RegisterCommandsAsync();
 
             await Client.LoginAsync(TokenType.Bot, TOKEN);
 
             await Client.StartAsync();
-                                           
+
             UpdateStatus();
-            
+
             await Task.Delay(-1);
         }
 
         private async Task Client_Ready()
-        {            
-            var instanceOfLavaNode = Services.GetRequiredService<LavaNode>();            
+        {
+            Console.WriteLine("Ready");
+            var instanceOfLavaNode = Services.GetRequiredService<LavaNode>();
             if (!instanceOfLavaNode.IsConnected)
             {
-                Console.WriteLine("Connecting Lava node..");                
+                Console.WriteLine("Connecting Lava node...");
                 await instanceOfLavaNode.ConnectAsync();
                 if (!instanceOfLavaNode.IsConnected)
                     Console.WriteLine("WARN Lava node connecting failed", Color.Red);
                 else
                     Console.WriteLine("Lava node connected", Color.Green);
-            }                        
+            }
         }
 
         private async Task HandleCommandAsync(SocketMessage arg)
@@ -120,19 +119,19 @@ namespace DiscordBot
             int argsPos = 0;
 
             try
-            {               
+            {
                 var message = arg as SocketUserMessage;
                 var provider = new GuildProvider((message.Author as SocketGuildUser).Guild);
-                var context = new SocketCommandContext(Client, message);                
+                var context = new SocketCommandContext(Client, message);
                 var serGuild = FilesProvider.GetGuild((message.Author as SocketGuildUser).Guild);
                 var roles = (context.User as SocketGuildUser).Roles.Select(x => x.Id).ToList();
 
-                if (message.Author.IsBot || 
-                    message is null || 
+                if (message.Author.IsBot ||
+                    message is null ||
                     (!serGuild.CommandsChannels.Contains(arg.Channel.Id) && serGuild.CommandsChannels.Count > 0) ||
-                    roles.Exists(x => serGuild.IgnoreRoles.Contains(x))) return;                
+                    roles.Exists(x => serGuild.IgnoreRoles.Contains(x))) return;
                 if (message.HasStringPrefix(serGuild.Prefix, ref argsPos))
-                {                                            
+                {
                     IResult result = await Commands.ExecuteAsync(context, argsPos, Services);
 
                     if (!result.IsSuccess)
@@ -145,7 +144,7 @@ namespace DiscordBot
                             Console.WriteLine("Command:", Color.Red);
                             Console.WriteLine(message);
                             Console.WriteLine("Command Status: Failed", Color.Red);
-                        }                            
+                        }
                         switch (result.Error)
                         {
                             case CommandError.UnknownCommand:
@@ -159,27 +158,27 @@ namespace DiscordBot
                                     int index = 0;
 
                                     foreach (var command in Commands.Commands)
-                                    {                                        
+                                    {
                                         string p = null;
                                         foreach (var param in command.Parameters)
                                             p += $" `{param.Name}`";
                                         distances.Add((command.Name, Filter.Distance(messCommand, command.Name), p));
-                                        foreach (var alias in command.Aliases)                                        
+                                        foreach (var alias in command.Aliases)
                                             distances.Add((alias, Filter.Distance(messCommand, alias), p));
                                     }
 
-                                    for (int i = 0; i < distances.Count; i++)                                    
+                                    for (int i = 0; i < distances.Count; i++)
                                         if ((distances[i].Item2 < min && min > 0) || min == 0)
                                         {
                                             min = distances[i].Item2;
                                             index = i;
-                                        }                                    
+                                        }
 
                                     predicateCommand = distances[index].Item1;
                                     parameters = distances[index].Item3;
 
-                                    await context.Channel.SendMessageAsync($"Неизвестная команда. Пропиши команду `{serGuild.Prefix}Хелп`.{(predicateCommand != null && predicateCommand != "Хелп"? $"\nМожет быть ты это имел ввиду команду `{serGuild.Prefix}{predicateCommand}`{parameters}?" : null)}");
-                                }                                
+                                    await context.Channel.SendMessageAsync($"Неизвестная команда. Пропиши команду `{serGuild.Prefix}Хелп`.{(predicateCommand != null && predicateCommand != "Хелп" ? $"\nМожет быть ты это имел ввиду команду `{serGuild.Prefix}{predicateCommand}`{parameters}?" : null)}");
+                                }
                                 break;
                             case CommandError.ParseFailed:
                                 await context.Channel.SendMessageAsync("Наверное ты неправильно ввел данные.");
@@ -203,7 +202,7 @@ namespace DiscordBot
                                 await context.Channel.SendMessageAsync("Команда выполнена неудачно.");
                                 break;
                         }
-                    }                                            
+                    }
                 }
             }
             catch (NullReferenceException)
@@ -218,8 +217,8 @@ namespace DiscordBot
 
         private async Task RegisterCommandsAsync()
         {
-            Commands.AddTypeReader<Emoji>(new EmojiTypeReader());            
-            await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), Services);                                   
+            Commands.AddTypeReader<Emoji>(new EmojiTypeReader());
+            await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), Services);
             Client.MessageReceived += HandleCommandAsync;
         }
 
@@ -250,7 +249,7 @@ namespace DiscordBot
                         Console.WriteLine($"Ex: {ex}");
                     }
                 }
-            }).Start();            
+            }).Start();
         }
     }
 }

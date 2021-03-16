@@ -3,32 +3,32 @@
 
 using Discord;
 using Discord.WebSocket;
-using System.Threading.Tasks;
-using System;
 using DiscordBot.Serializable;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DiscordBot.Providers
 {
     public class GuildProvider
     {
         public SocketGuild Guild { get; }
-        public SerializableGuild SerializableGuild { get => FilesProvider.GetGuild(Guild);}
+        public SerializableGuild SerializableGuild { get => FilesProvider.GetGuild(Guild); }
 
         public GuildProvider(SocketGuild guild)
-        {            
+        {
             Guild = guild;
         }
 
         public SocketVoiceChannel CreateRoomChannel() => Guild.GetVoiceChannel(SerializableGuild.SystemChannels.CreateRoomChannelId);
         public SocketTextChannel LinksTextChannel() => Guild.GetTextChannel(SerializableGuild.SystemChannels.LinksChannelId);
-        public SocketTextChannel VideosTextChannel() => Guild.GetTextChannel(SerializableGuild.SystemChannels.VideosChannelId);        
+        public SocketTextChannel VideosTextChannel() => Guild.GetTextChannel(SerializableGuild.SystemChannels.VideosChannelId);
         public SocketCategoryChannel RoomsCategoryChannel() => Guild.GetCategoryChannel(SerializableGuild.SystemCategories.VoiceRoomsCategoryId);
-        public SocketCategoryChannel ContentCategoryChannel() => Guild.GetCategoryChannel(SerializableGuild.SystemCategories.ContentCategoryId);                
+        public SocketCategoryChannel ContentCategoryChannel() => Guild.GetCategoryChannel(SerializableGuild.SystemCategories.ContentCategoryId);
 
         public enum GetCategoryIdEnum { MainVoiceChannelsCategory, RoomVoiceChannelsCategory, MainTextChannelsCategory, ContentChannelsCategory, BotChannelsCategory }
-                
+
         public async Task SendHelloMessageToGuild(DiscordSocketClient client)
         {
             try
@@ -39,9 +39,9 @@ namespace DiscordBot.Providers
                     Title = $"👋 Спасибо, что пригласили меня на сервер {Guild.Name} 👋",
                     Description = $"Меня зовут {client.CurrentUser.Username}. Я много чего умею! Пропиши `!Хелп`, чтобы узнать мой функционал.\nЕсли возникнут проблемы, тогда можешь задать вопрос на [сервере поддержки](https://discord.gg/p6R4yk7uqK).\n",
                     Fields = new List<EmbedFieldBuilder>
-                    { 
+                    {
                         new EmbedFieldBuilder
-                        { 
+                        {
                             Name = $"{botyaEmoji} Мой сайт:",
                             Value = "https://botbotya.ru",
                             IsInline = true
@@ -65,14 +65,14 @@ namespace DiscordBot.Providers
         public void SetWarns(IUser user, int warns)
         {
             var serGuild = SerializableGuild;
-            List<ulong> ids = serGuild.BadUsers.Select(x => x.Item1).ToList();                        
+            List<ulong> ids = serGuild.BadUsers.Select(x => x.Item1).ToList();
             int index = ids.IndexOf(user.Id);
 
             if (index >= 0 && warns >= 0)
-                serGuild.BadUsers[index] = (user.Id, warns);            
-            else if(warns >= 0)
+                serGuild.BadUsers[index] = (user.Id, warns);
+            else if (warns >= 0)
                 serGuild.BadUsers.Add((user.Id, warns));
-            else if(index >= 0 && warns < 0)
+            else if (index >= 0 && warns < 0)
                 serGuild.BadUsers[index] = (user.Id, 0);
 
             FilesProvider.RefreshGuild(serGuild);
@@ -81,7 +81,7 @@ namespace DiscordBot.Providers
         public void PlusWarns(IUser user, int count)
         {
             var serGuild = SerializableGuild;
-            List<ulong> ids = serGuild.BadUsers.Select(x => x.Item1).ToList();            
+            List<ulong> ids = serGuild.BadUsers.Select(x => x.Item1).ToList();
             int index = ids.IndexOf(user.Id);
 
             if (index >= 0)
@@ -99,10 +99,10 @@ namespace DiscordBot.Providers
             int index = ids.IndexOf(user.Id);
 
             if (index >= 0)
-                if(serGuild.BadUsers[index].Item2 - count >= 0)
+                if (serGuild.BadUsers[index].Item2 - count >= 0)
                     serGuild.BadUsers[index] = (user.Id, serGuild.BadUsers[index].Item2 - count);
-            else
-                serGuild.BadUsers.Add((user.Id, count));
+                else
+                    serGuild.BadUsers.Add((user.Id, count));
 
             FilesProvider.RefreshGuild(serGuild);
         }
@@ -128,10 +128,10 @@ namespace DiscordBot.Providers
             foreach (var ch in guild.Channels)
             {
                 if (ch.Name == name)
-                { 
+                {
                     val = true;
                     continue;
-                }                 
+                }
             }
 
             return val;

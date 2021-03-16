@@ -1,34 +1,34 @@
 ﻿//© Copyright 2021 Denis Voitenko MIT License
 //GitHub repository: https://github.com/DenVot/BotBotya
 
-using System;
 using Discord;
 using Discord.WebSocket;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using DiscordBot.Modules.ContentManaging;
 using DiscordBot.Providers;
 using DiscordBot.RoomManaging;
 using Microsoft.Extensions.DependencyInjection;
-using DiscordBot.Modules.ContentManaging;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.NotificationsManaging
 {
     public class LogModule : IModule
     {
         private DiscordSocketClient Client { get; }
-        private RoomModule RoomModuleInstance { get; }        
+        private RoomModule RoomModuleInstance { get; }
         private ContentModule ContentModuleInstance { get; }
 
         public LogModule(DiscordSocketClient client, IServiceProvider modules)
         {
-            Client = client;           
+            Client = client;
             RoomModuleInstance = modules.GetRequiredService<RoomModule>();
             ContentModuleInstance = modules.GetRequiredService<ContentModule>();
-            Client.Ready += Client_Ready;            
+            Client.Ready += Client_Ready;
         }
 
         private Task Client_Ready()
-        {            
+        {
             RoomModuleInstance.OnRoomCreated += RoomModuleInstance_OnRoomCreated;
             RoomModuleInstance.OnRoomDestroyed += RoomModuleInstance_OnRoomDestroyed;
             ContentModuleInstance.OnBadWordCommited += ContentModuleInstance_OnBadWordCommited;
@@ -37,11 +37,11 @@ namespace DiscordBot.Modules.NotificationsManaging
         }
 
         public void RunModule()
-        {            
+        {
             Client.MessageDeleted += Client_MessageDeleted;
             Client.UserLeft += Client_UserLeft;
             Client.UserJoined += Client_UserJoined;
-            Client.MessageUpdated += Client_MessageUpdated;                                  
+            Client.MessageUpdated += Client_MessageUpdated;
         }
 
         private async void ContentModuleInstance_OnInviteLinkCommited(string content, ITextChannel sourceChannel, SocketGuildUser user)
@@ -50,9 +50,9 @@ namespace DiscordBot.Modules.NotificationsManaging
             {
                 Description = $"{user.Mention} разместил ссылку-приглашение",
                 Fields = new List<EmbedFieldBuilder>
-                { 
+                {
                     new EmbedFieldBuilder
-                    { 
+                    {
                         Name = "Ссылка:",
                         Value = $"`{content}`"
                     }
@@ -79,7 +79,7 @@ namespace DiscordBot.Modules.NotificationsManaging
         private async void RoomModuleInstance_OnRoomDestroyed(SocketGuildUser user, IVoiceChannel channel)
         {
             await SendLog(user, new EmbedBuilder
-            { 
+            {
                 Description = $"{user.Mention} удалил комнату {channel.Name}"
             });
         }
@@ -96,9 +96,9 @@ namespace DiscordBot.Modules.NotificationsManaging
         {
             var mess = arg1.Value;
             if (mess != null)
-            { 
-                var content = mess.Content;            
-            
+            {
+                var content = mess.Content;
+
                 if (!arg1.Value.Author.IsBot && arg2 is SocketTextChannel channel)
                 {
                     var user = arg1.Value.Author as SocketGuildUser;
@@ -114,9 +114,9 @@ namespace DiscordBot.Modules.NotificationsManaging
                             }
                         }
                     });
-                }            
+                }
             }
-        }     
+        }
 
         private async Task Client_MessageUpdated(Cacheable<IMessage, ulong> arg1, SocketMessage arg2, ISocketMessageChannel arg3)
         {
@@ -146,7 +146,7 @@ namespace DiscordBot.Modules.NotificationsManaging
         {
             await SendLog(arg, new EmbedBuilder
             {
-                Description = $"Новый участник сервера {arg.Mention}"                
+                Description = $"Новый участник сервера {arg.Mention}"
             });
         }
 
@@ -154,17 +154,17 @@ namespace DiscordBot.Modules.NotificationsManaging
         {
             await SendLog(arg, new EmbedBuilder
             {
-                Description = $"Участник {arg.Mention} покинул сервер."                
+                Description = $"Участник {arg.Mention} покинул сервер."
             });
-        }       
+        }
 
         private async Task SendLog(IUser user, EmbedBuilder builder)
         {
             var guild = (user as SocketGuildUser).Guild;
             var serGuild = FilesProvider.GetGuild(guild);
             if (serGuild.SystemChannels.LogsChannelId != default)
-            {                                
-                string time = $"Время: {DateTime.Now.ToShortTimeString()}";                
+            {
+                string time = $"Время: {DateTime.Now.ToShortTimeString()}";
 
                 builder.Footer = new EmbedFooterBuilder
                 {
@@ -176,12 +176,12 @@ namespace DiscordBot.Modules.NotificationsManaging
                 var channel = guild.GetTextChannel(serGuild.SystemChannels.LogsChannelId);
                 if (channel != null)
                     await channel.SendMessageAsync(embed: builder.Build());
-                else 
-                {                                       
+                else
+                {
                     serGuild.SystemChannels.LogsChannelId = default;
                     FilesProvider.RefreshGuild(serGuild);
-                }                    
-            }            
+                }
+            }
         }
     }
 }

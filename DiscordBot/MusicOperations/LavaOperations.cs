@@ -16,11 +16,11 @@ namespace DiscordBot.MusicOperations
 {
     public class LavaOperations
     {
-        public readonly LavaNode LavaNode;        
+        public readonly LavaNode LavaNode;
 
         private delegate Task UpdatePlayerHandler(IGuild guild);
         private event UpdatePlayerHandler UpdatePlayer;
-        
+
         public Dictionary<IGuild, IUserMessage> PlayersMessagesCollection = new Dictionary<IGuild, IUserMessage>();
 
         public LavaOperations(LavaNode lavaNode, DiscordSocketClient client)
@@ -29,11 +29,11 @@ namespace DiscordBot.MusicOperations
             foreach (var guild in client.Guilds)
                 PlayersMessagesCollection.Add(guild, null);
             UpdatePlayer += LavaOperations_UpdatePlayer;
-        }        
+        }
 
         public async Task JoinAsync(SocketGuildUser user, SocketTextChannel contextChannel)
         {
-            var voiceState = user.VoiceState;            
+            var voiceState = user.VoiceState;
             var channel = voiceState.Value.VoiceChannel;
             var serGuild = FilesProvider.GetGuild(user.Guild);
 
@@ -51,12 +51,12 @@ namespace DiscordBot.MusicOperations
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);                
+                Console.WriteLine(ex);
             }
         }
 
         public async Task LeaveAsync(SocketGuildUser user, SocketTextChannel contextChannel)
-        {                     
+        {
             try
             {
                 if (user.Guild.CurrentUser.VoiceChannel != null)
@@ -74,8 +74,8 @@ namespace DiscordBot.MusicOperations
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);                
-            }            
+                Console.WriteLine(ex);
+            }
         }
 
         public async Task PlayTrackAsync(SocketGuildUser user, string[] query, SocketTextChannel contextChannel)
@@ -87,11 +87,11 @@ namespace DiscordBot.MusicOperations
             }
             string Query = null;
 
-            for (int i = 0; i < query.Length; i++)            
-                Query += i == 0 ? $"{query[i]}" : $" {query[i]}";            
+            for (int i = 0; i < query.Length; i++)
+                Query += i == 0 ? $"{query[i]}" : $" {query[i]}";
 
             try
-            {                
+            {
                 bool hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
                 if (user.VoiceChannel == null)
                 {
@@ -99,21 +99,21 @@ namespace DiscordBot.MusicOperations
                     return;
                 }
 
-                if (!hasPlayer)                
-                    player = await LavaNode.JoinAsync(user.VoiceChannel);                
+                if (!hasPlayer)
+                    player = await LavaNode.JoinAsync(user.VoiceChannel);
                 else
-                    if(player.VoiceState.VoiceChannel == null)
-                        await LavaNode.JoinAsync(user.VoiceChannel);
+                    if (player.VoiceState.VoiceChannel == null)
+                    await LavaNode.JoinAsync(user.VoiceChannel);
 
                 var search = Uri.IsWellFormedUriString(Query, UriKind.Absolute) ? await LavaNode.SearchAsync(Query) : await LavaNode.SearchYouTubeAsync(Query);
                 var track = search.Tracks.FirstOrDefault();
                 await player.PlayAsync(track);
 
-                await SendPlayer(player, contextChannel);                
+                await SendPlayer(player, contextChannel);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);                
+                Console.WriteLine(ex);
             }
         }
 
@@ -140,11 +140,11 @@ namespace DiscordBot.MusicOperations
                     return;
                 }
 
-                await player.StopAsync();                             
+                await player.StopAsync();
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);                
+                Console.WriteLine(ex);
             }
         }
 
@@ -173,11 +173,11 @@ namespace DiscordBot.MusicOperations
                 }
 
                 await player.PauseAsync();
-                await SendPlayer(player, contextChannel);                
+                await SendPlayer(player, contextChannel);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);                
+                Console.WriteLine(ex);
             }
         }
 
@@ -192,7 +192,7 @@ namespace DiscordBot.MusicOperations
                     await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NotConnected));
                     return;
                 }
-                   
+
                 if (!hasPlayer)
                 {
                     await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoTrack));
@@ -203,16 +203,16 @@ namespace DiscordBot.MusicOperations
                 {
                     await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoTrack));
                     return;
-                }                   
+                }
 
                 await player.ResumeAsync();
-                await SendPlayer(player, contextChannel);                
+                await SendPlayer(player, contextChannel);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);                
+                Console.WriteLine(ex);
             }
-        }        
+        }
 
         public async Task SetVolumeAsync(SocketGuildUser user, ushort vol, SocketTextChannel contextChannel)
         {
@@ -224,7 +224,7 @@ namespace DiscordBot.MusicOperations
                 var hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
                 if (!hasPlayer)
                     await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoTrack));
-                await player.UpdateVolumeAsync(conv);                
+                await player.UpdateVolumeAsync(conv);
                 await contextChannel.SendMessageAsync(embed: new EmbedBuilder
                 {
                     Description = $"Текущая громкость: {vol}%",
@@ -234,7 +234,7 @@ namespace DiscordBot.MusicOperations
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);                
+                Console.WriteLine(ex);
             }
         }
 
@@ -262,7 +262,7 @@ namespace DiscordBot.MusicOperations
                     Description = "Нет трека в воспроизведении",
                     Color = Color.Red
                 }.Build(),
-                ErrorType.NoName => new EmbedBuilder 
+                ErrorType.NoName => new EmbedBuilder
                 {
                     Description = "Ты не указал ссылку или название на видео или трек",
                     Color = Color.Red
@@ -284,7 +284,7 @@ namespace DiscordBot.MusicOperations
                 var mess = await textChannel.SendMessageAsync(embed: new EmbedBuilder
                 {
                     Title = $"Плеер сервера {guild.Name}",
-                    Description = player.Track.Title,                    
+                    Description = player.Track.Title,
                     Color = ColorProvider.GetColorForCurrentGuild(serGuild),
                     Author = new EmbedAuthorBuilder { Name = player.Track.Author, Url = player.Track.Url },
                     Footer = new EmbedFooterBuilder
@@ -356,7 +356,7 @@ namespace DiscordBot.MusicOperations
                     try
                     {
                         var serGuild = FilesProvider.GetGuild(Guild);
-                        var message = PlayersMessagesCollection[Guild];                        
+                        var message = PlayersMessagesCollection[Guild];
                         int h = player.Track.Position.Hours;
                         int m = player.Track.Position.Minutes;
                         int s = player.Track.Position.Seconds;

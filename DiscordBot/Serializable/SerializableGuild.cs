@@ -14,7 +14,7 @@ namespace DiscordBot.Serializable
         /// <summary>
         /// Id роли по-умолчанию
         /// </summary>
-        public ulong DefaultRoleId { get; set; } = 0;        
+        public ulong DefaultRoleId { get; set; } = 0;
         /// <summary>
         /// Максимальное количество предупреждений
         /// </summary>
@@ -54,7 +54,7 @@ namespace DiscordBot.Serializable
         /// <summary>
         /// Проверка правописания команд. Если true, тогда бот будет уведомлять о неправильной команде.
         /// </summary>
-        public bool UnknownCommandMessage { get; set; } = false;        
+        public bool UnknownCommandMessage { get; set; } = false;
         /// <summary>
         /// Проверка плохих слов
         /// </summary>
@@ -102,7 +102,7 @@ namespace DiscordBot.Serializable
         /// <summary>
         /// Список людей с предупреждениями
         /// </summary>
-        public List<(ulong, int)> BadUsers { get; set; } = new List<(ulong, int)>();        
+        public List<(ulong, int)> BadUsers { get; set; } = new List<(ulong, int)>();
         /// <summary>
         /// Системные категории
         /// </summary>

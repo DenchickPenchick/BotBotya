@@ -11,7 +11,7 @@ namespace DiscordBot.Models
     /// В данный момент на стадии разработки модель слова. Не использовать!
     /// </summary>
     public class WordModel
-    {                
+    {
         public string Word { get; set; } = null;
 
         /// <summary>
@@ -23,6 +23,6 @@ namespace DiscordBot.Models
         /// </summary>
         /// <param name="wordToCalc">Слово, для которого нужно посчитать редакционное расстояние</param>
         /// <returns>Расстояние Левенштейна. Тип: <see cref="int"/>.</returns>
-        public int CalculateLevensteinDistanse(string wordToCalc) => Filter.Distance(Word, wordToCalc);        
+        public int CalculateLevensteinDistanse(string wordToCalc) => Filter.Distance(Word, wordToCalc);
     }
 }

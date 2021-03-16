@@ -1,15 +1,14 @@
 ﻿//© Copyright 2021 Denis Voitenko MIT License
 //GitHub repository: https://github.com/DenVot/BotBotya
 
+using Discord;
 using Discord.WebSocket;
 using DiscordBot.Modules;
+using DiscordBot.Providers;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Console = Colorful.Console;
-using Discord;
-using DiscordBot.Providers;
-using System.Linq;
-using System.Collections.Generic;
-using System.Collections;
 
 namespace DiscordBot.GuildManaging
 {
@@ -17,7 +16,7 @@ namespace DiscordBot.GuildManaging
     /// Модуль, который отвечает за правильную работу с серверами.
     /// </summary>
     public class GuildModule : IModule
-    {        
+    {
         private readonly DiscordSocketClient Client;
 
         private Dictionary<ulong, ulong> txtChannelsForVoice = new Dictionary<ulong, ulong>();
@@ -30,14 +29,14 @@ namespace DiscordBot.GuildManaging
         {
             Client = client;
             Client.ReactionAdded += Client_ReactionAdded;
-        }        
+        }
 
         /// <summary>
         /// Запускает модуль
         /// </summary>
         public void RunModule()
         {
-            Client.JoinedGuild += Client_JoinedGuild;            
+            Client.JoinedGuild += Client_JoinedGuild;
             Client.UserJoined += Client_UserJoined;
             Client.UserLeft += Client_UserLeft;
             Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
@@ -61,7 +60,7 @@ namespace DiscordBot.GuildManaging
         private async Task Client_UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
         {
             if (arg1 is SocketGuildUser user)
-            {             
+            {
                 var serGuild = FilesProvider.GetGuild(user.Guild);
                 var currentChannel = arg3.VoiceChannel;
                 var prevChannel = arg2.VoiceChannel;
@@ -86,11 +85,11 @@ namespace DiscordBot.GuildManaging
                     {
                         var channel = contextGuild.GetTextChannel(txtChannelsForVoice[currentChannel.Id]);
 
-                        if (channel != null)                        
-                            await channel.AddPermissionOverwriteAsync(user, allowPerms);                        
+                        if (channel != null)
+                            await channel.AddPermissionOverwriteAsync(user, allowPerms);
                     }
                 }
-                if(prevChannel != null)
+                if (prevChannel != null)
                     if (prevChannel.Users.Count == 0)
                     {
                         var channel = contextGuild.GetTextChannel(txtChannelsForVoice[prevChannel.Id]);
@@ -109,7 +108,7 @@ namespace DiscordBot.GuildManaging
 
             if (serGuild.DefaultRoleId != default)
                 await arg.AddRoleAsync(defaultRole);
-            if(serGuild.HelloMessageEnable && serGuild.HelloMessage != null)
+            if (serGuild.HelloMessageEnable && serGuild.HelloMessage != null)
                 await arg.GetOrCreateDMChannelAsync().Result.SendMessageAsync(serGuild.HelloMessage);
             if (newUsers != null)
                 await arg.Guild.GetTextChannel(serGuild.SystemChannels.NewUsersChannelId).SendMessageAsync(embed: new EmbedBuilder
@@ -123,8 +122,8 @@ namespace DiscordBot.GuildManaging
         private async Task Client_JoinedGuild(SocketGuild arg)
         {
             Console.WriteLine($"Bot joined new guild({arg.Id}).", Color.Blue);
-            await new GuildProvider(arg).SendHelloMessageToGuild(Client);                        
-        }        
+            await new GuildProvider(arg).SendHelloMessageToGuild(Client);
+        }
 
         private async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
@@ -132,19 +131,19 @@ namespace DiscordBot.GuildManaging
             var message = FilesProvider.GetReactRoleMessage(userMessage.Id);
 
             if (message != null)
-            {                
+            {
                 if (arg3.User.Value is SocketGuildUser user)
                 {
                     if (!user.IsBot)
-                    { 
+                    {
                         var reactRoleMess = message.EmojiesRoleId;
                         int indexOf = reactRoleMess.Select(x => x.Item1).ToList().IndexOf(arg3.Emote.Name);
-                    
+
                         await user.AddRoleAsync(user.Guild.GetRole(reactRoleMess[indexOf].Item2));
-                        await userMessage.RemoveReactionAsync(arg3.Emote, arg3.User.Value);                    
+                        await userMessage.RemoveReactionAsync(arg3.Emote, arg3.User.Value);
                     }
                 }
-            }            
+            }
         }
     }
 }

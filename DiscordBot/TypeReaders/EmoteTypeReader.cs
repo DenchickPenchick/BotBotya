@@ -13,7 +13,7 @@ namespace DiscordBot.TypeReaders
         public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
         {
             try
-            {                
+            {
                 if (new Emoji(input) != null)
                     return Task.FromResult(TypeReaderResult.FromSuccess(new Emoji(input)));
 

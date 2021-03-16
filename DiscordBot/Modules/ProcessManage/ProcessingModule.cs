@@ -9,9 +9,9 @@ namespace DiscordBot.Modules.ProcessManage
     {
         private ModulesCollection ModulesCollection { get; }
 
-        public ProcessingModule(ModulesCollection modulesCollection) => ModulesCollection = modulesCollection;        
+        public ProcessingModule(ModulesCollection modulesCollection) => ModulesCollection = modulesCollection;
 
         public void RunModule() => ModulesCollection.RunAllModules();
-        
+
     }
 }

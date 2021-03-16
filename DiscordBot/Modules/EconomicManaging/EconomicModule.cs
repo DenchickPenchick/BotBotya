@@ -11,7 +11,7 @@ namespace DiscordBot.Modules.EconomicManaging
     /// Модуль, который отвечает за "экономику" серверов
     /// </summary>
     public class EconomicModule : IModule
-    {        
+    {
         private DiscordSocketClient Client { get; set; }
 
         /// <summary>
@@ -24,14 +24,14 @@ namespace DiscordBot.Modules.EconomicManaging
             client.MessageReceived += Client_MessageReceived;
             client.JoinedGuild += Client_JoinedGuild;
             client.Ready += Client_Ready;
-        }        
+        }
 
         /// <summary>
         /// Не нужны какие-либо действия, поэтому здесь <see cref="RunModule()"/> - это заглушка
         /// </summary>
         public void RunModule()
         {
-            
+
         }
 
         private Task Client_JoinedGuild(SocketGuild arg)
@@ -42,8 +42,8 @@ namespace DiscordBot.Modules.EconomicManaging
 
         private Task Client_Ready()
         {
-            foreach (var guild in Client.Guilds)            
-                FilesProvider.AddEconomicGuild(guild);                            
+            foreach (var guild in Client.Guilds)
+                FilesProvider.AddEconomicGuild(guild);
             return Task.CompletedTask;
         }
 

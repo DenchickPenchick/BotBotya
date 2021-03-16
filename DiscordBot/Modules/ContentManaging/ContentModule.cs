@@ -2,14 +2,14 @@
 //GitHub repository: https://github.com/DenVot/BotBotya
 
 using Discord;
-using Discord.WebSocket;
-using System;
-using System.Threading.Tasks;
-using DiscordBot.Providers;
-using System.Collections.Generic;
-using DiscordBot.TextReaders;
 using Discord.Commands;
+using Discord.WebSocket;
+using DiscordBot.Providers;
+using DiscordBot.TextReaders;
+using System;
+using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.ContentManaging
 {
@@ -255,7 +255,7 @@ namespace DiscordBot.Modules.ContentManaging
 
                             }
                         }
-                }            
+                }
         }
 
         #region --АЛГОРИТМ ПО ИЗВЛЕЧЕНИЮ ССЫЛОК ИЗ СООБЩЕНИЯ
@@ -288,7 +288,7 @@ namespace DiscordBot.Modules.ContentManaging
                                     uris.Add(new Uri(url));
                             }
                         }
-                        else if(httpsChars && chars.Length - (i + 7) >= 0)
+                        else if (httpsChars && chars.Length - (i + 7) >= 0)
                         {
                             url += "https";
                             string doubleSlash = chars[i + 5].ToString() + chars[i + 6].ToString() + chars[i + 7].ToString();
@@ -345,10 +345,10 @@ namespace DiscordBot.Modules.ContentManaging
         #region --СИСТЕМА НАКАЗАНИЙ--
         private void MuteUser(SocketGuildUser user)
         {
-            new Thread(async x => 
+            new Thread(async x =>
             {
                 var textChannels = user.Guild.TextChannels;
-                foreach (var channel in textChannels)                
+                foreach (var channel in textChannels)
                     await channel.AddPermissionOverwriteAsync(user, new OverwritePermissions(sendMessages: PermValue.Deny));
 
                 Thread.Sleep(TimeSpan.FromHours(1));
