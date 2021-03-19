@@ -64,6 +64,14 @@ namespace DiscordBot.Serializable
         /// </summary>
         public bool CreateTextChannelsForVoiceChannels { get; set; } = false;
         /// <summary>
+        /// Показывает, допущен ли сервер к рекламе
+        /// </summary>
+        public bool AdvertisingAccepted { get; set; } = false;
+        /// <summary>
+        /// Показывает, рассматривается ли объявление в данный момент
+        /// </summary>
+        public bool AdvertisingModerationSended { get; set; } = false;
+        /// <summary>
         /// Содержание приветственного сообщения
         /// </summary>
         public string HelloMessage { get; set; } = null;
@@ -111,5 +119,9 @@ namespace DiscordBot.Serializable
         /// Системные каналы.
         /// </summary>
         public SerializableChannels SystemChannels { get; set; } = new SerializableChannels();
+        /// <summary>
+        /// Объявление
+        /// </summary>
+        public SerializableAdvertising Advert { get; set; } = new SerializableAdvertising();
     }
 }

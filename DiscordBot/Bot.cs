@@ -7,6 +7,8 @@ using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.Collections;
 using DiscordBot.GuildManaging;
+using DiscordBot.Interactivities;
+using DiscordBot.Modules.AdvertisingManaging;
 using DiscordBot.Modules.ContentManaging;
 using DiscordBot.Modules.EconomicManaging;
 using DiscordBot.Modules.NotificationsManaging;
@@ -16,6 +18,7 @@ using DiscordBot.MusicOperations;
 using DiscordBot.Providers;
 using DiscordBot.Providers.FileManaging;
 using DiscordBot.RoomManaging;
+using DiscordBot.Serializable;
 using DiscordBot.TextReaders;
 using DiscordBot.TypeReaders;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,8 +35,7 @@ namespace DiscordBot
 {
     public class Bot
     {
-        public string TOKEN = null;
-        public string PathToBotDirectory = null;
+        public SerializableConfig Configuration { get; set; }
 
         public DiscordSocketClient Client { get; set; }
         public CommandService Commands { get; private set; }
@@ -56,12 +58,14 @@ namespace DiscordBot
             {
                 DefaultTimeout = TimeSpan.FromMinutes(5)
             });
-            Services = new ServiceCollection()
+            Services = new ServiceCollection()                
                 .AddSingleton(this)
                 .AddSingleton(Client)
+                .AddSingleton(Configuration)
                 .AddSingleton<InteractiveService>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<Commands>()
+                .AddSingleton(new PaginatingService(Client, maxMessages: 200))
                 .AddSingleton(new LavaNode(Client, new LavaConfig
                 {
                     ResumeTimeout = TimeSpan.MaxValue
@@ -78,6 +82,7 @@ namespace DiscordBot
             var modulesCollection = new ModulesCollection()
                 .AddModule(new FilesModule(this))
                 .AddModule(new GuildModule(Client))
+                .AddModule(new AdvertisingModule(Client, Configuration))
                 .AddModule(modulesForLogs.GetRequiredService<RoomModule>())
                 .AddModule(modulesForLogs.GetRequiredService<ContentModule>())
                 .AddModule(new LogModule(Client, modulesForLogs))
@@ -90,7 +95,7 @@ namespace DiscordBot
 
             await RegisterCommandsAsync();
 
-            await Client.LoginAsync(TokenType.Bot, TOKEN);
+            await Client.LoginAsync(TokenType.Bot, Configuration.Token);
 
             await Client.StartAsync();
 

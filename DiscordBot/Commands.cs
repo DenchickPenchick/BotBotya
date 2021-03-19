@@ -6,6 +6,7 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.Attributes;
+using DiscordBot.Interactivities;
 using DiscordBot.MusicOperations;
 using DiscordBot.Providers;
 using DiscordBot.Providers.Entities;
@@ -36,15 +37,21 @@ namespace DiscordBot
     #endregion
 
     public class Commands : InteractiveBase
-    {
+    {    
         private readonly Bot Bot;
 
         private readonly LavaOperations LavaOperations;
+        private readonly PaginatingService PaginatingService;
+        private readonly SerializableConfig Configuration;
 
-        public Commands(LavaOperations lavaOperations, Bot bot)
+        private SocketGuild GetSupportGuild() => Context.Client.GetGuild(Configuration.SupportGuildId);
+
+        public Commands(LavaOperations lavaOperations, Bot bot, PaginatingService paginating, SerializableConfig configuration)
         {
             LavaOperations = lavaOperations;
+            PaginatingService = paginating;
             Bot = bot;
+            Configuration = configuration;
         }
 
         #region --СТАНДАРТНЫЕ КОМАНДЫ--
@@ -130,27 +137,12 @@ namespace DiscordBot
             else
                 try
                 {
-                    var paged = new PaginatedMessage();
-                    paged.Title = "Справка по командам";
-                    paged.Pages = pages;
-                    paged.Color = ColorProvider.GetColorForCurrentGuild(serGuild);
-                    paged.Options = new PaginatedAppearanceOptions
+                    await PaginatingService.SendPaginatedMessageAsync(new PaginatorEntity
                     {
-                        Jump = null,
-                        Info = null
-                    };
-                    await PagedReplyAsync(paged);
-                    //{
-                    //    Title = "Справка по командам",
-                    //    Pages = (IEnumerable<string>)pages,
-                    //    Color = ColorProvider.GetColorForCurrentGuild(serGuild),
-                    //    Options = new PaginatedAppearanceOptions
-                    //    {
-                    //        Jump = null,
-                    //        Info = null,
-                    //        Stop = null
-                    //    }
-                    //});
+                        Title = "Справка по командам",
+                        Color = ColorProvider.GetColorForCurrentGuild(Context.Guild),                        
+                        Pages = pages
+                    }, Context); 
                 }
                 catch (Exception ex)
                 {
@@ -255,7 +247,7 @@ namespace DiscordBot
         [RequireUserPermission(GuildPermission.ManageRoles)]
         [StandartCommand]
         [Alias("Шаблон", "Конструктор")]
-        [Summary("создает каналы в соответствии с шаблоном. Возможные шаблоны:\n1. Игровой (подойдет для игровых серверов)\n2. Группа (подойдет для сообщества)\n3. Учебная (подойдет для групп для одноклассников/однокурсников)\n4. Стандарт (создет дефолтный сервер)\n**ЕСЛИ ТЫ ХОЧЕШЬ УДАЛИТЬ КАНАЛЫ, ТОГДА ВВЕДИ ТОКЕН** `r` **ПОСЛЕ ТИПА**")]
+        [Summary("создает каналы в соответствии с шаблоном. Возможные шаблоны:\n1. Игровой (подойдет для игровых серверов)\n2. Группа (подойдет для сообщества)\n3. Учебная (подойдет для групп для одноклассников/однокурсников)\n4. Стандарт (создет дефолтный сервер)\nЕсли ты хочешь удалить каналы, тогда введи токен** `r` **после типа")]
         public async Task FastStart(string start, string token = null)
         {
             start = start.ToLower();
@@ -705,59 +697,107 @@ namespace DiscordBot
             }
         }
 
-        [Command("ПройтиОпрос", RunMode = RunMode.Async)]
-        [StandartCommand]
-        [Summary("позволяет обучать бота для лучшего распознования ошибок")]
-        public async Task EducReq()
+        //В разработке
+        //[Command("ПройтиОпрос", RunMode = RunMode.Async)]
+        //[StandartCommand]
+        //[Summary("позволяет обучать бота для лучшего распознования ошибок")]
+        //public async Task EducReq()
+        //{
+        //    await ReplyAsync("Сейчас я вам покажу предпологаемое слово и покажу это же слово, но с ошибкой. Ответьте, асоциируется ли неправильное слово с исходным?\nДля ответа поставьте **1 (да)** или **0 (нет)**");
+        //    var options = FilesProvider.GetGlobalOptions();
+        //    var badWords = options.GlobalBadWords;
+        //    Random random = new Random();
+
+        //    int index = random.Next(0, badWords.Count);
+        //    var badWord = badWords[index];
+
+        //    string content = badWord.Word;
+        //    var builder = new EmbedBuilder
+        //    {
+        //        Title = $"Слово {content}",
+        //        Color = ColorProvider.GetColorForCurrentGuild(Context.Guild)
+        //    };
+
+        //    //Меньше 50 - удаление
+        //    //Больше 50 - добавление            
+        //    int operType = new Random().Next(0, 100);
+        //    char[] alpha = "абвгдеёжзиклмнопрстуфхцчшщъыьэюя".ToCharArray();
+
+        //    string predException;
+        //    if (operType <= 50)
+        //        predException = badWord.Word.Remove(random.Next(0, badWord.Word.Length - 1), 1);
+        //    else
+        //        predException = badWord.Word.Insert(random.Next(0, badWord.Word.Length - 1), alpha[random.Next(0, alpha.Length - 1)].ToString());
+
+        //    builder.WithDescription(predException);
+        //    await ReplyAsync(embed: builder.Build());
+
+        //    var nextMess = await NextMessageAsync();
+        //    if (nextMess != null)
+        //    {
+        //        var isVariant = int.TryParse(nextMess.Content, out int variant);
+        //        if (isVariant)
+        //        {
+        //            if (variant == 1)
+        //            {
+        //                options.GlobalBadWords[index].Exceptions.Add(predException);
+        //                FilesProvider.RefreshGlobalOptions(options);
+        //            }
+
+        //            await ReplyAsync("Спасибо за участие в опросе!");
+        //        }
+        //        else
+        //            await ReplyAsync("Некорректный формат ответа");
+        //    }
+        //    else
+        //        await ReplyAsync("Ты не ответил в течении 5 минут");
+        //}
+        #endregion
+
+        #region --ВЗАИМОПИАР--
+        
+
+        [Command("ОтправитьНаПроверку")]
+        [AutoPartnership]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("отсылает на проверку твое объявление")]
+        public async Task SendToModer()
         {
-            await ReplyAsync("Сейчас я вам покажу предпологаемое слово и покажу это же слово, но с ошибкой. Ответьте, асоциируется ли неправильное слово с исходным?\nДля ответа поставьте **1 (да)** или **0 (нет)**");
-            var options = FilesProvider.GetGlobalOptions();
-            var badWords = options.GlobalBadWords;
-            Random random = new Random();
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            var globalOptions = FilesProvider.GetGlobalOptions();
+            var supportGuild = GetSupportGuild();
 
-            int index = random.Next(0, badWords.Count);
-            var badWord = badWords[index];
+            var supportAdmin = supportGuild.GetUser(Configuration.AdminId);
 
-            string content = badWord.Word;
-            var builder = new EmbedBuilder
-            {
-                Title = $"Слово {content}",
-                Color = ColorProvider.GetColorForCurrentGuild(Context.Guild)
-            };
-
-            //Меньше 50 - удаление
-            //Больше 50 - добавление            
-            int operType = new Random().Next(0, 100);
-            char[] alpha = "абвгдеёжзиклмнопрстуфхцчшщъыьэюя".ToCharArray();
-
-            string predException;
-            if (operType <= 50)
-                predException = badWord.Word.Remove(random.Next(0, badWord.Word.Length - 1), 1);
-            else
-                predException = badWord.Word.Insert(random.Next(0, badWord.Word.Length - 1), alpha[random.Next(0, alpha.Length - 1)].ToString());
-
-            builder.WithDescription(predException);
-            await ReplyAsync(embed: builder.Build());
-
-            var nextMess = await NextMessageAsync();
-            if (nextMess != null)
-            {
-                var isVariant = int.TryParse(nextMess.Content, out int variant);
-                if (isVariant)
-                {
-                    if (variant == 1)
-                    {
-                        options.GlobalBadWords[index].Exceptions.Add(predException);
-                        FilesProvider.RefreshGlobalOptions(options);
-                    }
-
-                    await ReplyAsync("Спасибо за участие в опросе!");
-                }
-                else
-                    await ReplyAsync("Некорректный формат ответа");
+            //Защита от спама
+            if (serGuild.AdvertisingModerationSended)
+            { 
+                await ReplyAsync("Твое объявление до сих пор рассматривается");
+                return;
             }
-            else
-                await ReplyAsync("Ты не ответил в течении 5 минут");
+            if (serGuild.AdvertisingAccepted)
+            {
+                await ReplyAsync("Твое объявление уже проверено");
+                return;
+            }
+            if (supportGuild == null || supportAdmin == null)
+            {
+                await ReplyAsync("В данный момент функция автопиара не работает. Повтори попытку позже.");
+                return;
+            }
+
+            var adminDM = await supportAdmin.GetOrCreateDMChannelAsync();
+
+            var mess = await adminDM.SendMessageAsync($"Поступило новое объявление на рассмотрение\n**Общая информация:**\n*Количество участников:* {Context.Guild.Users.Count}\n*Создан:* {Context.Guild.CreatedAt.DateTime.ToShortDateString()}\n`✅` - допущено\n`❌` - отказ", embed: serGuild.Advert.BuildAdvertise());
+            await mess.AddReactionsAsync(new List<IEmote>
+            {
+                new Emoji("✅"),
+                new Emoji("❌")
+            }.ToArray());
+            globalOptions.CheckingMessagesForAdvertising.Add(mess.Id, Context.Guild.Id);
+            FilesProvider.RefreshGlobalOptions(globalOptions);
+
+            await ReplyAsync("Отправлено, ожидай.");
         }
         #endregion
 

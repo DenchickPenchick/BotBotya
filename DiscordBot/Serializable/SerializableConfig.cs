@@ -7,5 +7,7 @@ namespace DiscordBot.Serializable
     {
         public string Token { get; set; } = "NOTSETED";
         public string Path { get; set; } = "NOTSETED";
+        public ulong SupportGuildId { get; set; } = 0;
+        public ulong AdminId { get; set; } = 0;
     }
 }

@@ -42,6 +42,8 @@ namespace DiscordBot.MusicOperations
 
             try
             {
+                if(LavaNode.GetPlayer(contextChannel.Guild).VoiceChannel.Id != channel.Id)
+                    await LavaNode.LeaveAsync(LavaNode.GetPlayer(contextChannel.Guild).VoiceChannel);
                 await LavaNode.JoinAsync(channel);
                 await contextChannel.SendMessageAsync(embed: new EmbedBuilder
                 {

@@ -23,10 +23,12 @@ namespace DiscordBot.Providers
             return JsonSerializer.Deserialize<SerializableConfig>(reader.ReadToEnd()).Path;
         }
 
-        public static SerializableGuild GetGuild(IGuild guild)
+        public static SerializableGuild GetGuild(IGuild guild) => GetGuild(guild.Id);
+
+        public static SerializableGuild GetGuild(ulong guildId)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
-            using FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/BotGuilds/{guild.Id}.xml", FileMode.Open);
+            XmlSerializer serializer = new(typeof(SerializableGuild));
+            using FileStream stream = new($@"{GetBotDirectoryPath()}/BotGuilds/{guildId}.xml", FileMode.Open);
             return (SerializableGuild)serializer.Deserialize(stream);
         }
 

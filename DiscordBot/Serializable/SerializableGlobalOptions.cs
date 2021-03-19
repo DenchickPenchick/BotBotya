@@ -8,13 +8,17 @@ namespace DiscordBot.Serializable
 {
     public class SerializableGlobalOptions
     {
+        ///// <summary>
+        ///// Глобальные нежелательные слова
+        ///// </summary>
+        //public List<WordModel> GlobalBadWords { get; set; } = new List<WordModel>();
+        ///// <summary>
+        ///// Претенденты слов на добавление в глобальный список опечаток. Первый параметр - это слово, которое правильно написано. Второй - это кортеж из опечатки и голосов (первый за, а второй против)
+        ///// </summary>
+        //public Dictionary<string, (string, int, int)> ApplicantWords { get; set; } = new Dictionary<string, (string, int, int)>();
         /// <summary>
-        /// Глобальные нежелательные слова
+        /// Коллекция ключ-значение, где хранится в виде ключа - id сообщения, а в виде значения - id Discord севрера. Относится к взаимопиару.
         /// </summary>
-        public List<WordModel> GlobalBadWords { get; set; } = new List<WordModel>();
-        /// <summary>
-        /// Претенденты слов на добавление в глобальный список опечаток. Первый параметр - это слово, которое правильно написано. Второй - это кортеж из опечатки и голосов (первый за, а второй против)
-        /// </summary>
-        public Dictionary<string, (string, int, int)> ApplicantWords { get; set; } = new Dictionary<string, (string, int, int)>();
+        public Dictionary<ulong, ulong> CheckingMessagesForAdvertising { get; set; } = new Dictionary<ulong, ulong>();
     }
 }
