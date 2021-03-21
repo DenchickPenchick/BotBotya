@@ -17,9 +17,7 @@ namespace DiscordBot.GuildManaging
     /// </summary>
     public class GuildModule : IModule
     {
-        private readonly DiscordSocketClient Client;
-
-        private Dictionary<ulong, ulong> txtChannelsForVoice = new Dictionary<ulong, ulong>();
+        private readonly DiscordSocketClient Client;        
 
         /// <summary>
         /// Инициализирует новый экземпляр класса <see cref="GuildModule"/>
@@ -38,8 +36,7 @@ namespace DiscordBot.GuildManaging
         {
             Client.JoinedGuild += Client_JoinedGuild;
             Client.UserJoined += Client_UserJoined;
-            Client.UserLeft += Client_UserLeft;
-            Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
+            Client.UserLeft += Client_UserLeft;            
         }
 
 
@@ -55,49 +52,6 @@ namespace DiscordBot.GuildManaging
                     ThumbnailUrl = arg.GetAvatarUrl(),
                     Color = Color.Blue
                 }.Build());
-        }
-
-        private async Task Client_UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
-        {
-            if (arg1 is SocketGuildUser user)
-            {
-                var serGuild = FilesProvider.GetGuild(user.Guild);
-                var currentChannel = arg3.VoiceChannel;
-                var prevChannel = arg2.VoiceChannel;
-                var contextGuild = user.Guild;
-
-                var denyPerms = new OverwritePermissions(sendMessages: PermValue.Deny, viewChannel: PermValue.Deny);
-                var allowPerms = new OverwritePermissions(sendMessages: PermValue.Allow, viewChannel: PermValue.Allow);
-
-                if (currentChannel != null)
-                {
-                    if (currentChannel.Users.Count == 1 && serGuild.SystemChannels.CreateRoomChannelId != currentChannel.Id)
-                    {
-                        var chann = await contextGuild.CreateTextChannelAsync($"{currentChannel.Name}", x => { x.CategoryId = currentChannel.CategoryId; x.Position = currentChannel.Position + 1; });
-
-                        txtChannelsForVoice.Add(currentChannel.Id, chann.Id);
-
-                        await chann.AddPermissionOverwriteAsync(contextGuild.EveryoneRole, denyPerms);
-                        foreach (var userInCh in currentChannel.Users)
-                            await chann.AddPermissionOverwriteAsync(userInCh, allowPerms);
-                    }
-                    else
-                    {
-                        var channel = contextGuild.GetTextChannel(txtChannelsForVoice[currentChannel.Id]);
-
-                        if (channel != null)
-                            await channel.AddPermissionOverwriteAsync(user, allowPerms);
-                    }
-                }
-                if (prevChannel != null)
-                    if (prevChannel.Users.Count == 0)
-                    {
-                        var channel = contextGuild.GetTextChannel(txtChannelsForVoice[prevChannel.Id]);
-
-                        if (channel != null)
-                            await channel.DeleteAsync();
-                    }
-            }
         }
 
         private async Task Client_UserJoined(SocketGuildUser arg)

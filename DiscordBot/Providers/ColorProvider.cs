@@ -12,6 +12,9 @@ namespace DiscordBot.Providers
         {
             Color color;
 
+            if (name == null)
+                name = default;
+
             switch (name.ToLower())
             {
                 case "синий":
@@ -32,6 +35,17 @@ namespace DiscordBot.Providers
                 case "серый":
                     color = Color.LightGrey;
                     break;
+                case "желтый":
+                    color = new Color(255, 255, 0);
+                    break;                
+                case "жёлтый":
+                    color = new Color(255, 255, 0);
+                    break;
+                case "бирюзовый":
+                    color = new Color(0, 0, 255);
+                    break;
+                case null:
+                    return new Color(18, 124, 164);
                 default:
                     return new Color(18, 124, 164);
             }

@@ -1,6 +1,7 @@
 ﻿//© Copyright 2021 Denis Voitenko MIT License
 //GitHub repository: https://github.com/DenVot/BotBotya
 
+using System;
 using System.Collections.Generic;
 
 namespace DiscordBot.Serializable
@@ -123,5 +124,13 @@ namespace DiscordBot.Serializable
         /// Объявление
         /// </summary>
         public SerializableAdvertising Advert { get; set; } = new SerializableAdvertising();
+        /// <summary>
+        /// Показывает, когда можно совершить следующий запрос на проверку
+        /// </summary>
+        public DateTime NextCheck { get; set; } = new DateTime();
+        /// <summary>
+        /// Показывает следующее время рассылки
+        /// </summary>
+        public DateTime NextSend { get; set; } = new DateTime();
     }
 }

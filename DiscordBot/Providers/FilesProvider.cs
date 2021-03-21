@@ -32,6 +32,12 @@ namespace DiscordBot.Providers
             return (SerializableGuild)serializer.Deserialize(stream);
         }
 
+        public static SerializableConfig GetConfig()
+        {
+            using StreamReader reader = new("config.json");
+            return JsonSerializer.Deserialize<SerializableConfig>(reader.ReadToEnd());
+        }
+
         public static IEnumerable<SerializableGuild> GetAllGuilds()
         {
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));

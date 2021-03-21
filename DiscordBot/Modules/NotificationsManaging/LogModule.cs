@@ -16,13 +16,13 @@ namespace DiscordBot.Modules.NotificationsManaging
     public class LogModule : IModule
     {
         private DiscordSocketClient Client { get; }
-        private RoomModule RoomModuleInstance { get; }
+        private VoiceChannelsModule RoomModuleInstance { get; }
         private ContentModule ContentModuleInstance { get; }
 
         public LogModule(DiscordSocketClient client, IServiceProvider modules)
         {
             Client = client;
-            RoomModuleInstance = modules.GetRequiredService<RoomModule>();
+            RoomModuleInstance = modules.GetRequiredService<VoiceChannelsModule>();
             ContentModuleInstance = modules.GetRequiredService<ContentModule>();
             Client.Ready += Client_Ready;
         }

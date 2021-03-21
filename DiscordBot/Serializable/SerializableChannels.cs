@@ -14,5 +14,6 @@ namespace DiscordBot.Serializable
         public ulong LeaveUsersChannelId { get; set; } = 0;
         public ulong CreateRoomChannelId { get; set; } = 0;
         public ulong LogsChannelId { get; set; } = 0;
+        public ulong AdvertisingChannelId { get; set; } = 0;
     }
 }

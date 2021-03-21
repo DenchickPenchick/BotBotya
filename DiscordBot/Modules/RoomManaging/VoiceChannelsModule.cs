@@ -6,12 +6,13 @@ using Discord.WebSocket;
 using DiscordBot.Modules;
 using DiscordBot.Providers;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordBot.RoomManaging
 {
-    public class RoomModule : IModule
+    public class VoiceChannelsModule : IModule
     {
         private DiscordSocketClient Client { get; set; }
 
@@ -19,17 +20,18 @@ namespace DiscordBot.RoomManaging
         public event RoomEventsHandler OnRoomCreated;
         public event RoomEventsHandler OnRoomDestroyed;
 
-        public RoomModule(DiscordSocketClient client)
+        private readonly Dictionary<ulong, ulong> txtChannelsForVoice = new Dictionary<ulong, ulong>();
+
+        public VoiceChannelsModule(DiscordSocketClient client)
         {
-            Client = client;
-            Client.Ready += Client_Ready;
-            Client.ChannelDestroyed += Client_ChannelDestroyed;
-            Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
+            Client = client;                                   
         }
 
         public void RunModule()
         {
-
+            Client.Ready += Client_Ready;
+            Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
+            Client.ChannelDestroyed += Client_ChannelDestroyed;
         }
 
         private async Task Client_Ready()
@@ -60,7 +62,11 @@ namespace DiscordBot.RoomManaging
                 var prevchannel = arg2.VoiceChannel;
                 SocketGuildUser socketGuildUser = arg1 as SocketGuildUser;
                 var guild = socketGuildUser.Guild;
-                GuildProvider provider = new GuildProvider(guild);
+                GuildProvider provider = new(guild);
+                var denyPerms = new OverwritePermissions(sendMessages: PermValue.Deny, viewChannel: PermValue.Deny);
+                var allowPerms = new OverwritePermissions(sendMessages: PermValue.Allow, viewChannel: PermValue.Allow);
+
+
                 if (provider.RoomsCategoryChannel() != null)
                 {
                     if (channel != null && prevchannel != null && channel != prevchannel)
@@ -98,6 +104,7 @@ namespace DiscordBot.RoomManaging
                         }
                 }
 
+                await ChannelForMicroDisabled(arg1, arg2, arg3);
             }
             catch (Exception e)
             {
@@ -141,6 +148,58 @@ namespace DiscordBot.RoomManaging
                 }
             }
             Console.WriteLine("Checked");
+        }
+
+        private async Task ChannelForMicroDisabled(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
+        {
+            if (arg1 is SocketGuildUser user)
+            {
+                var serGuild = FilesProvider.GetGuild(user.Guild);
+                var currentChannel = arg3.VoiceChannel;
+                var prevChannel = arg2.VoiceChannel;
+                var contextGuild = user.Guild;
+
+                var denyPerms = new OverwritePermissions(sendMessages: PermValue.Deny, viewChannel: PermValue.Deny);
+                var allowPerms = new OverwritePermissions(sendMessages: PermValue.Allow, viewChannel: PermValue.Allow);
+
+                if (currentChannel != null)
+                {
+                    if (currentChannel.Users.Count == 1 && serGuild.SystemChannels.CreateRoomChannelId != currentChannel.Id && !txtChannelsForVoice.ContainsKey(currentChannel.Id))
+                    {
+                        var chann = await contextGuild.CreateTextChannelAsync($"{currentChannel.Name}", x => { x.CategoryId = currentChannel.CategoryId; x.Position = currentChannel.Position + 1; });
+
+                        txtChannelsForVoice.Add(currentChannel.Id, chann.Id);
+
+                        await chann.AddPermissionOverwriteAsync(contextGuild.EveryoneRole, denyPerms);
+                        foreach (var userInCh in currentChannel.Users)
+                            await chann.AddPermissionOverwriteAsync(userInCh, allowPerms);
+                    }
+                    else
+                    {
+                        if (txtChannelsForVoice.ContainsKey(currentChannel.Id))
+                        {                         
+                            var channel = contextGuild.GetTextChannel(txtChannelsForVoice[currentChannel.Id]);
+
+                            if (channel != null)
+                                await channel.AddPermissionOverwriteAsync(user, allowPerms);
+                        }
+                    }
+                }
+                if (prevChannel != null)
+                    if (prevChannel.Users.Count == 0)
+                    {
+                        if (txtChannelsForVoice.ContainsKey(prevChannel.Id))
+                        {
+                            var channel = contextGuild.GetTextChannel(txtChannelsForVoice[prevChannel.Id]);
+
+                            if (channel != null)
+                            {
+                                txtChannelsForVoice.Remove(prevChannel.Id);
+                                await channel.DeleteAsync();
+                            }
+                        }                        
+                    }
+            }
         }
 
         private async Task<SocketVoiceChannel> CreateRoom(SocketGuildUser user, GuildProvider provider)

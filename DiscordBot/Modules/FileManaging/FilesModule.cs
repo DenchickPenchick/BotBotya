@@ -76,53 +76,50 @@ namespace DiscordBot.Providers.FileManaging
                     fs.Close();
                     Environment.Exit(0);
                 }
-            using (StreamReader reader = new StreamReader("config.json"))
-            {
-                SerializableConfig config = JsonSerializer.Deserialize<SerializableConfig>(reader.ReadToEnd());
-                Bot.Configuration = config;
-            }
             Console.WriteLine("Configuring bot ended succesfully", Color.Green);
         }
 
         private void SetupBotDirectory()
         {
+            string basePath = FilesProvider.GetConfig().Path;
+
             Console.WriteLine("Checking directories...", Color.Blue);
 
             Console.WriteLine("Checking directory BotDirectory...");
-            if (!Directory.Exists(Bot.Configuration.Path))
+            if (!Directory.Exists(basePath))
             {
                 Console.WriteLine("BotDirectory not found", Color.Red);
-                Directory.CreateDirectory(Bot.Configuration.Path);
+                Directory.CreateDirectory(basePath);
                 Console.WriteLine("BotDirectory created", Color.Green);
             }
             else
                 Console.WriteLine("BotDirectory found", Color.Green);
 
             Console.WriteLine("Checking directory BotGuilds...");
-            if (!Directory.Exists($@"{Bot.Configuration.Path}/BotGuilds"))
+            if (!Directory.Exists($@"{basePath}/BotGuilds"))
             {
                 Console.WriteLine("BotGuilds not found", Color.Red);
-                Directory.CreateDirectory($@"{Bot.Configuration.Path}/BotGuilds");
+                Directory.CreateDirectory($@"{basePath}/BotGuilds");
                 Console.WriteLine("BotGuilds created", Color.Green);
             }
             else
                 Console.WriteLine("BotGuilds found", Color.Green);
 
             Console.WriteLine("Checking directory ServerConnectorsHandlers...");
-            if (!Directory.Exists(@$"{Bot.Configuration.Path}/ServerConnectorsHandlers"))
+            if (!Directory.Exists(@$"{basePath}/ServerConnectorsHandlers"))
             {
                 Console.WriteLine("ServerConnectorsHandlers not found", Color.Red);
-                Directory.CreateDirectory($@"{Bot.Configuration.Path}/ServerConnectorsHandlers");
+                Directory.CreateDirectory($@"{basePath}/ServerConnectorsHandlers");
                 Console.WriteLine("ServerConnectorsHandlers created", Color.Green);
             }
             else
                 Console.WriteLine("ServerConnectorsHandlers found", Color.Green);
 
             Console.WriteLine("Checking directory EconomicGuilds...");
-            if (!Directory.Exists(@$"{Bot.Configuration.Path}/EconomicGuilds"))
+            if (!Directory.Exists(@$"{basePath}/EconomicGuilds"))
             {
                 Console.WriteLine("ServerConnectorsHandlers not found", Color.Red);
-                Directory.CreateDirectory($@"{Bot.Configuration.Path}/EconomicGuilds");
+                Directory.CreateDirectory($@"{basePath}/EconomicGuilds");
                 Console.WriteLine("EconomicGuilds created", Color.Green);
             }
             else
@@ -130,10 +127,10 @@ namespace DiscordBot.Providers.FileManaging
 
             Console.WriteLine("Checking files...");
 
-            if (!File.Exists($"{Bot.Configuration.Path}/ReactRoleMessages.xml"))
+            if (!File.Exists($"{basePath}/ReactRoleMessages.xml"))
             {
                 Console.WriteLine("ReactRoleMessages.xml not found", Color.Red);
-                using (FileStream stream = new($"{Bot.Configuration.Path}/ReactRoleMessages.xml", FileMode.Create))
+                using (FileStream stream = new($"{basePath}/ReactRoleMessages.xml", FileMode.Create))
                 {
                     var serializer = new XmlSerializer(typeof(SerializableReactRoleMessages));
 
@@ -147,10 +144,10 @@ namespace DiscordBot.Providers.FileManaging
             else
                 Console.WriteLine("ReactRoleMessages.xml found", Color.Green);
 
-            if (!File.Exists($"{Bot.Configuration.Path}/GlobalOptions.xml"))
+            if (!File.Exists($"{basePath}/GlobalOptions.xml"))
             {
                 Console.WriteLine("GlobalOptions.xml not found", Color.Red);
-                using (FileStream stream = new($"{Bot.Configuration.Path}/GlobalOptions.xml", FileMode.Create))
+                using (FileStream stream = new($"{basePath}/GlobalOptions.xml", FileMode.Create))
                 {
                     var serializer = new XmlSerializer(typeof(SerializableGlobalOptions));
 
@@ -165,11 +162,12 @@ namespace DiscordBot.Providers.FileManaging
 
         private async void SetupBotGuildData()
         {
+            string basePath = FilesProvider.GetConfig().Path;
             DiscordSocketClient client = Bot.Client;
 
             Console.WriteLine("Checking guilds...");
             var guilds = client.Guilds;
-            string[] fileNames = Directory.GetFiles($@"{Bot.Configuration.Path}/BotGuilds");
+            string[] fileNames = Directory.GetFiles($@"{basePath}/BotGuilds");
             string[] fileNamesWithoutPath = new string[fileNames.Length];
             ulong[] GuildsId = new ulong[guilds.Count];
 
@@ -195,12 +193,13 @@ namespace DiscordBot.Providers.FileManaging
 
         private void AddGuild(SocketGuild guild)
         {
+            string basePath = FilesProvider.GetConfig().Path;
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
             SerializableGuild serializableGuild = new SerializableGuild
             {
                 GuildId = guild.Id
             };
-            using (FileStream stream = new FileStream($@"{Bot.Configuration.Path}/BotGuilds/{guild.Id}.xml", FileMode.Create))
+            using (FileStream stream = new FileStream($@"{basePath}/BotGuilds/{guild.Id}.xml", FileMode.Create))
                 serializer.Serialize(stream, serializableGuild);
             Console.WriteLine($"Guild({guild.Id}) serialized.", Color.Green);
         }

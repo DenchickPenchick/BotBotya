@@ -1,4 +1,7 @@
-﻿using System;
+﻿//© Copyright 2021 Denis Voitenko MIT License
+//GitHub repository: https://github.com/DenVot/BotBotya
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -25,7 +28,7 @@ namespace DiscordBot.Interactivities
             MaxMessages = maxMessages;
         }
 
-        private long MaxSizeRAM { get; } = default; //Максимальное количество памяти, которое может занимать колекция из сообщений
+        private long MaxSizeRAM { get; } = default; //Максимальное количество памяти, которое может занимать коллекция из сообщений
         private int MaxMessages { get; } = default;
 
         private long GetRAMSize() //Получение занятой памяти в рантайме

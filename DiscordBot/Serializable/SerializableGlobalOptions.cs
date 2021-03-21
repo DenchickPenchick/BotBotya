@@ -19,6 +19,6 @@ namespace DiscordBot.Serializable
         /// <summary>
         /// Коллекция ключ-значение, где хранится в виде ключа - id сообщения, а в виде значения - id Discord севрера. Относится к взаимопиару.
         /// </summary>
-        public Dictionary<ulong, ulong> CheckingMessagesForAdvertising { get; set; } = new Dictionary<ulong, ulong>();
+        public List<ulong> MessagesToCheck { get; set; } = new List<ulong>();
     }
 }

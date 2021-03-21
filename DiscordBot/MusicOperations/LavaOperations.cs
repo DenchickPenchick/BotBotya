@@ -21,7 +21,9 @@ namespace DiscordBot.MusicOperations
         private delegate Task UpdatePlayerHandler(IGuild guild);
         private event UpdatePlayerHandler UpdatePlayer;
 
-        public Dictionary<IGuild, IUserMessage> PlayersMessagesCollection = new Dictionary<IGuild, IUserMessage>();
+        public Dictionary<IGuild, IUserMessage> PlayersMessagesCollection = new();
+
+        private Dictionary<IGuild, (List<LavaTrack>, int)> Queues = new();
 
         public LavaOperations(LavaNode lavaNode, DiscordSocketClient client)
         {
@@ -29,6 +31,7 @@ namespace DiscordBot.MusicOperations
             foreach (var guild in client.Guilds)
                 PlayersMessagesCollection.Add(guild, null);
             UpdatePlayer += LavaOperations_UpdatePlayer;
+            //lavaNode.OnTrackEnded += LavaNode_OnTrackEnded;
         }
 
         public async Task JoinAsync(SocketGuildUser user, SocketTextChannel contextChannel)
@@ -110,6 +113,54 @@ namespace DiscordBot.MusicOperations
                 var search = Uri.IsWellFormedUriString(Query, UriKind.Absolute) ? await LavaNode.SearchAsync(Query) : await LavaNode.SearchYouTubeAsync(Query);
                 var track = search.Tracks.FirstOrDefault();
                 await player.PlayAsync(track);
+
+                await SendPlayer(player, contextChannel);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        public async Task AddTrackToQueueAsync(SocketGuildUser user, string[] query, SocketTextChannel contextChannel)
+        {
+            if (user.VoiceChannel == null)
+            {
+                await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NoName));
+                return;
+            }
+            string Query = null;
+
+            for (int i = 0; i < query.Length; i++)
+                Query += i == 0 ? $"{query[i]}" : $" {query[i]}";
+
+            try
+            {
+                var guild = contextChannel.Guild;
+
+                bool hasPlayer = LavaNode.TryGetPlayer(user.Guild, out LavaPlayer player);
+                if (user.VoiceChannel == null)
+                {
+                    await contextChannel.SendMessageAsync(embed: CreateErrorReplyEmbed(ErrorType.NotConnected));
+                    return;
+                }
+
+                if (!hasPlayer)
+                    player = await LavaNode.JoinAsync(user.VoiceChannel);
+                else
+                    if (player.VoiceState.VoiceChannel == null)
+                    await LavaNode.JoinAsync(user.VoiceChannel);
+
+                var search = Uri.IsWellFormedUriString(Query, UriKind.Absolute) ? await LavaNode.SearchAsync(Query) : await LavaNode.SearchYouTubeAsync(Query);
+                var track = search.Tracks.FirstOrDefault();
+
+                //await player.PlayAsync(track, TimeSpan.FromSeconds(0), track.Duration, true);
+
+                Queues[guild].Item1.Add(track);
+                Queues[guild] = new (Queues[guild].Item1, Queues[guild].Item2 + 1);
+
+                if (player.Track == null)
+                    await player.PlayAsync(track);
 
                 await SendPlayer(player, contextChannel);
             }
@@ -344,6 +395,14 @@ namespace DiscordBot.MusicOperations
                 Console.WriteLine($"Ex: {ex}");
             }
         }
+
+        //private async Task LavaNode_OnTrackEnded(TrackEndedEventArgs arg)
+        //{
+        //    if (Queues.Count > 0 && Queues.ContainsKey(arg.Player.TextChannel.Guild))
+        //    { 
+            
+        //    }
+        //}
 
         private async void UpdateTimeThreadTask(object guild)
         {

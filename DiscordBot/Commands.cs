@@ -37,21 +37,20 @@ namespace DiscordBot
     #endregion
 
     public class Commands : InteractiveBase
-    {    
+    {
         private readonly Bot Bot;
 
         private readonly LavaOperations LavaOperations;
         private readonly PaginatingService PaginatingService;
-        private readonly SerializableConfig Configuration;
+        private SerializableConfig Configuration { get => FilesProvider.GetConfig(); }
 
         private SocketGuild GetSupportGuild() => Context.Client.GetGuild(Configuration.SupportGuildId);
 
-        public Commands(LavaOperations lavaOperations, Bot bot, PaginatingService paginating, SerializableConfig configuration)
+        public Commands(LavaOperations lavaOperations, Bot bot, PaginatingService paginating)
         {
             LavaOperations = lavaOperations;
             PaginatingService = paginating;
             Bot = bot;
-            Configuration = configuration;
         }
 
         #region --СТАНДАРТНЫЕ КОМАНДЫ--
@@ -140,9 +139,9 @@ namespace DiscordBot
                     await PaginatingService.SendPaginatedMessageAsync(new PaginatorEntity
                     {
                         Title = "Справка по командам",
-                        Color = ColorProvider.GetColorForCurrentGuild(Context.Guild),                        
+                        Color = ColorProvider.GetColorForCurrentGuild(Context.Guild),
                         Pages = pages
-                    }, Context); 
+                    }, Context);
                 }
                 catch (Exception ex)
                 {
@@ -387,7 +386,12 @@ namespace DiscordBot
                     Title = $"Поступила жалоба на участника {user.Username}",
                     Description = $"**Причина:**\n`{reasonForm}`",
                     ThumbnailUrl = user.GetAvatarUrl(),
-                    Color = ColorProvider.GetColorForCurrentGuild(serGuild)
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild),
+                    Footer = new EmbedFooterBuilder
+                    {
+                        Text = Context.Guild.Name,
+                        IconUrl = Context.Guild.IconUrl
+                    }
                 }.Build();
 
                 var embedToReportedUser = new EmbedBuilder
@@ -395,7 +399,12 @@ namespace DiscordBot
                     Title = $"На тебя поступила жалоба от {Context.User.Username}",
                     Description = $"**Причина:**\n`{reasonForm}`",
                     ThumbnailUrl = Context.User.GetAvatarUrl(),
-                    Color = ColorProvider.GetColorForCurrentGuild(serGuild)
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild),
+                    Footer = new EmbedFooterBuilder
+                    {
+                        Text = Context.Guild.Name,
+                        IconUrl = Context.Guild.IconUrl
+                    }
                 }.Build();
 
                 await Context.Guild.Owner.GetOrCreateDMChannelAsync().Result.SendMessageAsync(embed: embedToAdmin);
@@ -492,23 +501,34 @@ namespace DiscordBot
         [Summary("делает рассылку сообщений всем участникам сервера")]
         public async Task SendMessages(params string[] mess)
         {
+            var content = Context.Message.Content;
             var serGuild = FilesProvider.GetGuild(Context.Guild);
-            string message = null;
+            string message = content.Remove(0, serGuild.Prefix.Length + "рассылка".Length);
             string noMessageToUsers = null;
-
-            for (int i = 0; i < mess.Length; i++)
-                message += i == 0 ? mess[i] : $" {mess[i]}";
 
             foreach (var user in Context.Guild.Users)
             {
                 if (!user.IsBot)
                 {
-
                     try
                     {
                         var ch = await user.GetOrCreateDMChannelAsync();
                         if (ch != null)
-                            await ch.SendMessageAsync(message);
+                            await ch.SendMessageAsync(embed: new EmbedBuilder
+                            {
+                                Description = message,
+                                Color = ColorProvider.GetColorForCurrentGuild(Context.Guild),
+                                Footer = new EmbedFooterBuilder
+                                {
+                                    Text = Context.Guild.Name,
+                                    IconUrl = Context.Guild.IconUrl
+                                },
+                                Author = new EmbedAuthorBuilder
+                                {
+                                    Name = Context.User.Username,
+                                    IconUrl = Context.User.GetAvatarUrl()
+                                }
+                            }.Build());
                     }
                     catch (Exception)
                     {
@@ -754,8 +774,61 @@ namespace DiscordBot
         //}
         #endregion
 
-        #region --ВЗАИМОПИАР--
-        
+        #region --ВЗАИМОПИАР--   
+        [Command("КаналДляРекламы")]
+        [AutoPartnership]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("устанавливает канал, куда будут присылаться чужие объявления. Если канала нет, или бот не может туда писать, или участники не видят его, тогда ты не можешь использовать функцию взаимопиара")]
+        public async Task SetAdvChannel(SocketTextChannel channel)
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            var everyoneRole = Context.Guild.EveryoneRole;
+            var overWritePermissionsForEveryone = channel.GetPermissionOverwrite(everyoneRole);
+
+            if (overWritePermissionsForEveryone.HasValue)
+            {
+                var valueOfPerms = overWritePermissionsForEveryone.Value;
+
+                if (valueOfPerms.ViewChannel == PermValue.Deny)
+                {
+                    await ReplyAsync($"Роль `everyone` не может просматривать канал {channel.Mention}.");
+                    return;
+                }
+
+                if (valueOfPerms.ReadMessageHistory == PermValue.Deny)
+                {
+                    await ReplyAsync($"Роль `everyone` не может просматривать историю сообщений в канале {channel.Mention}.");
+                    return;
+                }
+            }
+
+            serGuild.SystemChannels.AdvertisingChannelId = channel.Id;
+
+            FilesProvider.RefreshGuild(serGuild);
+
+            await ReplyAsync($"Теперь я буду присылать чужие объявления в {channel.Mention}");
+        }
+
+        [Command("СоздатьКаналДляРекламы")]
+        [AutoPartnership]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("автоматически создает и настраивает канал для чужих объявлений. Является аналогом команды `КаналДляРекламы`")]
+        public async Task CreateAdvChannel()
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            var advCategory = await Context.Guild.CreateCategoryChannelAsync("💼Партнерство");
+            var advChannel = await Context.Guild.CreateTextChannelAsync("💼┋Партнерство", x => x.CategoryId = advCategory.Id);
+
+            await advChannel.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new OverwritePermissions(sendMessages: PermValue.Deny, viewChannel: PermValue.Allow, readMessageHistory: PermValue.Allow));
+
+            serGuild.SystemChannels.AdvertisingChannelId = advChannel.Id;
+
+            FilesProvider.RefreshGuild(serGuild);
+
+            await ReplyAsync($"Я создал канал для рекламы {advChannel.Mention}.");
+            await advChannel.SendMessageAsync("**СЮДА БУДУТ ПРИСЫЛАТЬСЯ ОБЪЯВЛЕНИЯ С ДРУГИХ DISCORD СЕРВЕРОВ**");
+        }
 
         [Command("ОтправитьНаПроверку")]
         [AutoPartnership]
@@ -771,7 +844,7 @@ namespace DiscordBot
 
             //Защита от спама
             if (serGuild.AdvertisingModerationSended)
-            { 
+            {
                 await ReplyAsync("Твое объявление до сих пор рассматривается");
                 return;
             }
@@ -786,18 +859,286 @@ namespace DiscordBot
                 return;
             }
 
+            if (serGuild.Advert.Title == null)
+            {
+                await ReplyAsync("У объявления должен быть заголовок");
+                return;
+            }
+
+            if (serGuild.Advert.Description == null)
+            {
+                await ReplyAsync("У объявления должно быть описание");
+                return;
+            }
+
+            if (serGuild.Advert.AdvColor == null)
+            {
+                await ReplyAsync("У объявления должен быть цвет");
+                return;
+            }
+
+            if (serGuild.Advert.InviteUrl == "NONE")
+            {
+                await ReplyAsync("У объявления должно быть приглашение");
+                return;
+            }
+
+            var subDate = DateTime.Now.ToUniversalTime().Subtract(serGuild.NextCheck);
+
+            if (subDate.Hours < 0)
+            {
+                int hours = subDate.Hours * -1;
+                int minutes = subDate.Minutes * -1;
+                int seconds = subDate.Seconds * -1;
+                char lastCharH = hours.ToString().Last();
+                char lastCharM = minutes.ToString().Last();
+                char lastCharS = seconds.ToString().Last();
+
+                await ReplyAsync($"Вы не можете отсылать на проверку свое объявление больше чем одно в 3 часа с момента последней проверки.\n*Осталось:* `{hours} {(lastCharH == '1' ? "час" : "часа")} " +
+                    $"{minutes} {(lastCharM == '1' ? "минута" : lastCharM == '2' || lastCharM == '3' || lastCharM == '4' ? "минуты" : "минут")} " +
+                    $"{seconds} {(lastCharS == '1' ? "секунда" : lastCharS == '2' || lastCharS == '3' || lastCharS == '4' ? "секунды" : "секунд")}`");
+                return;
+            }
+
             var adminDM = await supportAdmin.GetOrCreateDMChannelAsync();
 
-            var mess = await adminDM.SendMessageAsync($"Поступило новое объявление на рассмотрение\n**Общая информация:**\n*Количество участников:* {Context.Guild.Users.Count}\n*Создан:* {Context.Guild.CreatedAt.DateTime.ToShortDateString()}\n`✅` - допущено\n`❌` - отказ", embed: serGuild.Advert.BuildAdvertise());
+            var advBuilder = serGuild.Advert.GetBuilder(Context.Guild);
+
+            advBuilder.WithFooter(new EmbedFooterBuilder
+            {
+                Text = Context.Guild.Id.ToString()
+            });
+
+            var mess = await adminDM.SendMessageAsync($"Поступило новое объявление на рассмотрение\n**Общая информация:**\n*Количество участников:* {Context.Guild.Users.Count}\n*Создан:* {Context.Guild.CreatedAt.DateTime.ToShortDateString()}\n`✅` - допущено\n`❌` - отказ", embed: advBuilder.Build());
             await mess.AddReactionsAsync(new List<IEmote>
             {
                 new Emoji("✅"),
                 new Emoji("❌")
             }.ToArray());
-            globalOptions.CheckingMessagesForAdvertising.Add(mess.Id, Context.Guild.Id);
+            globalOptions.MessagesToCheck.Add(mess.Id);
+            serGuild.AdvertisingModerationSended = true;
+
             FilesProvider.RefreshGlobalOptions(globalOptions);
+            FilesProvider.RefreshGuild(serGuild);
 
             await ReplyAsync("Отправлено, ожидай.");
+        }
+
+        [Command("Разослать")]
+        [AutoPartnership]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("разошлет твое объявление по Discord серверам-партнерам")]
+        public async Task SendAdv()
+        {
+            var allSerGuilds = FilesProvider.GetAllGuilds();
+            var currentSerGuild = FilesProvider.GetGuild(Context.Guild);
+            var client = Context.Client;
+
+            if (!currentSerGuild.AdvertisingAccepted)
+            {
+                await ReplyAsync("Ты не допущен к рекламе.");
+                return;
+            }
+
+            if (Context.Guild.GetTextChannel(currentSerGuild.SystemChannels.AdvertisingChannelId) == null)
+            {
+                await ReplyAsync("У тебя нет канала для отправки чужих объявлений.");
+                return;
+            }
+
+            var subDate = DateTime.Now.ToUniversalTime().Subtract(currentSerGuild.NextSend);
+
+            if (subDate.Hours < 0)
+            {
+                int hours = subDate.Hours * -1;
+                int minutes = subDate.Minutes * -1;
+                int seconds = subDate.Seconds * -1;
+                char lastCharH = hours.ToString().Last();
+                char lastCharM = minutes.ToString().Last();
+                char lastCharS = seconds.ToString().Last();
+
+                await ReplyAsync($"Ты не можешь рассылать объявления чаще чем раз в два часа\n*Осталось:* `{hours} {(lastCharH == '1' ? "час" : "часа")} " +
+                    $"{minutes} {(lastCharM == '1' ? "минута" : lastCharM == '2' || lastCharM == '3' || lastCharM == '4' ? "минуты" : "минут")} " +
+                    $"{seconds} {(lastCharS == '1' ? "секунда" : lastCharS == '2' || lastCharS == '3' || lastCharS == '4' ? "секунды" : "секунд")}`");
+                return;
+            }
+
+            allSerGuilds.ToList().ForEach(async x =>
+            {
+                var advChannel = client.GetGuild(x.GuildId).GetTextChannel(x.SystemChannels.AdvertisingChannelId);
+                if (advChannel != null && x.GuildId != currentSerGuild.GuildId)                
+                    await advChannel.SendMessageAsync(embed: currentSerGuild.Advert.BuildAdvertise(Context.Guild));                
+            });
+
+            int count = allSerGuilds.Where(x => client.GetGuild(x.GuildId).GetTextChannel(x.SystemChannels.AdvertisingChannelId) != null).Count() - 1;
+            char lastChar = count.ToString().ToCharArray().Last();
+
+            currentSerGuild.NextSend = DateTime.Now.ToUniversalTime().AddHours(2);
+
+            FilesProvider.RefreshGuild(currentSerGuild);
+
+            await ReplyAsync($"Я разослал объявление на {count} {(lastChar == '1' ? "сервер" : lastChar == '2' || lastChar == '3' || lastChar == '4' ? "сервера" : "серверов")}.");
+        }
+
+        [Command("Заголовок")]
+        [AutoPartnership]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("редактирует заголовок объявления")]
+        public async Task EditTitle(params string[] titleArray)
+        {
+            if (titleArray.Length > 0)
+            {
+                var serGuild = FilesProvider.GetGuild(Context.Guild);
+                string description = null;
+
+                titleArray.ToList().ForEach(x => description += $" {x}");
+                description = description.Remove(0, 1);
+                serGuild.Advert.Title = description;
+
+                serGuild.AdvertisingAccepted = false;
+
+                FilesProvider.RefreshGuild(serGuild);
+
+                await ReplyAsync("Заголовок объявления изменен.", embed: serGuild.Advert.BuildAdvertise(Context.Guild));
+            }
+            else
+                await ReplyAsync("Заголовок объявления не может быть пустым!");
+        }
+
+        [Command("Текст")]
+        [AutoPartnership]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("редактирует текст объявления")]
+        public async Task EditDescription(params string[] descriptionArray)
+        {
+            if (descriptionArray.Length > 0)
+            {
+                var serGuild = FilesProvider.GetGuild(Context.Guild);
+                string description;
+                var content = Context.Message.Content;
+
+                description = content.Remove(0, serGuild.Prefix.Length + "текст".Length);
+                serGuild.Advert.Description = description;
+                serGuild.AdvertisingAccepted = false;
+
+                FilesProvider.RefreshGuild(serGuild);
+
+                await ReplyAsync("Текст объявления изменен.", embed: serGuild.Advert.BuildAdvertise(Context.Guild));
+            }
+            else
+                await ReplyAsync("Текст объявления не может быть пустым!");
+        }
+
+        [Command("Цвет")]
+        [AutoPartnership]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("меняет цвет объявления")]
+        public async Task EditColor(string color)
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            serGuild.Advert.AdvColor = ColorProvider.GetColorFromName(color);
+
+            FilesProvider.RefreshGuild(serGuild);
+            await ReplyAsync("Цвет объявления изменен", embed: serGuild.Advert.BuildAdvertise(Context.Guild));
+        }
+
+        [Command("Цвет")]
+        [AutoPartnership]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("меняет цвет объявления")]
+        public async Task EditColor(int r, int g, int b)
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            if (r > 255)
+            {
+                await ReplyAsync("Значение `r` не может быть больше 255");
+                return;
+            }
+
+            if (g > 255)
+            {
+                await ReplyAsync("Значение `g` не может быть больше 255");
+                return;
+            }
+
+            if (b > 255)
+            {
+                await ReplyAsync("Значение `b` не может быть больше 255");
+                return;
+            }
+
+            serGuild.Advert.AdvColor = new Color(r, g, b);
+
+            FilesProvider.RefreshGuild(serGuild);
+            await ReplyAsync("Цвет объявления изменен", embed: serGuild.Advert.BuildAdvertise(Context.Guild));
+        }
+
+        [Command("Картинка")]
+        [AutoPartnership]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("меняет картинку у объявления. Если хочешь, чтобы вместо картинки была аватарка сервера, тогда введи букву `G` вместо ссылки")]
+        public async Task ChangeThumbnail(string url)
+        {
+            if (url.ToLower() != "g" && !Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute))
+            {
+                await ReplyAsync("Некорректная ссылка");
+                return;
+            }
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            serGuild.Advert.ThumbnailUrl = url;
+            serGuild.AdvertisingAccepted = false;
+
+            FilesProvider.RefreshGuild(serGuild);
+
+            await ReplyAsync("Картинка изменена", embed: serGuild.Advert.BuildAdvertise(Context.Guild));
+        }
+
+        [Command("ОсновнаяКартинка")]
+        [AutoPartnership]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("меняет основную картинку у объявления. Если хочешь, чтобы вместо картинки была аватарка сервера, тогда введи букву `G` вместо ссылки")]
+        public async Task ChangeImage(string url)
+        {
+            if (url.ToLower() != "g" && !Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute))
+            {
+                await ReplyAsync("Некорректная ссылка");
+                return;
+            }
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            serGuild.Advert.ImageUrl = url;
+            serGuild.AdvertisingAccepted = false;
+
+            FilesProvider.RefreshGuild(serGuild);
+
+            await ReplyAsync("Картинка изменена", embed: serGuild.Advert.BuildAdvertise(Context.Guild));
+        }
+
+        [Command("ДобавитьПриглашение")]
+        [AutoPartnership]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("добавляет ссылку-приглашение, которое будет вставляться в твое объявление")]
+        public async Task InjectInvite(string inviteUrl)
+        {
+            var allInvites = await Context.Guild.GetInvitesAsync();
+
+            var client = Context.Client;            
+
+            if (allInvites.Any(x => x.Url == inviteUrl))
+            {
+                var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+                serGuild.Advert.InviteUrl = inviteUrl;
+
+                FilesProvider.RefreshGuild(serGuild);
+
+                await ReplyAsync("Приглашение добавлено", embed:  serGuild.Advert.BuildAdvertise(Context.Guild));
+            }
+            else
+                await ReplyAsync("Я не нашел такого приглашения на твоем сервере");
         }
         #endregion
 
