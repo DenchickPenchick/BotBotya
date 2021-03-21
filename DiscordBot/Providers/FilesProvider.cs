@@ -23,11 +23,23 @@ namespace DiscordBot.Providers
             return JsonSerializer.Deserialize<SerializableConfig>(reader.ReadToEnd()).Path;
         }
 
-        public static SerializableGuild GetGuild(IGuild guild) => GetGuild(guild.Id);
+        public static SerializableGuild GetGuild(IGuild guild)
+        {
+            try
+            { 
+                return GetGuild(guild.Id);            
+            }
+            catch (IOException)
+            {
+                AddGuild(guild);
+                return GetGuild(guild);
+            }
+        } 
 
         public static SerializableGuild GetGuild(ulong guildId)
         {
             XmlSerializer serializer = new(typeof(SerializableGuild));
+
             using FileStream stream = new($@"{GetBotDirectoryPath()}/BotGuilds/{guildId}.xml", FileMode.Open);
             return (SerializableGuild)serializer.Deserialize(stream);
         }
@@ -40,7 +52,7 @@ namespace DiscordBot.Providers
 
         public static IEnumerable<SerializableGuild> GetAllGuilds()
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
+            XmlSerializer serializer = new(typeof(SerializableGuild));
             string directoryWithGuilds = $"{GetBotDirectoryPath()}/BotGuilds";
             string[] files = Directory.GetFiles(directoryWithGuilds);
 
@@ -53,10 +65,10 @@ namespace DiscordBot.Providers
 
         public static SerializableGlobalOptions GetGlobalOptions()
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(SerializableGlobalOptions));
+            XmlSerializer serializer = new(typeof(SerializableGlobalOptions));
             string pathToXML = $"{GetBotDirectoryPath()}/GlobalOptions.xml";
 
-            using FileStream stream = new FileStream(pathToXML, FileMode.Open);
+            using FileStream stream = new(pathToXML, FileMode.Open);
             return (SerializableGlobalOptions)serializer.Deserialize(stream);
         }
 
@@ -65,7 +77,7 @@ namespace DiscordBot.Providers
             File.Delete($@"{GetBotDirectoryPath()}/BotGuilds/{id}.xml");
         }
 
-        public static void AddGuild(SocketGuild guild)
+        public static void AddGuild(IGuild guild)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
             SerializableGuild serializableGuild = new SerializableGuild
