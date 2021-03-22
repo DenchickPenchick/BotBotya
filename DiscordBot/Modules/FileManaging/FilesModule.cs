@@ -60,6 +60,7 @@ namespace DiscordBot.Providers.FileManaging
         private Task Client_Ready()
         {
             SetupBotGuildData();
+            ReserializeAllFiles();
             return Task.CompletedTask;
         }
 
@@ -189,6 +190,82 @@ namespace DiscordBot.Providers.FileManaging
                     FilesProvider.DeleteGuild(ulong.Parse(fileName));
 
             Console.WriteLine("Guilds checked", Color.Green);
+        }
+
+        //Должен вызываться в начале работы программы
+        //Обновляет версии файлов конфигурации сервера до новейшей.
+        private void ReserializeAllFiles()
+        {
+            string[] allGuildsFiles = Directory.GetFiles(FilesProvider.GetConfig().Path + "/BotGuilds", "*.xml");
+            
+            var newSerializer = new XmlSerializer(typeof(SerializableGuild));
+
+            foreach (string path in allGuildsFiles)
+            {
+                using (FileStream fs = new FileStream(path, FileMode.Open))
+                {
+                    if (IsDeserializable(fs, out ObsoleteSerializableGuild guild))
+                    {
+                        var instanceOfNewGuild = new SerializableGuild
+                        {
+                            GuildId = guild.GuildId,
+                            DefaultRoleId = guild.DefaultRoleId,
+                            MaxWarns = guild.MaxWarns,
+                            LotsCount = guild.LotsCount,
+                            KickForWarns = guild.KickForWarns,
+                            BanForWarns = guild.BanForWarns,
+                            MuteForWarns = guild.MuteForWarns,
+                            WarnsForBadWords = guild.WarnsForBadWords,
+                            WarnsForInviteLink = guild.WarnsForInviteLink,
+                            HelloMessageEnable = guild.HelloMessageEnable,
+                            CheckingContent = guild.CheckingContent,
+                            UnknownCommandMessage = guild.UnknownCommandMessage,
+                            CheckingBadWords = guild.CheckingBadWords,
+                            CreateTextChannelsForVoiceChannels = guild.CreateTextChannelsForVoiceChannels,
+                            AdvertisingAccepted = guild.AdvertisingAccepted,
+                            AdvertisingModerationSended = guild.AdvertisingModerationSended,
+                            HelloMessage = guild.HelloMessage,
+                            EmojiOfRoom = guild.EmojiOfRoom,
+                            Prefix = guild.Prefix,
+                            EmbedColor = ColorProvider.GetColorFromName(guild.EmbedColor),
+                            CommandsChannels = guild.CommandsChannels,
+                            IgnoreRoles = guild.IgnoreRoles,
+                            BlaskListedRolesToSale = guild.BlaskListedRolesToSale,
+                            BadWords = guild.BadWords,
+                            ExceptWords = guild.ExceptWords,
+                            BadUsers = guild.BadUsers,
+                            SystemCategories = guild.SystemCategories,
+                            SystemChannels = guild.SystemChannels,
+                            Advert = guild.Advert,
+                            NextCheck = guild.NextCheck,
+                            NextSend = guild.NextSend
+                        };                                                
+
+                        fs.Close();
+
+                        File.WriteAllText(path, string.Empty);
+
+                        using (FileStream fileStr = new FileStream(path, FileMode.Open))                        
+                        newSerializer.Serialize(fileStr, instanceOfNewGuild);                                                
+                    }
+                }
+            }
+        }
+
+        private bool IsDeserializable(Stream stream, out ObsoleteSerializableGuild guild)
+        {
+            var ser = new XmlSerializer(typeof(ObsoleteSerializableGuild), new XmlRootAttribute("SerializableGuild"));
+
+            try
+            {
+                guild = (ObsoleteSerializableGuild)ser.Deserialize(stream);
+                return true;
+            }
+            catch (Exception)
+            {
+                guild = null;
+                return false;
+            }
         }
 
         private void AddGuild(SocketGuild guild)

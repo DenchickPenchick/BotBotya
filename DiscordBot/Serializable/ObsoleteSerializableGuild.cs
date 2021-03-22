@@ -1,13 +1,12 @@
-﻿//© Copyright 2021 Denis Voitenko MIT License
-//GitHub repository: https://github.com/DenVot/BotBotya
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using Discord;
+using System.Xml.Serialization;
 
 namespace DiscordBot.Serializable
 {
-    public class SerializableGuild
+    //Старая версия файла конфигурации сервера    
+    [XmlRoot("SerializableGuild")]
+    public class ObsoleteSerializableGuild
     {
         /// <summary>
         /// Id Discord сервера
@@ -88,7 +87,7 @@ namespace DiscordBot.Serializable
         /// <summary>
         /// Цвет эмбедов
         /// </summary>
-        public Color EmbedColor { get; set; } = new Color(18, 124, 164);
+        public string EmbedColor { get; set; } = "Синий";
         /// <summary>
         /// Коллекция с id каналов, где можно отвечать на команды
         /// </summary>

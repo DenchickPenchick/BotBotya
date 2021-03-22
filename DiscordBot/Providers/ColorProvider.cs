@@ -56,15 +56,15 @@ namespace DiscordBot.Providers
         public static Color GetColorForCurrentGuild(IGuild guild)
         {
             var serGuild = FilesProvider.GetGuild(guild);
-            return GetColorFromName(serGuild.EmbedColor);
+            return serGuild.EmbedColor;
         }
 
-        public static Color GetColorForCurrentGuild(SerializableGuild guild) => GetColorFromName(guild.EmbedColor);
+        public static Color GetColorForCurrentGuild(SerializableGuild guild) => guild.EmbedColor;
 
         public static void SerializeColor(string name, IGuild guild)
         {
             var serGuild = FilesProvider.GetGuild(guild);
-            serGuild.EmbedColor = name;
+            serGuild.EmbedColor = GetColorFromName(name);
             FilesProvider.RefreshGuild(serGuild);
         }
     }

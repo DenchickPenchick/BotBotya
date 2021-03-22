@@ -52,7 +52,7 @@ namespace DiscordBot
             });
 
             Commands = new CommandService();
-            InteractiveService interactiveService = new InteractiveService(Client, new InteractiveServiceConfig
+            InteractiveService interactiveService = new(Client, new InteractiveServiceConfig
             {
                 DefaultTimeout = TimeSpan.FromMinutes(5)
             });
@@ -88,7 +88,6 @@ namespace DiscordBot
                 .AddModule(new EconomicModule(Client));
 
             new ProcessingModule(modulesCollection).RunModule();
-
 
             Client.Ready += Client_Ready;
 

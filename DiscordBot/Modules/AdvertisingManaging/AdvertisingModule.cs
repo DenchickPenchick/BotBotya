@@ -64,9 +64,10 @@ namespace DiscordBot.Modules.AdvertisingManaging
                             globOptions.MessagesToCheck.RemoveAt(indexOf);
                             await guild.DefaultChannel.SendMessageAsync("Вам пришел отказ. Проверьте, соблюдаете ли Вы все правила, которые написаны в условии пользования данной функцией.\nВы можете прислать объявление на проверку повторно через 3 часа.");
                             break;
-                    }                                        
+                    }          
+                    
                     FilesProvider.RefreshGuild(serGuild);
-                    FilesProvider.RefreshGlobalOptions(globOptions);
+                    FilesProvider.RefreshGlobalOptions(globOptions);                    
                 }
             }
         }

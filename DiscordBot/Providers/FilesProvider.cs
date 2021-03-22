@@ -19,7 +19,7 @@ namespace DiscordBot.Providers
 
         public static string GetBotDirectoryPath()
         {
-            using StreamReader reader = new StreamReader("config.json");
+            using StreamReader reader = new("config.json");
             return JsonSerializer.Deserialize<SerializableConfig>(reader.ReadToEnd()).Path;
         }
 
@@ -58,7 +58,7 @@ namespace DiscordBot.Providers
 
             foreach (string file in files)
             {
-                using FileStream stream = new FileStream(file, FileMode.Open);
+                using FileStream stream = new(file, FileMode.Open);
                 yield return (SerializableGuild)serializer.Deserialize(stream);
             }
         }
