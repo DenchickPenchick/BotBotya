@@ -79,7 +79,7 @@ namespace DiscordBot.Modules.ServersConnectingManaging
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                LogsProvider.ExceptionLog(ex);
             }
         }
 

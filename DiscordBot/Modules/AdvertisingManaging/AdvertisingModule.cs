@@ -36,40 +36,42 @@ namespace DiscordBot.Modules.AdvertisingManaging
             var message = arg1.Value;
             var reactAuthor = arg3.User.Value;
             var globOptions = FilesProvider.GetGlobalOptions();
-
-            if (reactAuthor.Id == Configuration.AdminId && globOptions.MessagesToCheck.Contains(message.Id))
+            if (Configuration != null && message != null)
             {
-                ulong guildId = ulong.Parse(arg1.Value.Embeds.First().Footer.Value.Text);
-                var serGuild = FilesProvider.GetGuild(guildId);
-                var guild = Client.GetGuild(guildId);
+                if (reactAuthor.Id == Configuration.AdminId && globOptions.MessagesToCheck.Contains(message.Id))
+                {
+                    ulong guildId = ulong.Parse(arg1.Value.Embeds.First().Footer.Value.Text);
+                    var serGuild = FilesProvider.GetGuild(guildId);
+                    var guild = Client.GetGuild(guildId);
 
-                int indexOf = globOptions.MessagesToCheck.IndexOf(message.Id);
+                    int indexOf = globOptions.MessagesToCheck.IndexOf(message.Id);
 
-                if (guild != null && serGuild != null)
-                { 
-                    switch (arg3.Emote.Name)
+                    if (guild != null && serGuild != null)
                     {
-                        case "✅":
-                            serGuild.AdvertisingAccepted = true;
-                            serGuild.AdvertisingModerationSended = false;                            
-                            globOptions.MessagesToCheck.RemoveAt(indexOf);
-                            await guild.DefaultChannel.SendMessageAsync("Проверка пройдена успешно! Теперь Вы можете рассылать Ваши объявления!");
-                            break;
-                        case "❌":
-                            serGuild.AdvertisingAccepted = false;
-                            serGuild.AdvertisingModerationSended = false;
+                        switch (arg3.Emote.Name)
+                        {
+                            case "✅":
+                                serGuild.AdvertisingAccepted = true;
+                                serGuild.AdvertisingModerationSended = false;
+                                globOptions.MessagesToCheck.RemoveAt(indexOf);
+                                await guild.DefaultChannel.SendMessageAsync("Проверка пройдена успешно! Теперь Вы можете рассылать Ваши объявления!");
+                                break;
+                            case "❌":
+                                serGuild.AdvertisingAccepted = false;
+                                serGuild.AdvertisingModerationSended = false;
 
-                            serGuild.NextCheck = DateTime.Now.ToUniversalTime().AddHours(3);
+                                serGuild.NextCheck = DateTime.Now.ToUniversalTime().AddHours(3);
 
-                            globOptions.MessagesToCheck.RemoveAt(indexOf);
-                            await guild.DefaultChannel.SendMessageAsync("Вам пришел отказ. Проверьте, соблюдаете ли Вы все правила, которые написаны в условии пользования данной функцией.\nВы можете прислать объявление на проверку повторно через 3 часа.");
-                            break;
-                    }          
-                    
-                    FilesProvider.RefreshGuild(serGuild);
-                    FilesProvider.RefreshGlobalOptions(globOptions);                    
+                                globOptions.MessagesToCheck.RemoveAt(indexOf);
+                                await guild.DefaultChannel.SendMessageAsync("Вам пришел отказ. Проверьте, соблюдаете ли Вы все правила, которые написаны в условии пользования данной функцией.\nВы можете прислать объявление на проверку повторно через 3 часа.");
+                                break;
+                        }
+
+                        FilesProvider.RefreshGuild(serGuild);
+                        FilesProvider.RefreshGlobalOptions(globOptions);
+                    }
                 }
-            }
+            }            
         }
     }
 }

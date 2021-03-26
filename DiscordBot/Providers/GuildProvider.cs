@@ -33,7 +33,7 @@ namespace DiscordBot.Providers
         {
             try
             {
-                var botyaEmoji = Emote.Parse("<:botya:812734516829093918>");
+                var botyaEmoji = Emote.Parse("<:botya:806129905849860137>");
                 await Guild.DefaultChannel.SendMessageAsync(embed: new EmbedBuilder
                 {
                     Title = $"👋 Спасибо, что пригласили меня на сервер {Guild.Name} 👋",

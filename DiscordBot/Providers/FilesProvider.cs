@@ -37,7 +37,7 @@ namespace DiscordBot.Providers
         } 
 
         public static SerializableGuild GetGuild(ulong guildId)
-        {
+        {            
             XmlSerializer serializer = new(typeof(SerializableGuild));
 
             using FileStream stream = new($@"{GetBotDirectoryPath()}/BotGuilds/{guildId}.xml", FileMode.Open);
@@ -84,18 +84,25 @@ namespace DiscordBot.Providers
             {
                 GuildId = guild.Id
             };
-            using (FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/BotGuilds/{guild.Id}.xml", FileMode.Create))
+            using (FileStream stream = new($@"{GetBotDirectoryPath()}/BotGuilds/{guild.Id}.xml", FileMode.Create))
                 serializer.Serialize(stream, serializableGuild);
             Console.WriteLine($"Guild({guild.Id}) serialized.", Color.Green);
         }
 
         public static void RefreshGuild(SerializableGuild guild)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(SerializableGuild));
+            try
+            {
+                XmlSerializer serializer = new(typeof(SerializableGuild));
 
-            File.WriteAllText($@"{GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml", string.Empty);
-            using FileStream stream = new FileStream($@"{GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml", FileMode.Open, FileAccess.ReadWrite);
-            serializer.Serialize(stream, guild);
+                File.WriteAllText($@"{GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml", string.Empty);
+                using FileStream stream = new($@"{GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml", FileMode.Open, FileAccess.ReadWrite);
+                serializer.Serialize(stream, guild);
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine($"Refreshing guild failed.\nId: {guild.GuildId}\nPath: {GetBotDirectoryPath()}/BotGuilds/{guild.GuildId}.xml\nStack trace: {e.StackTrace}");
+            }
         }
 
         public static void RefreshGlobalOptions(SerializableGlobalOptions options)

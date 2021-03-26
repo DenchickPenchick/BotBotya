@@ -106,11 +106,7 @@ namespace DiscordBot.TextReaders
         private (bool, string) IsGlobalBadWord(string word)
         {
             var GlobalOptions = FilesProvider.GetGlobalOptions();
-
-            //foreach (var bad in GlobalOptions.GlobalBadWords)
-            //    if (bad.Word == word || bad.Exceptions.Contains(word))
-            //        return (true, bad.Word);
-
+            
             return (false, null);
         }
 

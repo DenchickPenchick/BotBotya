@@ -4,6 +4,7 @@
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using Discord.Net;
 using Discord.WebSocket;
 using DiscordBot.Attributes;
 using DiscordBot.Interactivities;
@@ -26,7 +27,7 @@ using Victoria;
 using Console = Colorful.Console;
 
 namespace DiscordBot
-{
+{ 
     #region --СТРУКТУРЫ--
     public class SentenceStruct
     {
@@ -72,12 +73,14 @@ namespace DiscordBot
 
             CommandCategoryAttribute prevCategoryAttribute = new StandartCommandAttribute();
 
+            var commandsArray = Bot.Commands.Commands.Select(x => x.Name).Distinct().ToList();
+
             foreach (var command in Bot.Commands.Commands)
             {
                 CommandCategoryAttribute categoryAttribute;
 
                 string aliases = "\nПсевдонимы:";
-                string parameters = "\nПараметры";
+                string parameters = "\nПараметры:";
 
                 foreach (string alias in command.Aliases)
                     if (alias != command.Name.ToLower())
@@ -96,6 +99,8 @@ namespace DiscordBot
                     categoryAttribute = new RolesCommandAttribute();
                 else if (command.Attributes.Contains(new ConsoleCommandsAttribute()))
                     categoryAttribute = new ConsoleCommandsAttribute();
+                else if (command.Attributes.Contains(new AutoPartnershipAttribute()))
+                    categoryAttribute = new AutoPartnershipAttribute();
                 else
                     categoryAttribute = new StandartCommandAttribute();
 
@@ -134,19 +139,14 @@ namespace DiscordBot
                     }.Build());
             }
             else
-                try
+            {                
+                await PaginatingService.SendPaginatedMessageAsync(new PaginatorEntity
                 {
-                    await PaginatingService.SendPaginatedMessageAsync(new PaginatorEntity
-                    {
-                        Title = "Справка по командам",
-                        Color = ColorProvider.GetColorForCurrentGuild(Context.Guild),
-                        Pages = pages
-                    }, Context);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
+                    Title = "Справка по командам",
+                    Color = ColorProvider.GetColorForCurrentGuild(serGuild),
+                    Pages = pages
+                }, Context);                                        
+            }                        
         }
 
         [Command("Хелп", RunMode = RunMode.Async)]
@@ -820,6 +820,7 @@ namespace DiscordBot
             var advCategory = await Context.Guild.CreateCategoryChannelAsync("💼Партнерство");
             var advChannel = await Context.Guild.CreateTextChannelAsync("💼┋Партнерство", x => x.CategoryId = advCategory.Id);
 
+            await advChannel.AddPermissionOverwriteAsync(Context.Client.CurrentUser, new OverwritePermissions(sendMessages: PermValue.Allow));
             await advChannel.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new OverwritePermissions(sendMessages: PermValue.Deny, viewChannel: PermValue.Allow, readMessageHistory: PermValue.Allow));
 
             serGuild.SystemChannels.AdvertisingChannelId = advChannel.Id;
@@ -930,7 +931,7 @@ namespace DiscordBot
         [Summary("разошлет твое объявление по Discord серверам-партнерам")]
         public async Task SendAdv()
         {
-            var allSerGuilds = FilesProvider.GetAllGuilds();
+            var allSerGuilds = FilesProvider.GetAllGuilds().ToList();
             var currentSerGuild = FilesProvider.GetGuild(Context.Guild);
             var client = Context.Client;
 
@@ -946,16 +947,25 @@ namespace DiscordBot
                 return;
             }
 
-            var subDate = DateTime.Now.ToUniversalTime().Subtract(currentSerGuild.NextSend);
+            var subDate = DateTime
+                .Now
+                .ToUniversalTime()
+                .Subtract(currentSerGuild.NextSend);
 
             if (subDate.Hours < 0)
             {
                 int hours = subDate.Hours * -1;
                 int minutes = subDate.Minutes * -1;
                 int seconds = subDate.Seconds * -1;
-                char lastCharH = hours.ToString().Last();
-                char lastCharM = minutes.ToString().Last();
-                char lastCharS = seconds.ToString().Last();
+                char lastCharH = hours
+                    .ToString()
+                    .Last();
+                char lastCharM = minutes
+                    .ToString()
+                    .Last();
+                char lastCharS = seconds
+                    .ToString()
+                    .Last();
 
                 await ReplyAsync($"Ты не можешь рассылать объявления чаще чем раз в два часа\n*Осталось:* `{hours} {(lastCharH == '1' ? "час" : "часа")} " +
                     $"{minutes} {(lastCharM == '1' ? "минута" : lastCharM == '2' || lastCharM == '3' || lastCharM == '4' ? "минуты" : "минут")} " +
@@ -963,14 +973,48 @@ namespace DiscordBot
                 return;
             }
 
-            allSerGuilds.ToList().ForEach(async x =>
-            {
-                var advChannel = client.GetGuild(x.GuildId).GetTextChannel(x.SystemChannels.AdvertisingChannelId);
-                if (advChannel != null && x.GuildId != currentSerGuild.GuildId)                
-                    await advChannel.SendMessageAsync(embed: currentSerGuild.Advert.BuildAdvertise(Context.Guild));                
-            });
-
             int count = allSerGuilds.Where(x => client.GetGuild(x.GuildId).GetTextChannel(x.SystemChannels.AdvertisingChannelId) != null).Count() - 1;
+
+            if (count == 0)
+            {
+                await ReplyAsync("На данный момент нет открытых серверов. Повтори попытку позже");
+                return;
+            }
+            new Thread(() =>
+            {
+                //DiscordHTTPException
+                                
+                allSerGuilds.ToList().ForEach(async x =>
+                {
+                    var advChannel = client.GetGuild(x.GuildId).GetTextChannel(x.SystemChannels.AdvertisingChannelId);
+
+                    try
+                    {                       
+                        if (advChannel != null && x.GuildId != currentSerGuild.GuildId)
+                            await advChannel.SendMessageAsync(embed: currentSerGuild.Advert.BuildAdvertise(Context.Guild));
+                    }
+                    catch (HttpException ex)
+                    {
+                        if (ex.DiscordCode == 5001)
+                        {
+                            var guild = advChannel.Guild;
+                            var serGuild = x;
+
+                            serGuild.SystemChannels.AdvertisingChannelId = default;
+
+                            var adminDMChannel = await guild.Owner.GetOrCreateDMChannelAsync();
+
+                            await adminDMChannel.SendMessageAsync(embed: new EmbedBuilder
+                            {
+                                Title = "Предупреждение",
+                                Description = "Я не могу отправить объявление в Ваш канал для рекламы. Чтобы Вы могли рассылать объявления, создайте канал для объявлений.",
+                                Color = ColorProvider.GetColorForCurrentGuild(serGuild)
+                            }.Build());
+                        }
+                    }
+                });                               
+            }).Start();
+
             char lastChar = count.ToString().ToCharArray().Last();
 
             currentSerGuild.NextSend = DateTime.Now.ToUniversalTime().AddHours(2);
@@ -1037,7 +1081,7 @@ namespace DiscordBot
         {
             var serGuild = FilesProvider.GetGuild(Context.Guild);
 
-            serGuild.Advert.AdvColor = ColorProvider.GetColorFromName(color);
+            serGuild.Advert.AdvColor = ColorProvider.GetColorFromName(color).ToString();
 
             FilesProvider.RefreshGuild(serGuild);
             await ReplyAsync("Цвет объявления изменен", embed: serGuild.Advert.BuildAdvertise(Context.Guild));
@@ -1069,7 +1113,9 @@ namespace DiscordBot
                 return;
             }
 
-            serGuild.Advert.AdvColor = new Color(r, g, b);
+            serGuild.Advert.AdvColor = new Color(r, g, b).ToString();
+
+            Console.WriteLine(new Color(r, g, b).ToString());
 
             FilesProvider.RefreshGuild(serGuild);
             await ReplyAsync("Цвет объявления изменен", embed: serGuild.Advert.BuildAdvertise(Context.Guild));
@@ -2179,6 +2225,21 @@ namespace DiscordBot
         }
 
         [RequireUserPermission(GuildPermission.ManageGuild)]
+        [Command("ЦветЭмбеда")]
+        [CustomisationCommand]
+        [Summary("устанавливает цвет эмбеда")]
+        public async Task ChangeEmbedColor(int r, int g, int b)
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            serGuild.ColorOfEmbed = new Color(r, g, b).ToString();
+
+            FilesProvider.RefreshGuild(serGuild);
+
+            await ReplyAsync("Цвет эмбеда сменен");
+        }
+
+        [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("ОтвечатьТолькоВ")]
         [CustomisationCommand]
         [Summary("устанавливает каналы, в которых бот будет отвечать")]
@@ -2392,11 +2453,10 @@ namespace DiscordBot
                     var attachment = Context.Message.Attachments.First();
                     if (Path.GetExtension(attachment.Filename) == ".txt")
                     {
-                        WebClient client = new WebClient();
+                        WebClient client = new();
                         Stream stream = client.OpenRead(attachment.Url);
 
-
-                        using StreamReader reader = new StreamReader(stream);
+                        using StreamReader reader = new(stream);
                         string text = await reader.ReadToEndAsync();
 
                         List<string> filteredWords = text.Trim(' ', '/', '\\', '=', '-', '+', '_', '(', ')', '*', '&', '?', '^', ':', '%', '$', ';', '@', '"', '.')
@@ -2404,7 +2464,8 @@ namespace DiscordBot
                             .ToList()
                             .Select(x => x.ToLower())
                             .Distinct()
-                            .Where(x => !guild.BadWords.Contains(x.ToLower())).ToList();
+                            .Where(x => !guild.BadWords.Contains(x.ToLower()))
+                            .ToList();
 
                         if (type == ExceptOrBad.Bad)
                             guild.BadWords.AddRange(filteredWords);
@@ -2428,7 +2489,8 @@ namespace DiscordBot
                     .ToList()
                     .Select(x => x.ToLower())
                     .Distinct()
-                    .Where(x => !guild.BadWords.Contains(x.ToLower())).ToList();
+                    .Where(x => !guild.BadWords.Contains(x.ToLower()))
+                    .ToList();
 
                 if (type == ExceptOrBad.Bad)
                     guild.BadWords.AddRange(filteredWords);

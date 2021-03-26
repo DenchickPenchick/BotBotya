@@ -56,7 +56,7 @@ namespace DiscordBot.MusicOperations
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                LogsProvider.ExceptionLog(ex);
             }
         }
 
@@ -79,7 +79,7 @@ namespace DiscordBot.MusicOperations
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                LogsProvider.ExceptionLog(ex);
             }
         }
 
@@ -118,7 +118,7 @@ namespace DiscordBot.MusicOperations
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                LogsProvider.ExceptionLog(ex);
             }
         }
 
@@ -166,7 +166,7 @@ namespace DiscordBot.MusicOperations
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                LogsProvider.ExceptionLog(ex);
             }
         }
 
@@ -197,7 +197,7 @@ namespace DiscordBot.MusicOperations
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                LogsProvider.ExceptionLog(ex);
             }
         }
 
@@ -230,7 +230,7 @@ namespace DiscordBot.MusicOperations
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                LogsProvider.ExceptionLog(ex);
             }
         }
 
@@ -263,7 +263,7 @@ namespace DiscordBot.MusicOperations
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                LogsProvider.ExceptionLog(ex);
             }
         }
 
@@ -287,7 +287,7 @@ namespace DiscordBot.MusicOperations
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                LogsProvider.ExceptionLog(ex);
             }
         }
 
@@ -361,7 +361,7 @@ namespace DiscordBot.MusicOperations
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ex: {ex}");
+                LogsProvider.ExceptionLog(ex);
             }
         }
 
@@ -392,7 +392,7 @@ namespace DiscordBot.MusicOperations
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ex: {ex}");
+                LogsProvider.ExceptionLog(ex);
             }
         }
 
@@ -445,14 +445,14 @@ namespace DiscordBot.MusicOperations
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Ex: {ex}");
+                        LogsProvider.ExceptionLog(ex);
                     }
                     Thread.Sleep(TimeSpan.FromSeconds(5));
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ex: {ex}");
+                LogsProvider.ExceptionLog(ex);
             }
         }
 

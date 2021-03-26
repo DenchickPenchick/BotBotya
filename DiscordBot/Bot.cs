@@ -57,12 +57,14 @@ namespace DiscordBot
                 DefaultTimeout = TimeSpan.FromMinutes(5)
             });
 
+            Client.Ready += Client_Ready;
+
             Services = new ServiceCollection()                
                 .AddSingleton(this)
                 .AddSingleton(Client)                                
                 .AddSingleton<InteractiveService>()
-                .AddSingleton<CommandService>()
-                .AddSingleton<Commands>()
+                //.AddSingleton<CommandService>()
+                .AddSingleton(Commands)
                 .AddSingleton(new PaginatingService(Client, maxMessages: 200))
                 .AddSingleton(new LavaNode(Client, new LavaConfig
                 {
@@ -89,8 +91,6 @@ namespace DiscordBot
 
             new ProcessingModule(modulesCollection).RunModule();
 
-            Client.Ready += Client_Ready;
-
             var config = FilesProvider.GetConfig();
 
             await RegisterCommandsAsync();
@@ -105,17 +105,20 @@ namespace DiscordBot
         }
 
         private async Task Client_Ready()
-        {
-            Console.WriteLine("Ready");
+        {            
             var instanceOfLavaNode = Services.GetRequiredService<LavaNode>();
             if (!instanceOfLavaNode.IsConnected)
             {
-                Console.WriteLine("Connecting Lava node...");
+                LogsProvider.Log("Connecting Lava node...");
                 await instanceOfLavaNode.ConnectAsync();
                 if (!instanceOfLavaNode.IsConnected)
-                    Console.WriteLine("WARN Lava node connecting failed", Color.Red);
+                    LogsProvider.ErrorLog(new Error
+                    {
+                        Description = "Lava node connecting failed",
+                        OccuredIn = "Bot.cs"
+                    });
                 else
-                    Console.WriteLine("Lava node connected", Color.Green);
+                    LogsProvider.Log("Lava node connected");
             }
         }
 
@@ -143,15 +146,17 @@ namespace DiscordBot
 
                             if (!result.IsSuccess)
                             {
-                                if (result.Error != CommandError.UnknownCommand)
-                                {
-                                    Console.WriteLine(result.ErrorReason, Color.Red);
-                                    Console.WriteLine("Command from:", Color.Red);
-                                    Console.WriteLine(context.User.Username);
-                                    Console.WriteLine("Command:", Color.Red);
-                                    Console.WriteLine(message);
-                                    Console.WriteLine("Command Status: Failed", Color.Red);
-                                }
+                                //if (result.Error != CommandError.UnknownCommand)
+                                //{                                    
+                                    var str = LogsProvider.ErrorLog(new Error
+                                    { 
+                                        Description = $"Command failed.",
+                                        OccuredIn = "Bot.cs"
+                                    }, false);
+                                    str.WriteLine($"Command from: {context.User.Username}");
+                                    str.WriteLine($"Reason: {result.ErrorReason}");
+                                    str.EndStream();
+                                //}
                                 switch (result.Error)
                                 {
                                     case CommandError.UnknownCommand:
@@ -213,14 +218,14 @@ namespace DiscordBot
                         }
                     }
             }
-                catch (NullReferenceException)
-                {
+            catch (NullReferenceException)
+            {
 
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Ex: {0}", ex, Color.Red);
-                }
+            }
+            catch (Exception ex)
+            {
+                LogsProvider.ExceptionLog(ex);
+            }
         }
 
         private async Task RegisterCommandsAsync()
@@ -254,7 +259,7 @@ namespace DiscordBot
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Ex: {ex}");
+                        LogsProvider.ExceptionLog(ex);
                     }
                 }
             }).Start();

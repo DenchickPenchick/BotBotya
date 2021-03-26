@@ -9,7 +9,7 @@ namespace DiscordBot.Serializable
     {
         public string Title { get; set; } = null;
         public string Description { get; set; } = null;
-        public Color AdvColor { get; set; } = new Color(18, 124, 164);
+        public string AdvColor { get; set; } = "";
         public string ThumbnailUrl { get; set; } = "g";
         public string ImageUrl { get; set; } = "g";
         public string InviteUrl { get; set; } = "NONE";
@@ -18,7 +18,7 @@ namespace DiscordBot.Serializable
         {
             Title = Title,
             Description = Description,
-            Color = AdvColor,
+            Color = ColorProvider.ConvertFromHex(AdvColor),
             Fields = new List<EmbedFieldBuilder>
             {
                 new EmbedFieldBuilder
@@ -39,7 +39,7 @@ namespace DiscordBot.Serializable
         {
             Title = Title,
             Description = Description,
-            Color = AdvColor,
+            Color = ColorProvider.ConvertFromHex(AdvColor),
             Fields = new List<EmbedFieldBuilder>
             { 
                 new EmbedFieldBuilder

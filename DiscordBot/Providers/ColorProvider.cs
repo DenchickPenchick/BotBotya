@@ -3,6 +3,7 @@
 
 using Discord;
 using DiscordBot.Serializable;
+using System;
 
 namespace DiscordBot.Providers
 {
@@ -51,20 +52,37 @@ namespace DiscordBot.Providers
             }
 
             return color;
-        }
+        }        
 
         public static Color GetColorForCurrentGuild(IGuild guild)
         {
             var serGuild = FilesProvider.GetGuild(guild);
-            return serGuild.EmbedColor;
+            return ConvertFromHex(serGuild.ColorOfEmbed);
         }
 
-        public static Color GetColorForCurrentGuild(SerializableGuild guild) => guild.EmbedColor;
+        public static Color GetColorForCurrentGuild(SerializableGuild guild) => ConvertFromHex(guild.ColorOfEmbed);
+
+        public static Color ConvertFromHex(string hex)
+        {
+            try
+            {
+                var color = System.Drawing.ColorTranslator.FromHtml(hex);
+
+                if (color.IsEmpty)
+                    return new Color(18, 124, 164);
+
+                return new Color(color.R, color.G, color.B);
+            }
+            catch (Exception)
+            {
+                return new Color(18, 124, 164);
+            }
+        }
 
         public static void SerializeColor(string name, IGuild guild)
         {
             var serGuild = FilesProvider.GetGuild(guild);
-            serGuild.EmbedColor = GetColorFromName(name);
+            serGuild.ColorOfEmbed = GetColorFromName(name).ToString();
             FilesProvider.RefreshGuild(serGuild);
         }
     }

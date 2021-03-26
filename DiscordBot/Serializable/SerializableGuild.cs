@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using Discord;
+using DiscordBot.Providers.Entities;
 
 namespace DiscordBot.Serializable
 {
@@ -54,6 +54,10 @@ namespace DiscordBot.Serializable
         /// </summary>
         public bool CheckingContent { get; set; } = false;
         /// <summary>
+        /// Показывает, забанена ли функция взаимопиара
+        /// </summary>
+        public bool IsBanned { get; set; } = false;
+        /// <summary>
         /// Проверка правописания команд. Если true, тогда бот будет уведомлять о неправильной команде.
         /// </summary>
         public bool UnknownCommandMessage { get; set; } = false;
@@ -88,7 +92,7 @@ namespace DiscordBot.Serializable
         /// <summary>
         /// Цвет эмбедов
         /// </summary>
-        public Color EmbedColor { get; set; } = new Color(18, 124, 164);
+        public string ColorOfEmbed { get; set; } = "#127ca4";        
         /// <summary>
         /// Коллекция с id каналов, где можно отвечать на команды
         /// </summary>
@@ -125,6 +129,10 @@ namespace DiscordBot.Serializable
         /// Объявление
         /// </summary>
         public SerializableAdvertising Advert { get; set; } = new SerializableAdvertising();
+        /// <summary>
+        /// Причина бана функции
+        /// </summary>
+        public PiarToSWarnEmbed WarnEmbed { get; set; } = null;
         /// <summary>
         /// Показывает, когда можно совершить следующий запрос на проверку
         /// </summary>

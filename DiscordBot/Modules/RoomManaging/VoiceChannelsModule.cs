@@ -108,7 +108,7 @@ namespace DiscordBot.RoomManaging
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Exception throwed while creating room: {e}", Color.Red);
+                LogsProvider.ExceptionLog(e);
             }
         }
 
@@ -146,8 +146,7 @@ namespace DiscordBot.RoomManaging
                             continue;
                         }
                 }
-            }
-            Console.WriteLine("Checked");
+            }            
         }
 
         private async Task ChannelForMicroDisabled(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
