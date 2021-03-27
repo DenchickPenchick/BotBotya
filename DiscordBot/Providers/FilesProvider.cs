@@ -85,8 +85,7 @@ namespace DiscordBot.Providers
                 GuildId = guild.Id
             };
             using (FileStream stream = new($@"{GetBotDirectoryPath()}/BotGuilds/{guild.Id}.xml", FileMode.Create))
-                serializer.Serialize(stream, serializableGuild);
-            Console.WriteLine($"Guild({guild.Id}) serialized.", Color.Green);
+                serializer.Serialize(stream, serializableGuild);            
         }
 
         public static void RefreshGuild(SerializableGuild guild)

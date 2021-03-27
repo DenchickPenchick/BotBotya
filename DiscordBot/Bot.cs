@@ -42,8 +42,7 @@ namespace DiscordBot
         public async Task RunBotAsync()
         {
             var assembly = Assembly.GetEntryAssembly();
-            Console.WriteAscii("Discord Bot Console", Color.Blue);
-            Console.WriteLine($"{assembly.GetCustomAttribute<AssemblyProductAttribute>().Product}\nVersion: {assembly.GetName().Version}\nGitHub: {assembly.GetCustomAttribute<AssemblyMetadataAttribute>().Value}\n{assembly.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright}\n", Color.Orange);
+            Console.WriteAscii("Discord Bot Console", Color.Blue);            
 
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {

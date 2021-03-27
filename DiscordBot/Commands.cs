@@ -54,131 +54,193 @@ namespace DiscordBot
             Bot = bot;
         }
 
+        public CommandService GetCommands() => Bot.Commands;
+
         #region --СТАНДАРТНЫЕ КОМАНДЫ--
-        [Command("Хелп", RunMode = RunMode.Async)]
+        //[Command("Хелп", RunMode = RunMode.Async)]
+        //[Alias("Хэлп", "Помощь")]
+        //[StandartCommand]
+        //[Summary("позволяет узнать полный список команд")]
+        //public async Task Help(int page = 0)
+        //{
+        //    int pos = 0;
+        //    int posit = 1;
+        //    int catpos = 0;
+        //    var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+        //    List<string> pages = new List<string>
+        //    {
+        //        null
+        //    };
+
+        //    CommandCategoryAttribute prevCategoryAttribute = new StandartCommandAttribute();
+
+        //    var commandsArray = Bot.Commands.Commands.Select(x => x.Name).Distinct().ToList();
+
+        //    foreach (var command in Bot.Commands.Commands)
+        //    {
+        //        CommandCategoryAttribute categoryAttribute;
+
+        //        string aliases = "\nПсевдонимы:";
+        //        string parameters = "\nПараметры:";
+
+        //        foreach (string alias in command.Aliases)
+        //            if (alias != command.Name.ToLower())
+        //                aliases += $" `{alias}`";
+
+        //        foreach (var param in command.Parameters)
+        //            parameters += $" `{param.Name}`";
+
+        //        if (command.Attributes.Contains(new StandartCommandAttribute()))
+        //            categoryAttribute = new StandartCommandAttribute();
+        //        else if (command.Attributes.Contains(new CustomisationCommandAttribute()))
+        //            categoryAttribute = new CustomisationCommandAttribute();
+        //        else if (command.Attributes.Contains(new MusicCommandAttribute()))
+        //            categoryAttribute = new MusicCommandAttribute();
+        //        else if (command.Attributes.Contains(new RolesCommandAttribute()))
+        //            categoryAttribute = new RolesCommandAttribute();
+        //        else if (command.Attributes.Contains(new ConsoleCommandsAttribute()))
+        //            categoryAttribute = new ConsoleCommandsAttribute();
+        //        else if (command.Attributes.Contains(new AutoPartnershipAttribute()))
+        //            categoryAttribute = new AutoPartnershipAttribute();
+        //        else
+        //            categoryAttribute = new StandartCommandAttribute();
+
+        //        if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"{pages[pos]}\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}".Length >= 1023)
+        //        {
+        //            if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName)
+        //                posit = 1;
+
+        //            pages.Add($"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}");
+        //            pos++;
+        //        }
+        //        else if (catpos == 0)
+        //        {
+        //            pages[0] += $"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}";
+        //            catpos++;
+        //        }
+        //        else
+        //            pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}";
+        //        prevCategoryAttribute = categoryAttribute;
+        //    }
+        //    if (page > 0)
+        //    {
+        //        if (page > pages.Count)
+        //            await ReplyAsync(embed: new EmbedBuilder
+        //            {
+        //                Title = "Справка по командам",
+        //                Description = pages.Last(),
+        //                Color = ColorProvider.GetColorForCurrentGuild(serGuild)
+        //            }.Build());
+        //        else
+        //            await ReplyAsync(embed: new EmbedBuilder
+        //            {
+        //                Title = "Справка по командам",
+        //                Description = pages[page - 1],
+        //                Color = ColorProvider.GetColorForCurrentGuild(serGuild)
+        //            }.Build());
+        //    }
+        //    else
+        //    {                
+        //        await PaginatingService.SendPaginatedMessageAsync(new PaginatorEntity
+        //        {
+        //            Title = "Справка по командам",
+        //            Color = ColorProvider.GetColorForCurrentGuild(serGuild),
+        //            Pages = pages
+        //        }, Context);                                        
+        //    }                        
+        //}
+
+        [Command("Хелп")]
         [Alias("Хэлп", "Помощь")]
         [StandartCommand]
         [Summary("позволяет узнать полный список команд")]
-        public async Task Help(int page = 0)
+        public async Task Help()
         {
-            int pos = 0;
-            int posit = 1;
-            int catpos = 0;
-            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            var serGuild = FilesProvider.GetGuild(Context.Guild);            
 
-            List<string> pages = new List<string>
-            {
-                null
-            };
-
-            CommandCategoryAttribute prevCategoryAttribute = new StandartCommandAttribute();
-
-            var commandsArray = Bot.Commands.Commands.Select(x => x.Name).Distinct().ToList();
-
-            foreach (var command in Bot.Commands.Commands)
-            {
-                CommandCategoryAttribute categoryAttribute;
-
-                string aliases = "\nПсевдонимы:";
-                string parameters = "\nПараметры:";
-
-                foreach (string alias in command.Aliases)
-                    if (alias != command.Name.ToLower())
-                        aliases += $" `{alias}`";
-
-                foreach (var param in command.Parameters)
-                    parameters += $" `{param.Name}`";
-
-                if (command.Attributes.Contains(new StandartCommandAttribute()))
-                    categoryAttribute = new StandartCommandAttribute();
-                else if (command.Attributes.Contains(new CustomisationCommandAttribute()))
-                    categoryAttribute = new CustomisationCommandAttribute();
-                else if (command.Attributes.Contains(new MusicCommandAttribute()))
-                    categoryAttribute = new MusicCommandAttribute();
-                else if (command.Attributes.Contains(new RolesCommandAttribute()))
-                    categoryAttribute = new RolesCommandAttribute();
-                else if (command.Attributes.Contains(new ConsoleCommandsAttribute()))
-                    categoryAttribute = new ConsoleCommandsAttribute();
-                else if (command.Attributes.Contains(new AutoPartnershipAttribute()))
-                    categoryAttribute = new AutoPartnershipAttribute();
-                else
-                    categoryAttribute = new StandartCommandAttribute();
-
-                if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"{pages[pos]}\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}".Length >= 1023)
-                {
-                    if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName)
-                        posit = 1;
-
-                    pages.Add($"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}");
-                    pos++;
-                }
-                else if (catpos == 0)
-                {
-                    pages[0] += $"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}";
-                    catpos++;
-                }
-                else
-                    pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}";
-                prevCategoryAttribute = categoryAttribute;
-            }
-            if (page > 0)
-            {
-                if (page > pages.Count)
-                    await ReplyAsync(embed: new EmbedBuilder
-                    {
-                        Title = "Справка по командам",
-                        Description = pages.Last(),
-                        Color = ColorProvider.GetColorForCurrentGuild(serGuild)
-                    }.Build());
-                else
-                    await ReplyAsync(embed: new EmbedBuilder
-                    {
-                        Title = "Справка по командам",
-                        Description = pages[page - 1],
-                        Color = ColorProvider.GetColorForCurrentGuild(serGuild)
-                    }.Build());
-            }
-            else
-            {                
-                await PaginatingService.SendPaginatedMessageAsync(new PaginatorEntity
-                {
-                    Title = "Справка по командам",
-                    Color = ColorProvider.GetColorForCurrentGuild(serGuild),
-                    Pages = pages
-                }, Context);                                        
-            }                        
-        }
-
-        [Command("Хелп", RunMode = RunMode.Async)]
-        [Alias("Хэлп", "Помощь")]
-        [StandartCommand]
-        [Summary("позволяет узнать полный список команд")]
-        public async Task Help(string commandName)
-        {
-            var serGuild = FilesProvider.GetGuild(Context.Guild);
-            var commands = Bot.Commands;
-            var predictCommand = Bot.Commands.Commands.Where(x => x.Name.ToLower() == commandName.ToLower() || x.Aliases.Any(a => a.ToLower() == commandName.ToLower())).First();
-            string parameters = null;
-            predictCommand.Parameters.ToList().ForEach(x => parameters += $" `{(x.IsOptional ? "|" : null)}{x}{(x.IsOptional ? "|" : null)}`");
             await ReplyAsync(embed: new EmbedBuilder
             {
-                Title = $"Справка по команде {predictCommand.Name}",
+                Title = "Хелп",
+                Description = "Ты можешь конкретней написать, по чему ты хочешь получить справку.",
                 Fields = new List<EmbedFieldBuilder>
                 {
                     new EmbedFieldBuilder
                     {
-                        Name = "Описание",
-                        Value = $"Данная команда {predictCommand.Summary}"
+                        Name = "Стандартные команды",
+                        Value = $"`{serGuild.Prefix}Хелп Стандарт`"
                     },
                     new EmbedFieldBuilder
                     {
-                        Name = "Формат ввода",
-                        Value = $"`{serGuild.Prefix}{predictCommand.Name}`{parameters}"
+                        Name = "Взаимопиар",
+                        Value = $"`{serGuild.Prefix}Хелп Пиар`"
+                    },
+                    new EmbedFieldBuilder
+                    {
+                        Name = "Кастомизация",
+                        Value = $"`{serGuild.Prefix}Хелп Кастомизация`"
+                    },
+                    new EmbedFieldBuilder
+                    {
+                        Name = "Музыка",
+                        Value = $"`{serGuild.Prefix}Хелп Музыка`"
+                    },
+                    new EmbedFieldBuilder
+                    {
+                        Name = "Магазин ролей",
+                        Value = $"`{serGuild.Prefix}Хелп Магазин`"
+                    },
+                    new EmbedFieldBuilder
+                    { 
+                        Name = "Консольные команды",
+                        Value = $"`{serGuild.Prefix}Хелп Консоль`"
                     }
                 },
-                Color = ColorProvider.GetColorForCurrentGuild(Context.Guild)
+                Color = ColorProvider.GetColorForCurrentGuild(Context.Guild),
+                Author = new EmbedAuthorBuilder
+                {
+                    Name = "Ботя",
+                    IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                    Url = "https://botbotya.ru/Pages/CommandsPage/index.html"
+                }
             }.Build());
         }
+
+        [Command("Хелп")]
+        [Alias("Хэлп", "Помощь")]
+        [StandartCommand]
+        [Summary("позволяет узнать полный список команд")]
+        public async Task Help(string query)
+        {
+            var allCommands = GetCommands().Commands;
+
+            switch (query.ToLower())
+            {
+                case "стандарт":
+                    var standartCommands = allCommands.Select(x => x.Attributes.Contains(new StandartCommandAttribute()));
+
+
+                    break;
+                case "пиар":
+
+                    break;
+                case "кастомизация":
+
+                    break;
+                case "музыка":
+
+                    break;
+                case "магазин":
+
+                    break;
+                case "консоль":
+
+                    break;
+                default:
+                    await ReplyAsync("Такого типа команд не существует.");
+                    return;
+            }
+        }        
 
         [Command("Статистика")]
         [StandartCommand]

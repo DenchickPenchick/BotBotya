@@ -48,13 +48,17 @@ namespace DiscordBot.Modules.AdvertisingManaging
 
                     if (guild != null && serGuild != null)
                     {
+                        var adminDM = await guild.Owner.GetOrCreateDMChannelAsync();
+
                         switch (arg3.Emote.Name)
                         {
                             case "✅":
                                 serGuild.AdvertisingAccepted = true;
                                 serGuild.AdvertisingModerationSended = false;
-                                globOptions.MessagesToCheck.RemoveAt(indexOf);
-                                await guild.DefaultChannel.SendMessageAsync("Проверка пройдена успешно! Теперь Вы можете рассылать Ваши объявления!");
+                                globOptions.MessagesToCheck.RemoveAt(indexOf);                                
+                                                                
+                                await adminDM.SendMessageAsync($"Проверка для сервера {guild.Name} пройдена успешно! Теперь Вы можете рассылать Ваши объявления!");                                                                
+
                                 break;
                             case "❌":
                                 serGuild.AdvertisingAccepted = false;
@@ -63,7 +67,7 @@ namespace DiscordBot.Modules.AdvertisingManaging
                                 serGuild.NextCheck = DateTime.Now.ToUniversalTime().AddHours(3);
 
                                 globOptions.MessagesToCheck.RemoveAt(indexOf);
-                                await guild.DefaultChannel.SendMessageAsync("Вам пришел отказ. Проверьте, соблюдаете ли Вы все правила, которые написаны в условии пользования данной функцией.\nВы можете прислать объявление на проверку повторно через 3 часа.");
+                                await adminDM.SendMessageAsync($"Вам пришел отказ в использовании функции \"Взаимопиар\" на сервере {guild.Name}. Проверьте, соблюдаете ли Вы все правила, которые написаны в условии пользования данной функцией.\nВы можете прислать объявление на проверку повторно через 3 часа.");
                                 break;
                         }
 

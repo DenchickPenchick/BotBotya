@@ -3,12 +3,17 @@
 
 using System;
 using System.Drawing;
+using System.IO;
+using System.Text;
 using Console = Colorful.Console;
 
 namespace DiscordBot.Providers
 {
     public static class LogsProvider
     {
+        public static bool SendLogsToFile { get; set; } = false;
+        public static bool SendDefaultLogsToFile { get; set; } = false;
+
         public static LogStream Log(string log, bool withAutoEnd = true)
         {
             var stream = new LogStream("log", Color.White);
@@ -17,8 +22,12 @@ namespace DiscordBot.Providers
 
             stream.StartStream();                       
             stream.WriteLine($"Description: {log}");
+
             if (withAutoEnd)
                 stream.EndStream();
+
+            if(SendDefaultLogsToFile)
+                SendLogStream(stream);
 
             return stream;
         }
@@ -29,11 +38,15 @@ namespace DiscordBot.Providers
 
             Console.WriteLine($"ERROR OCCURED [Time: {DateTime.Now.ToShortTimeString()} Date: {DateTime.Now.ToShortDateString()}]", Color.OrangeRed);
             stream.StartStream();
-            stream.WriteLine($"Description: {error.Description}");                        
-            stream.WriteLine("Occured in: {error.OccuredIn}");
+            stream.WriteLine($"Description: {error.Description}");  
+
+            if(error.OccuredIn != "NONE")
+                stream.WriteLine($"Occured in: {error.OccuredIn}");
 
             if(withAutoEnd)
                 stream.EndStream();
+
+            SendLogStream(stream);
 
             return stream;
         }
@@ -52,6 +65,28 @@ namespace DiscordBot.Providers
 
             return stream;
         }
+
+        private static FileStream GetLogsFileStream()
+        {
+            string path = "logs.txt";
+
+            using FileStream stream = new(path, FileMode.OpenOrCreate);
+            return stream;
+        }
+
+        private static void SendLogStream(LogStream logStream)
+        {
+            if (SendLogsToFile)
+            {
+                using var stream = GetLogsFileStream();
+                string content = logStream.Content;
+
+                byte[] contentByteArray = Encoding.UTF8.GetBytes(content);
+                int countOfContentByteArray = content.Length;
+
+                stream.Write(contentByteArray, 0, countOfContentByteArray);
+            }
+        }
     }
 
     public class Error
@@ -60,11 +95,12 @@ namespace DiscordBot.Providers
         public string OccuredIn { get; set; } = "NONE";
     }
 
-    public class LogStream
+    public class LogStream : IDisposable
     {
         private readonly Color streamColor;
         private readonly string streamName;
 
+        public string Content { get; private set; }
         public bool IsEnded { get; private set; }
 
         public LogStream(string streamName, Color streamColor)
@@ -78,6 +114,8 @@ namespace DiscordBot.Providers
             if (IsEnded)
                 throw new InvalidOperationException("Log stream ended and you can't write");
 
+            Content += $"│\n├─{line}";
+
             Console.WriteLine("│", streamColor);
             Console.WriteLine($"├─{line}", streamColor);
         }
@@ -87,6 +125,7 @@ namespace DiscordBot.Providers
             if (IsEnded)
                 throw new InvalidOperationException("Log stream ended and you can't start it again");
 
+            Content += $"┌─{streamName} STREAM";
             Console.WriteLine($"┌─{streamName} STREAM", streamColor);
         }
 
@@ -95,9 +134,15 @@ namespace DiscordBot.Providers
             if (IsEnded)
                 throw new InvalidOperationException("Log stream ended and you can't end it again");
 
+            Content += $"│\n└─{streamName} STREAM ENDED";
             Console.WriteLine("│", streamColor);
             Console.WriteLine($"└─{streamName} STREAM ENDED", streamColor);
 
+            IsEnded = true;
+        }
+
+        public void Dispose()
+        {
             IsEnded = true;
         }
     }

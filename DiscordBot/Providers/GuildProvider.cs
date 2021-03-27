@@ -58,7 +58,7 @@ namespace DiscordBot.Providers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ex: {ex}");
+                LogsProvider.ExceptionLog(ex);
             }
         }
 
