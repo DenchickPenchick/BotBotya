@@ -1,4 +1,7 @@
-﻿using Discord;
+﻿//© Copyright 2021 Denis Voitenko MIT License
+//GitHub repository: https://github.com/DenVot/BotBotya
+
+using Discord;
 using Discord.WebSocket;
 using DiscordBot.Providers;
 using DiscordBot.Serializable;
@@ -33,49 +36,55 @@ namespace DiscordBot.Modules.AdvertisingManaging
 
         private async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
-            var message = arg1.Value;
-            var reactAuthor = arg3.User.Value;
-            var globOptions = FilesProvider.GetGlobalOptions();
-            if (Configuration != null && message != null)
+            try
             {
-                if (reactAuthor.Id == Configuration.AdminId && globOptions.MessagesToCheck.Contains(message.Id))
+                var message = arg1.Value;
+                var reactAuthor = arg3.User.Value;
+                var globOptions = FilesProvider.GetGlobalOptions();
+                if (Configuration != null && message != null)
                 {
-                    ulong guildId = ulong.Parse(arg1.Value.Embeds.First().Footer.Value.Text);
-                    var serGuild = FilesProvider.GetGuild(guildId);
-                    var guild = Client.GetGuild(guildId);
-
-                    int indexOf = globOptions.MessagesToCheck.IndexOf(message.Id);
-
-                    if (guild != null && serGuild != null)
+                    if (reactAuthor.Id == Configuration.AdminId && globOptions.MessagesToCheck.Contains(message.Id))
                     {
-                        var adminDM = await guild.Owner.GetOrCreateDMChannelAsync();
+                        ulong guildId = ulong.Parse(arg1.Value.Embeds.First().Footer.Value.Text);
+                        var serGuild = FilesProvider.GetGuild(guildId);
+                        var guild = Client.GetGuild(guildId);
 
-                        switch (arg3.Emote.Name)
+                        int indexOf = globOptions.MessagesToCheck.IndexOf(message.Id);
+
+                        if (guild != null && serGuild != null)
                         {
-                            case "✅":
-                                serGuild.AdvertisingAccepted = true;
-                                serGuild.AdvertisingModerationSended = false;
-                                globOptions.MessagesToCheck.RemoveAt(indexOf);                                
-                                                                
-                                await adminDM.SendMessageAsync($"Проверка для сервера {guild.Name} пройдена успешно! Теперь Вы можете рассылать Ваши объявления!");                                                                
+                            var adminDM = await guild.Owner.GetOrCreateDMChannelAsync();
 
-                                break;
-                            case "❌":
-                                serGuild.AdvertisingAccepted = false;
-                                serGuild.AdvertisingModerationSended = false;
+                            switch (arg3.Emote.Name)
+                            {
+                                case "✅":
+                                    serGuild.AdvertisingAccepted = true;
+                                    serGuild.AdvertisingModerationSended = false;
+                                    globOptions.MessagesToCheck.RemoveAt(indexOf);
 
-                                serGuild.NextCheck = DateTime.Now.ToUniversalTime().AddHours(3);
+                                    await adminDM.SendMessageAsync($"Проверка для сервера {guild.Name} пройдена успешно! Теперь Вы можете рассылать Ваши объявления!");
+                                    break;
+                                case "❌":
+                                    serGuild.AdvertisingAccepted = false;
+                                    serGuild.AdvertisingModerationSended = false;
 
-                                globOptions.MessagesToCheck.RemoveAt(indexOf);
-                                await adminDM.SendMessageAsync($"Вам пришел отказ в использовании функции \"Взаимопиар\" на сервере {guild.Name}. Проверьте, соблюдаете ли Вы все правила, которые написаны в условии пользования данной функцией.\nВы можете прислать объявление на проверку повторно через 3 часа.");
-                                break;
+                                    serGuild.NextCheck = DateTime.Now.ToUniversalTime().AddHours(3);
+
+                                    globOptions.MessagesToCheck.RemoveAt(indexOf);
+                                    await adminDM.SendMessageAsync($"Вам пришел отказ в использовании функции \"Взаимопиар\" на сервере {guild.Name}. Проверьте, соблюдаете ли Вы все правила, которые написаны в условии пользования данной функцией.\nВы можете прислать объявление на проверку повторно через 3 часа.");
+                                    break;
+                            }
+
+                            FilesProvider.RefreshGuild(serGuild);
+                            FilesProvider.RefreshGlobalOptions(globOptions);
                         }
-
-                        FilesProvider.RefreshGuild(serGuild);
-                        FilesProvider.RefreshGlobalOptions(globOptions);
                     }
                 }
-            }            
+            }
+            catch (Exception ex)
+            {
+                LogsProvider.ExceptionLog(ex);
+            }
         }
     }
 }

@@ -61,8 +61,7 @@ namespace DiscordBot
             Services = new ServiceCollection()                
                 .AddSingleton(this)
                 .AddSingleton(Client)                                
-                .AddSingleton<InteractiveService>()
-                //.AddSingleton<CommandService>()
+                .AddSingleton<InteractiveService>()                
                 .AddSingleton(Commands)
                 .AddSingleton(new PaginatingService(Client, maxMessages: 200))
                 .AddSingleton(new LavaNode(Client, new LavaConfig
@@ -111,11 +110,29 @@ namespace DiscordBot
                 LogsProvider.Log("Connecting Lava node...");
                 await instanceOfLavaNode.ConnectAsync();
                 if (!instanceOfLavaNode.IsConnected)
+                {
                     LogsProvider.ErrorLog(new Error
                     {
-                        Description = "Lava node connecting failed",
+                        Description = "Lava node connecting failed. I'll try reconnect in 30 seconds.",
                         OccuredIn = "Bot.cs"
                     });
+
+                    new Thread(async () =>
+                    {
+                        while (!instanceOfLavaNode.IsConnected)
+                        {
+                            Thread.Sleep(TimeSpan.FromSeconds(30));
+                            await instanceOfLavaNode.ConnectAsync();
+
+                            LogsProvider.ErrorLog(new Error
+                            {
+                                Description = "Lava node connecting failed. I'll try reconnect in 30 seconds.",
+                                OccuredIn = "Bot.cs"
+                            });
+                        }                        
+                    }).Start();
+                }
+                    
                 else
                     LogsProvider.Log("Lava node connected");
             }

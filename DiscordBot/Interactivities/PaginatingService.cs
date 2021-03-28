@@ -4,40 +4,24 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
-using System.Runtime.Serialization.Formatters.Binary;
+using DiscordBot.Providers;
 
 namespace DiscordBot.Interactivities
 {
     public class PaginatingService
     {                
-        public PaginatingService(DiscordSocketClient client, long maxSizeRAM)
-        {
-            client.ReactionAdded += Client_ReactionAdded;
-            MaxSizeRAM = maxSizeRAM;
-        }
-
         public PaginatingService(DiscordSocketClient client, int maxMessages)
         {
             client.ReactionAdded += Client_ReactionAdded;
             MaxMessages = maxMessages;
         }
-
-        private long MaxSizeRAM { get; } = default; //Максимальное количество памяти, которое может занимать коллекция из сообщений
+        
         private int MaxMessages { get; } = default;
-
-        private long GetRAMSize() //Получение занятой памяти в рантайме
-        {
-            using Stream stream = new MemoryStream();
-            BinaryFormatter binary = new BinaryFormatter();
-            binary.Serialize(stream, Messages);
-            return stream.Length;
-        }
 
         private readonly List<(RestUserMessage, PaginatorEntity, int)> Messages = new List<(RestUserMessage, PaginatorEntity, int)>();
 
@@ -48,7 +32,7 @@ namespace DiscordBot.Interactivities
                 Title = paginatorEntity.Title,
                 ThumbnailUrl = paginatorEntity.ThumbnailUrl,
                 Description = paginatorEntity.Pages.ToList()[num],
-                Color = paginatorEntity.Color
+                Color = paginatorEntity.Color == default ? ColorProvider.GetColorForCurrentGuild(context.Guild) : paginatorEntity.Color
             }.Build());
 
             await mess.AddReactionsAsync(new List<IEmote>
@@ -62,7 +46,7 @@ namespace DiscordBot.Interactivities
 
             Messages.Add((mess, paginatorEntity, num));
 
-            if ((GetRAMSize() > MaxSizeRAM && MaxSizeRAM != default) || (Messages.Count > MaxMessages && MaxMessages != default))
+            if (Messages.Count > MaxMessages && MaxMessages != default)
                 Messages.RemoveAt(0);
         }
 
@@ -112,18 +96,31 @@ namespace DiscordBot.Interactivities
                 Messages[Messages.IndexOf(ourTuple)] = new(mess, paginatorEntity, Messages[Messages.IndexOf(ourTuple)].Item3 + 1);
             else if (index == ourTuple.Item2.Pages.Count())
                 Messages[Messages.IndexOf(ourTuple)] = new(mess, paginatorEntity, ourTuple.Item2.Pages.Count() - 1);
-            else if (index == 0)
-                Messages[Messages.IndexOf(ourTuple)] = new(mess, paginatorEntity, 0);
+            else if (index == 0 || index == -1)
+                Messages[Messages.IndexOf(ourTuple)] = new(mess, paginatorEntity, 0);            
             else
                 Messages[Messages.IndexOf(ourTuple)] = new(mess, paginatorEntity, Messages[Messages.IndexOf(ourTuple)].Item3 - 1);
 
-            await mess.ModifyAsync(x => x.Embed = new Optional<Embed>(new EmbedBuilder
+            try
             {
-                Title = paginatorEntity.Title,
-                ThumbnailUrl = paginatorEntity.ThumbnailUrl,
-                Description = paginatorEntity.Pages.ToList()[Messages[Messages.Select(z => z.Item1.Id).ToList().IndexOf(ourTuple.Item1.Id)].Item3],
-                Color = paginatorEntity.Color
-            }.Build()));            
+                await mess.ModifyAsync(x => x.Embed = new Optional<Embed>(new EmbedBuilder
+                {
+                    Title = paginatorEntity.Title,
+                    ThumbnailUrl = paginatorEntity.ThumbnailUrl,
+                    Description = paginatorEntity.Pages.ToList()[Messages[Messages.Select(z => z.Item1.Id).ToList().IndexOf(ourTuple.Item1.Id)].Item3],
+                    Color = paginatorEntity.Color
+                }.Build()));
+            }
+            catch (Exception)
+            {
+                await mess.ModifyAsync(x => x.Embed = new Optional<Embed>(new EmbedBuilder
+                {
+                    Title = paginatorEntity.Title,
+                    ThumbnailUrl = paginatorEntity.ThumbnailUrl,
+                    Description = paginatorEntity.Pages.ToList()[0],
+                    Color = paginatorEntity.Color
+                }.Build()));
+            }
         }        
     }
 }

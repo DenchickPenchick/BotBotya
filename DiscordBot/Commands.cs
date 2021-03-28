@@ -213,33 +213,70 @@ namespace DiscordBot
         public async Task Help(string query)
         {
             var allCommands = GetCommands().Commands;
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+            string help = null;
+            var pages = new PaginatorEntity
+            {
+                Color = ColorProvider.GetColorForCurrentGuild(Context.Guild),
+                Title = "Хелп"
+            };
+
+            IEnumerable<CommandInfo> enumerableOfCommands = null;
 
             switch (query.ToLower())
             {
                 case "стандарт":
-                    var standartCommands = allCommands.Select(x => x.Attributes.Contains(new StandartCommandAttribute()));
-
-
+                    enumerableOfCommands = allCommands.Where(x => x.Attributes.Contains(new StandartCommandAttribute()));                   
                     break;
                 case "пиар":
-
+                    enumerableOfCommands = allCommands.Where(x => x.Attributes.Contains(new AutoPartnershipAttribute()));
                     break;
                 case "кастомизация":
-
+                    enumerableOfCommands = allCommands.Where(x => x.Attributes.Contains(new CustomisationCommandAttribute()));
                     break;
                 case "музыка":
-
+                    enumerableOfCommands = allCommands.Where(x => x.Attributes.Contains(new MusicCommandAttribute()));
                     break;
                 case "магазин":
-
+                    enumerableOfCommands = allCommands.Where(x => x.Attributes.Contains(new RolesCommandAttribute()));
                     break;
                 case "консоль":
-
+                    enumerableOfCommands = allCommands.Where(x => x.Attributes.Contains(new ConsoleCommandsAttribute()));
                     break;
                 default:
                     await ReplyAsync("Такого типа команд не существует.");
                     return;
             }
+
+            if (enumerableOfCommands != null)
+            {
+                enumerableOfCommands
+                    .ToList()
+                    .ForEach(x =>
+                    {
+                        StringBuilder commandBuilder = new(100, maxCapacity: 1024);
+                        var parameters = x.Parameters;
+
+                        commandBuilder.Append($"\n`{serGuild.Prefix}{x.Name}`");
+                        parameters.ToList().ForEach(k => commandBuilder.Append($" *`{(k.IsOptional ? "|" : null)}{k.Name}{(k.IsOptional ? "|" : null)}`*"));
+                        commandBuilder.Append("\n*Описание:*\n" + x.Summary.First().ToString().ToUpper() + x.Summary.Remove(0, 1));
+                        commandBuilder.Append("\n────────────────────────");
+
+                        pages += commandBuilder.ToString();
+                    });
+
+                if (pages.Pages.Count() > 0)                
+                    await PaginatingService.SendPaginatedMessageAsync(pages, Context);                
+                else
+                    await ReplyAsync(embed: new EmbedBuilder
+                    { 
+                        Title = "Хелп",
+                        Description = help,
+                        Color = ColorProvider.GetColorForCurrentGuild(Context.Guild)
+                    }.Build());
+            }
+            else
+                await ReplyAsync("Произошла ошибка");
         }        
 
         [Command("Статистика")]
@@ -987,6 +1024,16 @@ namespace DiscordBot
             await ReplyAsync("Отправлено, ожидай.");
         }
 
+        [Command("Объявление")]
+        [AutoPartnership]
+        [Summary("показывает твое объявление")]
+        public async Task GetAdv()
+        {
+            var serGuild = FilesProvider.GetGuild(Context.Guild);
+
+            await ReplyAsync(embed: serGuild.Advert.BuildAdvertise(Context.Guild));
+        }
+
         [Command("Разослать")]
         [AutoPartnership]
         [RequireUserPermission(GuildPermission.Administrator)]
@@ -1186,17 +1233,17 @@ namespace DiscordBot
         [Command("Картинка")]
         [AutoPartnership]
         [RequireUserPermission(GuildPermission.Administrator)]
-        [Summary("меняет картинку у объявления. Если хочешь, чтобы вместо картинки была аватарка сервера, тогда введи букву `G` вместо ссылки")]
+        [Summary("меняет картинку у объявления. Если хочешь, чтобы вместо картинки была аватарка сервера, тогда введи букву `G` вместо ссылки. Если ты не хочешь, чтобы была картинка, тогда напиши букву `N` вместо ссылки.")]
         public async Task ChangeThumbnail(string url)
         {
-            if (url.ToLower() != "g" && !Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute))
+            if (url.ToLower() != "g" && url.ToLower() != "n" && !Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute))
             {
                 await ReplyAsync("Некорректная ссылка");
                 return;
             }
             var serGuild = FilesProvider.GetGuild(Context.Guild);
 
-            serGuild.Advert.ThumbnailUrl = url;
+            serGuild.Advert.ThumbnailUrl = url.ToLower() == "n" ? string.Empty : url;
             serGuild.AdvertisingAccepted = false;
 
             FilesProvider.RefreshGuild(serGuild);
@@ -1207,17 +1254,17 @@ namespace DiscordBot
         [Command("ОсновнаяКартинка")]
         [AutoPartnership]
         [RequireUserPermission(GuildPermission.Administrator)]
-        [Summary("меняет основную картинку у объявления. Если хочешь, чтобы вместо картинки была аватарка сервера, тогда введи букву `G` вместо ссылки")]
+        [Summary("меняет основную картинку у объявления. Если хочешь, чтобы вместо картинки была аватарка сервера, тогда введи букву `G` вместо ссылки. Если ты не хочешь, чтобы была картинка, тогда напиши букву `N` вместо ссылки.")]
         public async Task ChangeImage(string url)
         {
-            if (url.ToLower() != "g" && !Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute))
+            if (url.ToLower() != "g" && url.ToLower() != "n" && !Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute))
             {
                 await ReplyAsync("Некорректная ссылка");
                 return;
             }
             var serGuild = FilesProvider.GetGuild(Context.Guild);
 
-            serGuild.Advert.ImageUrl = url;
+            serGuild.Advert.ImageUrl = url.ToLower() == "n" ? string.Empty : url;
             serGuild.AdvertisingAccepted = false;
 
             FilesProvider.RefreshGuild(serGuild);
