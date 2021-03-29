@@ -2,6 +2,7 @@
 //GitHub repository: https://github.com/DenVot/BotBotya
 
 using DiscordBot.Modules;
+using DiscordBot.Providers;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -25,7 +26,11 @@ namespace DiscordBot.Collections
             return new ModulesCollection(Modules);
         }
 
-        public void RunAllModules() => Modules.ForEach(x => x.RunModule());
+        public void RunAllModules()
+        {
+            Modules.ForEach(x => x.RunModule());
+            LogsProvider.Log("All modules started");
+        } 
 
         public IEnumerator GetEnumerator() => Modules.GetEnumerator();
 

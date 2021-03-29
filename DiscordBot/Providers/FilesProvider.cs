@@ -50,6 +50,36 @@ namespace DiscordBot.Providers
             return JsonSerializer.Deserialize<SerializableConfig>(reader.ReadToEnd());
         }
 
+        public static void AddConfidant(ulong id)
+        {
+            string path = "config.json";
+            var config = GetConfig();
+
+            if (!config.ConfidantsId.Contains(id))
+            {             
+                config.ConfidantsId.Add(id);            
+                string ser = JsonSerializer.Serialize(config);
+
+                using StreamWriter writer = new(path);
+                writer.Write(ser);
+            }            
+        }
+
+        public static void RemoveConfidant(ulong id)
+        {
+            string path = "config.json";
+            var config = GetConfig();
+
+            if (config.ConfidantsId.Contains(id))
+            {
+                config.ConfidantsId.Remove(id);
+                string ser = JsonSerializer.Serialize(config);
+
+                using StreamWriter writer = new(path);
+                writer.Write(ser);
+            }
+        }
+
         public static IEnumerable<SerializableGuild> GetAllGuilds()
         {
             XmlSerializer serializer = new(typeof(SerializableGuild));

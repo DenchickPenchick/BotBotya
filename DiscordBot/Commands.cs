@@ -56,105 +56,11 @@ namespace DiscordBot
 
         public CommandService GetCommands() => Bot.Commands;
 
-        #region --СТАНДАРТНЫЕ КОМАНДЫ--
-        //[Command("Хелп", RunMode = RunMode.Async)]
-        //[Alias("Хэлп", "Помощь")]
-        //[StandartCommand]
-        //[Summary("позволяет узнать полный список команд")]
-        //public async Task Help(int page = 0)
-        //{
-        //    int pos = 0;
-        //    int posit = 1;
-        //    int catpos = 0;
-        //    var serGuild = FilesProvider.GetGuild(Context.Guild);
-
-        //    List<string> pages = new List<string>
-        //    {
-        //        null
-        //    };
-
-        //    CommandCategoryAttribute prevCategoryAttribute = new StandartCommandAttribute();
-
-        //    var commandsArray = Bot.Commands.Commands.Select(x => x.Name).Distinct().ToList();
-
-        //    foreach (var command in Bot.Commands.Commands)
-        //    {
-        //        CommandCategoryAttribute categoryAttribute;
-
-        //        string aliases = "\nПсевдонимы:";
-        //        string parameters = "\nПараметры:";
-
-        //        foreach (string alias in command.Aliases)
-        //            if (alias != command.Name.ToLower())
-        //                aliases += $" `{alias}`";
-
-        //        foreach (var param in command.Parameters)
-        //            parameters += $" `{param.Name}`";
-
-        //        if (command.Attributes.Contains(new StandartCommandAttribute()))
-        //            categoryAttribute = new StandartCommandAttribute();
-        //        else if (command.Attributes.Contains(new CustomisationCommandAttribute()))
-        //            categoryAttribute = new CustomisationCommandAttribute();
-        //        else if (command.Attributes.Contains(new MusicCommandAttribute()))
-        //            categoryAttribute = new MusicCommandAttribute();
-        //        else if (command.Attributes.Contains(new RolesCommandAttribute()))
-        //            categoryAttribute = new RolesCommandAttribute();
-        //        else if (command.Attributes.Contains(new ConsoleCommandsAttribute()))
-        //            categoryAttribute = new ConsoleCommandsAttribute();
-        //        else if (command.Attributes.Contains(new AutoPartnershipAttribute()))
-        //            categoryAttribute = new AutoPartnershipAttribute();
-        //        else
-        //            categoryAttribute = new StandartCommandAttribute();
-
-        //        if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName || $"{pages[pos]}\n{posit + 1}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}".Length >= 1023)
-        //        {
-        //            if (prevCategoryAttribute.CategoryName != categoryAttribute.CategoryName)
-        //                posit = 1;
-
-        //            pages.Add($"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}");
-        //            pos++;
-        //        }
-        //        else if (catpos == 0)
-        //        {
-        //            pages[0] += $"\n**{categoryAttribute.CategoryName}**\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}";
-        //            catpos++;
-        //        }
-        //        else
-        //            pages[pos] += $"\n{posit++}. Команда `{serGuild.Prefix}{command.Name}` {command.Summary}{(command.Parameters.Count > 0 ? parameters : null)}{(command.Aliases.Count > 1 ? aliases : null)}";
-        //        prevCategoryAttribute = categoryAttribute;
-        //    }
-        //    if (page > 0)
-        //    {
-        //        if (page > pages.Count)
-        //            await ReplyAsync(embed: new EmbedBuilder
-        //            {
-        //                Title = "Справка по командам",
-        //                Description = pages.Last(),
-        //                Color = ColorProvider.GetColorForCurrentGuild(serGuild)
-        //            }.Build());
-        //        else
-        //            await ReplyAsync(embed: new EmbedBuilder
-        //            {
-        //                Title = "Справка по командам",
-        //                Description = pages[page - 1],
-        //                Color = ColorProvider.GetColorForCurrentGuild(serGuild)
-        //            }.Build());
-        //    }
-        //    else
-        //    {                
-        //        await PaginatingService.SendPaginatedMessageAsync(new PaginatorEntity
-        //        {
-        //            Title = "Справка по командам",
-        //            Color = ColorProvider.GetColorForCurrentGuild(serGuild),
-        //            Pages = pages
-        //        }, Context);                                        
-        //    }                        
-        //}
-
+        #region --СТАНДАРТНЫЕ КОМАНДЫ--        
         [Command("Хелп")]
         [Alias("Хэлп", "Помощь")]
         [StandartCommand]
-        [Summary("позволяет узнать полный список команд")]
+        [Summary("позволяет узнать полный список категорий команд")]
         public async Task Help()
         {
             var serGuild = FilesProvider.GetGuild(Context.Guild);            
@@ -209,7 +115,7 @@ namespace DiscordBot
         [Command("Хелп")]
         [Alias("Хэлп", "Помощь")]
         [StandartCommand]
-        [Summary("позволяет узнать полный список команд")]
+        [Summary("позволяет узнать список команд для конкретной категории")]
         public async Task Help(string query)
         {
             var allCommands = GetCommands().Commands;
@@ -1053,6 +959,12 @@ namespace DiscordBot
             if (Context.Guild.GetTextChannel(currentSerGuild.SystemChannels.AdvertisingChannelId) == null)
             {
                 await ReplyAsync("У тебя нет канала для отправки чужих объявлений.");
+                return;
+            }
+
+            if (currentSerGuild.IsBanned)
+            {
+                await ReplyAsync(embed: currentSerGuild.WarnEmbed.Build());
                 return;
             }
 
@@ -2519,6 +2431,59 @@ namespace DiscordBot
             await Context.Guild.CreateVoiceChannelAsync(fullName);
             await ReplyAsync("Создал");
         }
+        #endregion
+
+        #region --АДМИНИСТРАЦИЯ БОТА--
+        //В данном регионе представлены команды, которые действительны только для ограниченного круга лиц
+
+        [Command("БанСервера")]
+        public async Task BanAdv(ulong id, double point, params string[] reasonArray)
+        {
+            var config = FilesProvider.GetConfig();
+
+            if (Context.User.Id == config.AdminId || config.ConfidantsId.Contains(Context.User.Id))
+            {
+                var serGuild = FilesProvider.GetGuild(id);
+                var currentSerGuild = FilesProvider.GetGuild(Context.Guild);
+
+                if (serGuild != null)
+                {
+                    var ToSProvider = new PiarToSProvider();
+                    string descr = Context.Message.Content.Remove(0, $"{currentSerGuild.Prefix}бансервера {id} {point}".Length);
+
+                    ToSProvider.SetPoint(point, reasonArray.Length == 0);
+
+                    if (reasonArray.Length != 0)
+                        ToSProvider.SetDescription(descr);
+
+                    ToSProvider.SerializeEmbedWithRefresh(serGuild);
+
+                    await ReplyAsync(embed: ToSProvider.Embed);
+
+                    var guild = Context.Client.GetGuild(id);
+
+                    var adminDM = await guild.Owner.GetOrCreateDMChannelAsync();
+
+                    await adminDM.SendMessageAsync(embed: ToSProvider.Embed);
+                }
+                else
+                    await ReplyAsync($"Сервера с ID {id} не найдено");
+            }            
+        }
+
+        [Command("ДобавитьДоверенноеЛицо")]
+        public async Task AddConf(ulong id)
+        {
+            var config = FilesProvider.GetConfig();
+            if (Context.User.Id == config.AdminId)
+            {
+                FilesProvider.AddConfidant(id);
+                await ReplyAsync("Добавлено");
+            }            
+        }
+
+        [Command("ДобавитьДоверенноеЛицо")]
+        public async Task AddConf(SocketGuildUser user) => await AddConf(user.Id);
         #endregion
 
         private async void ClearMessages(object count)

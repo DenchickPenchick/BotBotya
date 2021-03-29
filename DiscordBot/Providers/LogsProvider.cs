@@ -3,17 +3,12 @@
 
 using System;
 using System.Drawing;
-using System.IO;
-using System.Text;
 using Console = Colorful.Console;
 
 namespace DiscordBot.Providers
 {
     public static class LogsProvider
-    {
-        public static bool SendLogsToFile { get; set; } = false;
-        public static bool SendDefaultLogsToFile { get; set; } = false;
-
+    {        
         public static LogStream Log(string log, bool withAutoEnd = true)
         {
             var stream = new LogStream("log", Color.White);
@@ -24,10 +19,7 @@ namespace DiscordBot.Providers
             stream.WriteLine($"Description: {log}");
 
             if (withAutoEnd)
-                stream.EndStream();
-
-            if(SendDefaultLogsToFile)
-                SendLogStream(stream);
+                stream.EndStream();            
 
             return stream;
         }
@@ -44,9 +36,7 @@ namespace DiscordBot.Providers
                 stream.WriteLine($"Occured in: {error.OccuredIn}");
 
             if(withAutoEnd)
-                stream.EndStream();
-
-            SendLogStream(stream);
+                stream.EndStream();            
 
             return stream;
         }
@@ -64,28 +54,6 @@ namespace DiscordBot.Providers
                 stream.EndStream();
 
             return stream;
-        }
-
-        private static FileStream GetLogsFileStream()
-        {
-            string path = "logs.txt";
-
-            using FileStream stream = new(path, FileMode.OpenOrCreate);
-            return stream;
-        }
-
-        private static void SendLogStream(LogStream logStream)
-        {
-            if (SendLogsToFile)
-            {
-                using var stream = GetLogsFileStream();
-                string content = logStream.Content;
-
-                byte[] contentByteArray = Encoding.UTF8.GetBytes(content);
-                int countOfContentByteArray = content.Length;
-
-                stream.Write(contentByteArray, 0, countOfContentByteArray);
-            }
         }
     }
 
@@ -114,7 +82,7 @@ namespace DiscordBot.Providers
             if (IsEnded)
                 throw new InvalidOperationException("Log stream ended and you can't write");
 
-            Content += $"│\n├─{line}";
+            Content += $"\n│\n├─{line}";
 
             Console.WriteLine("│", streamColor);
             Console.WriteLine($"├─{line}", streamColor);

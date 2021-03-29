@@ -30,8 +30,7 @@ namespace DiscordBot.MusicOperations
             LavaNode = lavaNode;
             foreach (var guild in client.Guilds)
                 PlayersMessagesCollection.Add(guild, null);
-            UpdatePlayer += LavaOperations_UpdatePlayer;
-            //lavaNode.OnTrackEnded += LavaNode_OnTrackEnded;
+            UpdatePlayer += LavaOperations_UpdatePlayer;            
         }
 
         public async Task JoinAsync(SocketGuildUser user, SocketTextChannel contextChannel)

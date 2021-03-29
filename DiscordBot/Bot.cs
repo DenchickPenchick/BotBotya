@@ -11,6 +11,7 @@ using DiscordBot.Interactivities;
 using DiscordBot.Modules.AdvertisingManaging;
 using DiscordBot.Modules.ContentManaging;
 using DiscordBot.Modules.EconomicManaging;
+using DiscordBot.Modules.MusicManaging;
 using DiscordBot.Modules.NotificationsManaging;
 using DiscordBot.Modules.ProcessManage;
 using DiscordBot.Modules.ServersConnectingManaging;
@@ -18,7 +19,6 @@ using DiscordBot.MusicOperations;
 using DiscordBot.Providers;
 using DiscordBot.Providers.FileManaging;
 using DiscordBot.RoomManaging;
-using DiscordBot.Serializable;
 using DiscordBot.TextReaders;
 using DiscordBot.TypeReaders;
 using Microsoft.Extensions.DependencyInjection;
@@ -85,7 +85,8 @@ namespace DiscordBot
                 .AddModule(modulesForLogs.GetRequiredService<ContentModule>())
                 .AddModule(new LogModule(Client, modulesForLogs))
                 .AddModule(new ServersConnector(Client))
-                .AddModule(new EconomicModule(Client));
+                .AddModule(new EconomicModule(Client))
+                .AddModule(new MusicModule(Services));
 
             new ProcessingModule(modulesCollection).RunModule();
 
@@ -162,17 +163,19 @@ namespace DiscordBot
 
                             if (!result.IsSuccess)
                             {
-                                //if (result.Error != CommandError.UnknownCommand)
-                                //{                                    
+                                if (result.Error != CommandError.UnknownCommand)
+                                {
                                     var str = LogsProvider.ErrorLog(new Error
-                                    { 
+                                    {
                                         Description = $"Command failed.",
                                         OccuredIn = "Bot.cs"
                                     }, false);
+                                    str.WriteLine($"Content: {message.Content}");
                                     str.WriteLine($"Command from: {context.User.Username}");
                                     str.WriteLine($"Reason: {result.ErrorReason}");
                                     str.EndStream();
-                                //}
+                                }                                
+
                                 switch (result.Error)
                                 {
                                     case CommandError.UnknownCommand:
